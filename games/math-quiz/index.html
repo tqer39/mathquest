@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>算数クイズ（小学生向け）</title>
+    <meta name="description" content="小学生向けのやさしい算数クイズゲーム" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>算数クイズ</h1>
+      <p class="tagline">10問に挑戦してスコアを目指そう！</p>
+    </header>
+
+    <main class="app-main">
+      <section class="controls" aria-label="設定">
+        <div class="control-group">
+          <label for="mode">出題</label>
+          <select id="mode">
+            <option value="add">たし算（＋）</option>
+            <option value="sub">ひき算（－）</option>
+            <option value="mul">かけ算（×）</option>
+            <option value="mix" selected>ミックス</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="range">数の大きさ</label>
+          <select id="range">
+            <option value="10">0〜10</option>
+            <option value="20" selected>0〜20</option>
+            <option value="100">0〜100</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="questions">問題数</label>
+          <select id="questions">
+            <option value="5">5問</option>
+            <option value="10" selected>10問</option>
+            <option value="20">20問</option>
+          </select>
+        </div>
+
+        <button id="startBtn" class="primary">スタート</button>
+      </section>
+
+      <section id="game" class="game hidden" aria-live="polite" aria-label="クイズ">
+        <div class="status-bar">
+          <div>問題: <span id="qIndex">0</span>/<span id="qTotal">10</span></div>
+          <div>正解: <span id="correct">0</span></div>
+          <div>タイム: <span id="time">0.0</span>s</div>
+        </div>
+
+        <div class="question" id="question" aria-label="問題">1 + 1 = ?</div>
+
+        <div class="answer-area">
+          <input
+            id="answer"
+            class="answer-input"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9\-]*"
+            autocomplete="off"
+            aria-label="こたえ"
+          />
+          <button id="submitBtn" class="primary">こたえる</button>
+        </div>
+
+        <div id="feedback" class="feedback" role="status"></div>
+
+        <div class="numpad" aria-label="テンキー">
+          <button data-key="7">7</button>
+          <button data-key="8">8</button>
+          <button data-key="9">9</button>
+          <button data-key="4">4</button>
+          <button data-key="5">5</button>
+          <button data-key="6">6</button>
+          <button data-key="1">1</button>
+          <button data-key="2">2</button>
+          <button data-key="3">3</button>
+          <button data-key="0" class="wide">0</button>
+          <button data-key="-" title="マイナス">−</button>
+          <button data-key="back" title="けす">⌫</button>
+        </div>
+
+        <div class="actions">
+          <button id="skipBtn" class="secondary">スキップ</button>
+          <button id="endBtn" class="secondary">おわる</button>
+        </div>
+      </section>
+
+      <section id="result" class="result hidden" aria-label="結果">
+        <h2>結果</h2>
+        <p><span id="finalCorrect">0</span> / <span id="finalTotal">0</span> 正解</p>
+        <p>タイム: <span id="finalTime">0.0</span>s</p>
+        <p id="message"></p>
+        <button id="againBtn" class="primary">もういちど</button>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>© ed-games 算数クイズ</small>
+    </footer>
+
+    <script src="main.js"></script>
+  </body>
+  </html>

@@ -13,13 +13,13 @@
 - `apps/web`: フロントエンド（Hono 静的配信）
   - API を呼び出す最小のUI（算数クイズ）
 
-## 主要コマンド（ローカル）
+## 主要コマンド（ローカル/Bun）
 
-- 依存関係のインストール（ルート）: `npm install`
-- ビルド: `npm run build`
-- API 起動: `npm run dev:api` → <http://localhost:8787>
-- Web 起動: `npm run dev:web` → <http://localhost:8788>
-  - Webは API を `http://localhost:8787` に呼びます。両方起動してください。
+- 依存関係のインストール（ルート）: `bun install`
+- ビルド: `bun run build`
+- API 起動: `bun run dev:api` → <http://localhost:8787>
+- Web 起動: `bun run dev:web` → <http://localhost:8788>
+  - Web は API を `http://localhost:8787` に呼びます。両方起動してください。
 
 ## API 概要
 

@@ -1,14 +1,15 @@
 {
   "name": "ed-games",
   "private": true,
+  "packageManager": "bun@1.1.8",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run -w @ed-games/domain build && npm run -w @ed-games/app build && npm run -w @ed-games/api build",
-    "dev:api": "npm run -w @ed-games/api dev",
-    "dev:web": "npm run -w @ed-games/web dev",
-    "clean": "npm run -w @ed-games/domain clean && npm run -w @ed-games/app clean && npm run -w @ed-games/api clean && npm run -w @ed-games/web clean"
+    "build": "bun run -C packages/domain build && bun run -C packages/app build && bun run -C apps/api build && bun run -C apps/web build",
+    "dev:api": "bun run -C apps/api dev",
+    "dev:web": "bun run -C apps/web dev",
+    "clean": "bun run -C packages/domain clean && bun run -C packages/app clean && bun run -C apps/api clean && bun run -C apps/web clean"
   }
 }

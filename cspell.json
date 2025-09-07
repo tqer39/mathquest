@@ -36,6 +36,7 @@
     "fastapi",
     "FASTMCP",
     "getsentry",
+    "healthz",
     "itkq",
     "justfile",
     "kentaro",

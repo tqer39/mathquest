@@ -1,0 +1,14 @@
+{
+  "name": "ed-games",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run -w @ed-games/domain build && npm run -w @ed-games/app build && npm run -w @ed-games/api build",
+    "dev:api": "npm run -w @ed-games/api dev",
+    "dev:web": "npm run -w @ed-games/web dev",
+    "clean": "npm run -w @ed-games/domain clean && npm run -w @ed-games/app clean && npm run -w @ed-games/api clean && npm run -w @ed-games/web clean"
+  }
+}

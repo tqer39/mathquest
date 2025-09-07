@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ed-games API</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans JP, sans-serif; padding: 32px; }
+      code { background: #f3f4f6; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1>ed-games API</h1>
+    <p>Hono + DDD（モノレポ）最小実装です。</p>
+    <ul>
+      <li>ヘルスチェック: <code>GET /healthz</code></li>
+      <li>問題生成: <code>POST /v1/questions/next</code> 例: <code>{ "mode": "mix", "max": 20 }</code></li>
+      <li>採点: <code>POST /v1/answers/check</code> 例: <code>{ "a": 3, "b": 4, "op": "×", "value": 12 }</code></li>
+    </ul>
+  </body>
+  </html>

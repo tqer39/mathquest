@@ -1,0 +1,18 @@
+{
+  "name": "@ed-games/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --enable-source-maps dist/index.js || (npm run build && node --enable-source-maps dist/index.js)",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.11.0",
+    "hono": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

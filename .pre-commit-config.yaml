@@ -1,0 +1,97 @@
+---
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=512']
+      - id: check-json
+      - id: check-yaml
+      - id: detect-aws-credentials
+        args: [--allow-missing-credentials]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: trailing-whitespace
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+
+  - repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v9.2.0
+    hooks:
+      - id: cspell
+
+  # see: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.18.1
+    hooks:
+      - id: markdownlint-cli2
+        args: ['--fix']
+
+  - repo: local
+    hooks:
+      - id: textlint
+        name: textlint
+        language: node
+        types: [file]
+        files: \.(txt|md|mdown|markdown)$
+        entry: textlint
+        require_serial: false
+        additional_dependencies:
+          - 'textlint@15.2.1'
+          - 'textlint-filter-rule-allowlist@4.0.0'
+          - 'textlint-rule-ja-no-space-between-full-width@2.4.2'
+          - 'textlint-filter-rule-comments@1.2.2'
+          - 'textlint-rule-no-dropping-the-ra@3.0.0'
+          - 'textlint-rule-terminology@5.2.14'
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: Format GitHub Actions workflow files
+        types:
+          - yaml
+
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint-docker
+
+  - repo: https://github.com/renovatebot/pre-commit-hooks
+    rev: 41.75.0
+    hooks:
+      - id: renovate-config-validator
+        files: ^renovate\.json(5)?$
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.100.0
+    hooks:
+      - id: terraform_fmt
+
+  # Optional: rulesync drift check
+  - repo: local
+    hooks:
+      - id: rulesync-check
+        name: rulesync check drift
+        language: system
+        entry: bash -lc 'bash scripts/rulesync-check.sh'
+        pass_filenames: false
+      - id: rulesync-apply
+        name: rulesync apply (manual)
+        language: system
+        entry: bash -lc 'bash scripts/rulesync-apply.sh'
+        pass_filenames: false
+        stages: [manual]

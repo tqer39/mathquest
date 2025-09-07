@@ -1,0 +1,19 @@
+# rulesync 設定ファイル（雛形）
+#
+version: 1
+sources:
+  - name: org-rules
+    repo: github:your-org/your-rules-repo
+    ref: main
+    files:
+      - source: templates/.editorconfig
+        target: .editorconfig
+        mode: copy
+      - source: templates/.prettierrc
+        target: .prettierrc
+        mode: copy
+#
+# 注意:
+# - 実際のスキーマ・キーは rulesync のドキュメントに従ってください。
+# - 上記は例であり、コメント解除は仕様確認後に行ってください。
+# - 参照元リポジトリや `ref`（ブランチ/タグ/SHA）は固定推奨です。

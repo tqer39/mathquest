@@ -7,9 +7,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "bun run -C packages/domain build && bun run -C packages/app build && bun run -C apps/api build && bun run -C apps/web build",
-    "dev:api": "bun run -C apps/api dev",
-    "dev:web": "bun run -C apps/web dev",
-    "clean": "bun run -C packages/domain clean && bun run -C packages/app clean && bun run -C apps/api clean && bun run -C apps/web clean"
+    "build": "bun run --filter @ed-games/domain build && bun run --filter @ed-games/app build && bun run --filter @ed-games/api build && bun run --filter @ed-games/web build",
+    "dev:api": "bun run --filter @ed-games/api dev",
+    "dev:web": "bun run --filter @ed-games/web dev",
+    "clean": "bun run --filter @ed-games/domain clean && bun run --filter @ed-games/app clean && bun run --filter @ed-games/api clean && bun run --filter @ed-games/web clean"
   }
 }

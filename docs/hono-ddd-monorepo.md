@@ -15,6 +15,8 @@
 
 ## 主要コマンド（ローカル/Bun）
 
+- 事前準備（初回）: `just setup`
+  - Homebrew 経由のツール導入 → mise によるツール（node/bun 等）導入 → pre-commit 設定
 - 依存関係のインストール（ルート）: `bun install`
 - ビルド: `bun run build`
 - API 起動: `bun run dev:api` → <http://localhost:8787>
@@ -41,3 +43,12 @@
 ## 既存のフロントエンドとの連携
 
 `games/math-quiz/` はクライアントサイド完結の実装です。API を使う版に差し替える場合は、問題生成と採点の呼び出しを `/v1/...` に置き換えていけば移行できます。
+
+## Bun が未インストールの場合
+
+- mise 経由（推奨）
+  - `.tool-versions` に `bun 1.1.8` を追加済みなので、`just setup` もしくは `just install` を実行すると bun が導入されます。
+- Homebrew（macOS/Linux）
+  - `brew install oven-sh/bun/bun`
+- 公式スクリプト
+  - `curl -fsSL https://bun.sh/install | bash`（必要に応じて PATH 設定）

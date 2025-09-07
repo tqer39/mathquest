@@ -24,6 +24,12 @@ setup:
     fi
     @just ai-install
     pre-commit install
+    @if command -v bun >/dev/null 2>&1; then \
+        echo "→ Installing JS dependencies with bun..."; \
+        bun install; \
+    else \
+        echo "⚠ bun not found. Skip 'bun install'. Run 'mise install' or install bun and re-run 'just setup'."; \
+    fi
     @echo "Setup complete!"
 
 # Install AI CLI tools only (can be run independently)
@@ -87,5 +93,15 @@ rulesync args='':
         rulesync {{args}}; \
     else \
         echo "⚠ rulesync が見つかりません。docs/RULESYNC.ja.md を参照してインストールしてください。"; \
+        exit 1; \
+    fi
+
+# Install JS dependencies with bun (can be run independently)
+js-install:
+    @if command -v bun >/dev/null 2>&1; then \
+        echo "Installing JS dependencies with bun..."; \
+        bun install; \
+    else \
+        echo "⚠ bun not found. Run 'mise install' or 'brew install oven-sh/bun/bun'"; \
         exit 1; \
     fi

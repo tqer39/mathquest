@@ -71,7 +71,14 @@ status:
 
 # Install mise tools
 install:
+    @echo "Installing tools with mise..."
     mise install
+    @if command -v bun >/dev/null 2>&1; then \
+        echo "→ Installing JS dependencies with bun..."; \
+        bun install; \
+    else \
+        echo "⚠ bun not found. Skip 'bun install'. Run 'mise install' or install bun and re-run 'just install'."; \
+    fi
 
 # Update mise tools
 update:

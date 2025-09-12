@@ -81,6 +81,7 @@
     "bun",
     "TOTP",
     "usecases",
-    "clouddomains"
+    "clouddomains",
+    "pipefail"
   ]
 }

@@ -96,6 +96,20 @@ rulesync args='':
         exit 1; \
     fi
 
+# Run API and Web dev servers together (Node local)
+dev-node:
+    @echo "Starting API (8787) and Web (8788)..."
+    bash -lc 'set -euo pipefail; \
+      (bun run dev:api & pid_api=$!; \
+       bun run dev:web & pid_web=$!; \
+       trap "kill $$pid_api $$pid_web 2>/dev/null || true" INT TERM EXIT; \
+       wait)'
+
+# Run Edge SSR (Cloudflare Workers via Wrangler)
+dev-edge:
+    @echo "Starting Edge SSR (Wrangler dev)..."
+    bun run dev:edge
+
 # Install JS dependencies with bun (can be run independently)
 js-install:
     @if command -v bun >/dev/null 2>&1; then \

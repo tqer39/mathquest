@@ -9,28 +9,141 @@
   --muted: #6b7280;
   --card: #ffffff;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans JP, sans-serif; }
-.app-header, .app-footer { text-align: center; padding: 16px; }
-.app-main { max-width: 720px; margin: 0 auto; padding: 16px; }
-.controls, .game, .result { background: var(--card); border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.06); }
-.controls { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); align-items: end; }
-.control-group label { display: block; font-size: 14px; margin-bottom: 4px; }
-select, input[type=text], button { font-size: 18px; }
-select, input[type=text] { width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; }
-button { cursor: pointer; border: 0; border-radius: 10px; padding: 10px 14px; }
-.primary { background: var(--primary); color: var(--primary-contrast); }
-.secondary { background: var(--secondary); }
-.hidden { display: none !important; }
-.status-bar { display: flex; justify-content: space-between; color: var(--muted); margin-bottom: 8px; }
-.question { text-align: center; font-size: 48px; font-weight: 700; margin: 12px 0 6px; }
-.answer-area { display: flex; gap: 8px; justify-content: center; align-items: center; }
-.answer-input { max-width: 200px; text-align: center; }
-.feedback { text-align: center; min-height: 28px; margin: 8px 0 4px; font-size: 18px; font-weight: 600; }
-.feedback.ok { color: var(--ok); }
-.feedback.bad { color: var(--bad); }
-.numpad { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; max-width: 420px; margin: 10px auto; }
-.numpad button { padding: 14px 0; font-size: 22px; background: #f3f4f6; }
-.numpad .wide { grid-column: span 2; }
-.actions { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
-@media (min-width: 640px) { .question { font-size: 56px; } .answer-input { font-size: 22px; } }
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Noto Sans JP,
+    sans-serif;
+}
+.app-header,
+.app-footer {
+  text-align: center;
+  padding: 16px;
+}
+.app-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.controls,
+.game,
+.result {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+.controls {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+}
+.control-group label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+select,
+input[type='text'],
+button {
+  font-size: 18px;
+}
+select,
+input[type='text'] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.primary {
+  background: var(--primary);
+  color: var(--primary-contrast);
+}
+.secondary {
+  background: var(--secondary);
+}
+.hidden {
+  display: none !important;
+}
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.question {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+.answer-area {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+.answer-input {
+  max-width: 200px;
+  text-align: center;
+}
+.feedback {
+  text-align: center;
+  min-height: 28px;
+  margin: 8px 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.feedback.ok {
+  color: var(--ok);
+}
+.feedback.bad {
+  color: var(--bad);
+}
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 420px;
+  margin: 10px auto;
+}
+.numpad button {
+  padding: 14px 0;
+  font-size: 22px;
+  background: #f3f4f6;
+}
+.numpad .wide {
+  grid-column: span 2;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+@media (min-width: 640px) {
+  .question {
+    font-size: 56px;
+  }
+  .answer-input {
+    font-size: 22px;
+  }
+}

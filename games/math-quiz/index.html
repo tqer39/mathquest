@@ -46,9 +46,16 @@
         <button id="startBtn" class="primary">スタート</button>
       </section>
 
-      <section id="game" class="game hidden" aria-live="polite" aria-label="クイズ">
+      <section
+        id="game"
+        class="game hidden"
+        aria-live="polite"
+        aria-label="クイズ"
+      >
         <div class="status-bar">
-          <div>問題: <span id="qIndex">0</span>/<span id="qTotal">10</span></div>
+          <div>
+            問題: <span id="qIndex">0</span>/<span id="qTotal">10</span>
+          </div>
           <div>正解: <span id="correct">0</span></div>
           <div>タイム: <span id="time">0.0</span>s</div>
         </div>
@@ -93,7 +100,9 @@
 
       <section id="result" class="result hidden" aria-label="結果">
         <h2>結果</h2>
-        <p><span id="finalCorrect">0</span> / <span id="finalTotal">0</span> 正解</p>
+        <p>
+          <span id="finalCorrect">0</span> / <span id="finalTotal">0</span> 正解
+        </p>
         <p>タイム: <span id="finalTime">0.0</span>s</p>
         <p id="message"></p>
         <button id="againBtn" class="primary">もういちど</button>
@@ -106,4 +115,4 @@
 
     <script src="main.js"></script>
   </body>
-  </html>
+</html>

@@ -269,17 +269,17 @@ wrangler.toml # Wrangler 設定
 
 ## ✅ 要件と前提・制約（サマリ）
 
-| 要件/パターン | 充足 | 前提・制約 |
-|---|---|---|
-| Edge-SSR BFF（モノリス） | 可能 | Hono on WorkersでSSR+BFF同居。ルーティング/ミドルウェアで整理。 |
-| Hexagonal（DDD） | 可能 | `domain` 純TS、外部I/Oはアダプタ層に隔離。 |
-| CQRS-lite + KVキャッシュ | 可能 | KVは最終的整合。強整合が必要な箇所はD1直読みに絞る。 |
-| 無料3回（KV原子） | 可能 | KV の原子的カウンタを使用。匿名IDは Cookie で管理。 |
-| Turnstile/Rate-limit | 可能 | ミドルウェアで検証・制限。過剰制限は UX に注意。 |
-| Idempotency/Circuit Breaker | 可能 | KV に短命キー。CB は簡易実装（将来 Queues 導入余地）。 |
-| 認証（Better Auth） | 可能 | Google OAuth クライアントは手動作成→Secrets 注入。 |
-| D1 マイグレーション | 可能 | Terraform 外。CI で Wrangler 適用が前提。 |
-| Pages/Workers 分離 | 可能 | Pages ビルド/デプロイは CI。Terraform はプロジェクト作成まで。 |
+| 要件/パターン               | 充足 | 前提・制約                                                      |
+| --------------------------- | ---- | --------------------------------------------------------------- |
+| Edge-SSR BFF（モノリス）    | 可能 | Hono on WorkersでSSR+BFF同居。ルーティング/ミドルウェアで整理。 |
+| Hexagonal（DDD）            | 可能 | `domain` 純TS、外部I/Oはアダプタ層に隔離。                      |
+| CQRS-lite + KVキャッシュ    | 可能 | KVは最終的整合。強整合が必要な箇所はD1直読みに絞る。            |
+| 無料3回（KV原子）           | 可能 | KV の原子的カウンタを使用。匿名IDは Cookie で管理。             |
+| Turnstile/Rate-limit        | 可能 | ミドルウェアで検証・制限。過剰制限は UX に注意。                |
+| Idempotency/Circuit Breaker | 可能 | KV に短命キー。CB は簡易実装（将来 Queues 導入余地）。          |
+| 認証（Better Auth）         | 可能 | Google OAuth クライアントは手動作成→Secrets 注入。              |
+| D1 マイグレーション         | 可能 | Terraform 外。CI で Wrangler 適用が前提。                       |
+| Pages/Workers 分離          | 可能 | Pages ビルド/デプロイは CI。Terraform はプロジェクト作成まで。  |
 
 ## 🧪 テスト戦略
 

@@ -9,7 +9,8 @@
     "types": "wrangler types"
   },
   "dependencies": {
-    "hono": "^4.4.3"
+    "hono": "^4.4.3",
+    "@ed-games/domain": "workspace:*"
   },
   "devDependencies": {
     "wrangler": "^3.76.0",

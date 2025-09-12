@@ -55,6 +55,14 @@ fix:
     pre-commit run trailing-whitespace --all-files
     pre-commit run markdownlint-cli2 --all-files
 
+# Format all supported files with Prettier (via pre-commit hook)
+format:
+    pre-commit run prettier --all-files
+
+# Format only staged files (typical git commit flow)
+format-staged:
+    pre-commit run prettier
+
 # Clean pre-commit cache
 clean:
     @echo "Cleaning pre-commit cache..."

@@ -49,3 +49,14 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
   - API 側（`apps/api`）は CORS を許可済みですが、URL を確認してください。
 - pre-commit が失敗する
   - `just lint` で詳細を確認。ファイル整形や辞書（`cspell.json`）の単語追加を行ってください。
+
+## コード整形（Prettier）
+
+- すべての対象ファイルを整形
+  - `just format`
+  - または `bun run format`
+- ステージ済みのみ整形（コミット前など）
+  - `just format-staged`
+  - または `bun run format:staged`
+
+pre-commit の Prettier フックを拡張しており、`js/ts/tsx/json/css/html/md/yaml` が対象です。

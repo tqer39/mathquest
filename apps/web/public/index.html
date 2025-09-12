@@ -43,20 +43,30 @@
 
       <section id="game" class="game hidden">
         <div class="status-bar">
-          <div>問題: <span id="qIndex">0</span>/<span id="qTotal">10</span></div>
+          <div>
+            問題: <span id="qIndex">0</span>/<span id="qTotal">10</span>
+          </div>
           <div>正解: <span id="correct">0</span></div>
         </div>
         <div class="question" id="question">1 + 1 = ?</div>
         <div class="answer-area">
-          <input id="answer" class="answer-input" type="text" inputmode="numeric" />
+          <input
+            id="answer"
+            class="answer-input"
+            type="text"
+            inputmode="numeric"
+          />
           <button id="submitBtn" class="primary">こたえる</button>
         </div>
         <div id="feedback" class="feedback"></div>
         <div class="numpad">
-          <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
-          <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
-          <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
-          <button data-key="0" class="wide">0</button><button data-key="-">−</button><button data-key="back">⌫</button>
+          <button data-key="7">7</button><button data-key="8">8</button
+          ><button data-key="9">9</button> <button data-key="4">4</button
+          ><button data-key="5">5</button><button data-key="6">6</button>
+          <button data-key="1">1</button><button data-key="2">2</button
+          ><button data-key="3">3</button>
+          <button data-key="0" class="wide">0</button
+          ><button data-key="-">−</button><button data-key="back">⌫</button>
         </div>
         <div class="actions">
           <button id="skipBtn" class="secondary">スキップ</button>
@@ -66,11 +76,13 @@
 
       <section id="result" class="result hidden">
         <h2>結果</h2>
-        <p><span id="finalCorrect">0</span> / <span id="finalTotal">0</span> 正解</p>
+        <p>
+          <span id="finalCorrect">0</span> / <span id="finalTotal">0</span> 正解
+        </p>
         <button id="againBtn" class="primary">もういちど</button>
       </section>
     </main>
     <footer class="app-footer"><small>© ed-games</small></footer>
     <script src="/assets/main.js"></script>
   </body>
-  </html>
+</html>

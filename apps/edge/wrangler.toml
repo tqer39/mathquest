@@ -1,5 +1,5 @@
 name = "ed-games-edge"
-main = "dist/index.js"
+main = "src/index.tsx"
 compatibility_date = "2024-09-01"
 
 [[kv_namespaces]]

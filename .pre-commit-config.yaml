@@ -61,9 +61,8 @@ repos:
     rev: v3.1.0
     hooks:
       - id: prettier
-        name: Format GitHub Actions workflow files
-        types:
-          - yaml
+        name: Prettier format
+        files: "\\.(?:[cm]?[jt]sx?|json|css|scss|html?|md|markdown|ya?ml)$"
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.7

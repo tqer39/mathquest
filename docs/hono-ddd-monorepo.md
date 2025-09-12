@@ -22,6 +22,8 @@
 - API 起動: `bun run dev:api` → <http://localhost:8787>
 - Web 起動: `bun run dev:web` → <http://localhost:8788>
   - Web は API を `http://localhost:8787` に呼びます。両方起動してください。
+- Edge-SSR 起動（Workers）: `bun run dev:edge` → Wrangler のURLにアクセス
+  - KV/D1 は wrangler.toml のバインディングを環境に合わせて設定してください。
 
 ## API 概要
 

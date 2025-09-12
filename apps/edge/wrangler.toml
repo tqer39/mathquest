@@ -1,0 +1,16 @@
+name = "ed-games-edge"
+main = "dist/index.js"
+compatibility_date = "2024-09-01"
+
+[[kv_namespaces]]
+binding = "KV_FREE_TRIAL"
+id = "kv_free_trial_id"
+preview_id = "kv_free_trial_preview"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ed_games"
+database_id = "d1_ed_games_id"
+
+[vars]
+DEFAULT_LANG = "ja"

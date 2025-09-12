@@ -10,6 +10,7 @@
     "build": "bun run --filter @ed-games/domain build && bun run --filter @ed-games/app build && bun run --filter @ed-games/api build && bun run --filter @ed-games/web build",
     "dev:api": "bun run --filter @ed-games/api dev",
     "dev:web": "bun run --filter @ed-games/web dev",
+    "dev:edge": "bun run --filter @ed-games/edge dev",
     "clean": "bun run --filter @ed-games/domain clean && bun run --filter @ed-games/app clean && bun run --filter @ed-games/api clean && bun run --filter @ed-games/web clean"
   }
 }

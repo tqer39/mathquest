@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -b tsconfig.json",
     "dev": "node --enable-source-maps dist/index.js || (npm run build && node --enable-source-maps dist/index.js)",
     "clean": "rm -rf dist"
   },

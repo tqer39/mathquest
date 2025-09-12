@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
 import { cors } from 'hono/cors'
-import { serveStatic } from 'hono/serve-static'
+import { serveStatic } from '@hono/node-server/serve-static'
 import type { Mode } from '@ed-games/domain'
 import { generateQuestion, checkAnswer as check } from '@ed-games/domain'
 

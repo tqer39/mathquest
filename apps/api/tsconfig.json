@@ -3,11 +3,11 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "composite": true,
-    "references": [
-      { "path": "../../packages/domain" },
-      { "path": "../../packages/app" }
-    ]
+    "composite": true
   },
+  "references": [
+    { "path": "../../packages/domain" },
+    { "path": "../../packages/app" }
+  ],
   "include": ["src"]
 }

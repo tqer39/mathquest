@@ -72,6 +72,15 @@
     "tfstate",
     "tqer",
     "vercel",
-    "Vercel"
+    "Vercel",
+    "Hono",
+    "hono",
+    "Monorepo",
+    "monorepo",
+    "Bun",
+    "bun",
+    "TOTP",
+    "usecases",
+    "clouddomains"
   ]
 }

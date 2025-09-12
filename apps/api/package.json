@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b tsconfig.json",
-    "dev": "node --enable-source-maps dist/index.js || (npm run build && node --enable-source-maps dist/index.js)",
+    "dev": "bash ./scripts/dev.sh",
     "clean": "rm -rf dist"
   },
   "dependencies": {

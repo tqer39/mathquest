@@ -267,6 +267,11 @@ wrangler.toml # Wrangler 設定
 - **登録**：Google Cloud Domains（Terraform管理。登録と同時に NS を Cloudflare に）
 - **DNS**：Cloudflare Provider で IaC 化
 
+### 環境別ドメイン方針
+
+- 本番（prod）：`mathquest.app`
+- 開発（dev）：`dev.mathquest.app`（親 `mathquest.app` から NS 委任してサブゾーン運用）
+
 ## ✅ 要件と前提・制約（サマリ）
 
 | 要件/パターン               | 充足 | 前提・制約                                                      |

@@ -79,6 +79,11 @@
     "TOTP",
     "usecases",
     "clouddomains",
-    "pipefail"
+    "pipefail",
+    "sansu",
+    "tfvars",
+    "Chiyoda",
+    "mathquest",
+    "subzone"
   ]
 }

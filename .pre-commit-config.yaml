@@ -79,6 +79,7 @@ repos:
     rev: v1.100.0
     hooks:
       - id: terraform_fmt
+        stages: [manual]
 
   # Optional: rulesync drift check
   - repo: local

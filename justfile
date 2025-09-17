@@ -134,3 +134,47 @@ js-install:
         echo "⚠ bun not found. Run 'mise install' or 'brew install oven-sh/bun/bun'"; \
         exit 1; \
     fi
+
+# Wrap terraform with convenient -chdir handling
+# Usage examples:
+#   just tf -- -chdir dev/bootstrap init -reconfigure
+#   just tf -- -chdir infra/terraform/envs/dev/bootstrap plan
+#   just tf -- version
+tf *args:
+    @bash -lc 'set -euo pipefail; \
+      BASE="infra/terraform/envs"; \
+      ARGS=(); \
+      while [[ $# -gt 0 ]]; do \
+        case "$1" in \
+          --) \
+            shift; \
+            continue \
+            ;; \
+          -chdir) \
+            shift; p="$1"; \
+            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
+              p="$BASE/$p"; \
+            fi; \
+            ARGS+=("-chdir=$p"); \
+            shift \
+            ;; \
+          -chdir=*) \
+            p="${1#-chdir=}"; \
+            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
+              p="$BASE/$p"; \
+            fi; \
+            ARGS+=("-chdir=$p"); \
+            shift \
+            ;; \
+          *) \
+            ARGS+=("$1"); \
+            shift \
+            ;; \
+        esac; \
+      done; \
+      echo "→ terraform ${ARGS[*]}"; \
+      if command -v mise >/dev/null 2>&1; then \
+        exec mise exec terraform -- terraform "${ARGS[@]}"; \
+      else \
+        exec terraform "${ARGS[@]}"; \
+      fi' -- {{args}}

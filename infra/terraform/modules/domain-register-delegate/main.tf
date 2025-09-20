@@ -30,10 +30,10 @@ resource "google_clouddomains_registration" "root" {
   }
 
   contact_settings {
-    privacy             = "PRIVATE_CONTACT_DATA"
-    registrant_contact  = local.contact
-    admin_contact       = local.contact
-    technical_contact   = local.contact
+    privacy            = "PRIVATE_CONTACT_DATA"
+    registrant_contact = local.contact
+    admin_contact      = local.contact
+    technical_contact  = local.contact
   }
 
   dns_settings {

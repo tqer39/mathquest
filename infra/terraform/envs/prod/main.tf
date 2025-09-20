@@ -1,8 +1,8 @@
 module "domain_register_delegate" {
   source = "../../modules/domain-register-delegate"
 
-  root_domain            = var.root_domain
-  cloudflare_account_id  = var.cloudflare_account_id
+  root_domain           = var.root_domain
+  cloudflare_account_id = var.cloudflare_account_id
 
   contact_country_code        = var.contact_country_code
   contact_postal_code         = var.contact_postal_code

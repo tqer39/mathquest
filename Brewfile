@@ -9,6 +9,7 @@ brew "git"         # Version control system
 brew "pre-commit"  # Git hooks framework
 brew "uv"          # Python package and project manager
 brew "rulesync"    # Synchronize repository rules
+brew "aws-vault"  # AWS 資格情報の安全な管理
 tap "jacobbednarz/tap"  # cf-vault 公式リポジトリ（Cloudflare Secrets管理ツール）
 brew "jacobbednarz/tap/cf-vault"  # Cloudflare API Secrets 用 Vault CLI
 

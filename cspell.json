@@ -38,6 +38,7 @@
     "esac",
     "fastapi",
     "FASTMCP",
+    "getline",
     "getsentry",
     "healthz",
     "hono",

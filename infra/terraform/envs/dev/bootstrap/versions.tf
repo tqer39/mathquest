@@ -1,15 +1,15 @@
 terraform {
   required_version = "= 1.13.2"
-
   required_providers {
-    cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = "= 4.28.0"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "= 6.13.0"
     }
   }
-
-  backend "local" {
-    # dev ルートに state を保存
-    path = "../terraform/dev-bootstrap.tfstate"
+  backend "s3" {
+    bucket  = "terraform-tfstate-tqer39-072693953877-ap-northeast-1"
+    key     = "mathquest/infra/terraform/envs/dev/dev-bootstrap.tfstate"
+    encrypt = true
+    region  = "ap-northeast-1"
   }
 }

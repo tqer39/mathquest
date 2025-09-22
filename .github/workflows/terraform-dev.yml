@@ -75,7 +75,7 @@ jobs:
           CHECK_DIFF: ${{ env.CHECK_DIFF }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_DEV }}
-          working-directory: ./terraform/environments/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
+          working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
 
       - name: Start Deployment
         if: env.TF_PLAN_STATUS == 'has-diff' && github.ref == 'refs/heads/main'
@@ -90,7 +90,7 @@ jobs:
         if: env.TF_PLAN_STATUS == 'has-diff' && contains(fromJSON('["push", "workflow_dispatch"]'), github.event_name)
         uses: ./.github/actions/terraform-apply
         with:
-          working-directory: ./terraform/environments/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
+          working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
 
       - name: Finish Deployment
         if: env.TF_PLAN_STATUS == 'has-diff' && always() && github.ref == 'refs/heads/main'

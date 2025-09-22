@@ -30,7 +30,7 @@ concurrency:
 
 env:
   AWS_ACCOUNT_ID: '072693953877'
-  AWS_ENV_NAME: portfolio
+  AWS_ENV_NAME: dev
   OIDC_IAM_ROLE: portfolio-terraform-aws-deploy
   CHECK_DIFF: ${{ inputs.CHECK_DIFF || github.event.inputs.CHECK_DIFF || '_false' }}
 

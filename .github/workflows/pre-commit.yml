@@ -21,7 +21,6 @@ jobs:
 
       - uses: jdx/mise-action@v2
         with:
-          version: latest
           cache: true
 
       - run: mise install

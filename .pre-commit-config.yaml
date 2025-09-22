@@ -52,6 +52,15 @@ repos:
           - 'textlint-rule-no-dropping-the-ra@3.0.0'
           - 'textlint-rule-terminology@5.2.14'
 
+  - repo: local
+    hooks:
+      - id: terraform-fmt
+        name: Terraform fmt
+        language: system
+        entry: bash -lc 'mise exec terraform -- terraform fmt -recursive'
+        types_or: [terraform, hcl]
+        pass_filenames: false
+
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0
     hooks:
@@ -61,9 +70,8 @@ repos:
     rev: v3.1.0
     hooks:
       - id: prettier
-        name: Format GitHub Actions workflow files
-        types:
-          - yaml
+        name: Prettier format
+        files: "\\.(?:[cm]?[jt]sx?|json|css|scss|html?|md|markdown|ya?ml)$"
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.7
@@ -75,11 +83,6 @@ repos:
     hooks:
       - id: renovate-config-validator
         files: ^renovate\.json(5)?$
-
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.100.0
-    hooks:
-      - id: terraform_fmt
 
   # Optional: rulesync drift check
   - repo: local

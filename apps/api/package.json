@@ -1,0 +1,20 @@
+{
+  "name": "@ed-games/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "dev": "bash ./scripts/dev.sh",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@ed-games/app": "*",
+    "@ed-games/domain": "*",
+    "@hono/node-server": "^1.11.0",
+    "hono": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

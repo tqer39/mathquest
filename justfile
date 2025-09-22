@@ -24,6 +24,12 @@ setup:
     fi
     @just ai-install
     pre-commit install
+    @if command -v bun >/dev/null 2>&1; then \
+        echo "→ Installing JS dependencies with bun..."; \
+        bun install; \
+    else \
+        echo "⚠ bun not found. Skip 'bun install'. Run 'mise install' or install bun and re-run 'just setup'."; \
+    fi
     @echo "Setup complete!"
 
 # Install AI CLI tools only (can be run independently)
@@ -49,6 +55,14 @@ fix:
     pre-commit run trailing-whitespace --all-files
     pre-commit run markdownlint-cli2 --all-files
 
+# Format all supported files with Prettier (via pre-commit hook)
+format:
+    pre-commit run prettier --all-files
+
+# Format only staged files (typical git commit flow)
+format-staged:
+    pre-commit run prettier
+
 # Clean pre-commit cache
 clean:
     @echo "Cleaning pre-commit cache..."
@@ -65,7 +79,14 @@ status:
 
 # Install mise tools
 install:
+    @echo "Installing tools with mise..."
     mise install
+    @if command -v bun >/dev/null 2>&1; then \
+        echo "→ Installing JS dependencies with bun..."; \
+        bun install; \
+    else \
+        echo "⚠ bun not found. Skip 'bun install'. Run 'mise install' or install bun and re-run 'just install'."; \
+    fi
 
 # Update mise tools
 update:
@@ -89,3 +110,71 @@ rulesync args='':
         echo "⚠ rulesync が見つかりません。docs/RULESYNC.ja.md を参照してインストールしてください。"; \
         exit 1; \
     fi
+
+# Run API and Web dev servers together (Node local)
+dev-node:
+    @echo "Starting API (8787) and Web (8788)..."
+    bash -lc 'set -euo pipefail; \
+      (bun run dev:api & pid_api=$!; \
+       bun run dev:web & pid_web=$!; \
+       trap "kill $$pid_api $$pid_web 2>/dev/null || true" INT TERM EXIT; \
+       wait)'
+
+# Run Edge SSR (Cloudflare Workers via Wrangler)
+dev-edge:
+    @echo "Starting Edge SSR (Wrangler dev)..."
+    bun run dev:edge
+
+# Install JS dependencies with bun (can be run independently)
+js-install:
+    @if command -v bun >/dev/null 2>&1; then \
+        echo "Installing JS dependencies with bun..."; \
+        bun install; \
+    else \
+        echo "⚠ bun not found. Run 'mise install' or 'brew install oven-sh/bun/bun'"; \
+        exit 1; \
+    fi
+
+# Wrap terraform with convenient -chdir handling
+# Usage examples:
+#   just tf -- -chdir dev/bootstrap init -reconfigure
+#   just tf -- -chdir infra/terraform/envs/dev/bootstrap plan
+#   just tf -- version
+tf *args:
+    @bash -lc 'set -euo pipefail; \
+      BASE="infra/terraform/envs"; \
+      ARGS=(); \
+      while [[ $# -gt 0 ]]; do \
+        case "$1" in \
+          --) \
+            shift; \
+            continue \
+            ;; \
+          -chdir) \
+            shift; p="$1"; \
+            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
+              p="$BASE/$p"; \
+            fi; \
+            ARGS+=("-chdir=$p"); \
+            shift \
+            ;; \
+          -chdir=*) \
+            p="${1#-chdir=}"; \
+            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
+              p="$BASE/$p"; \
+            fi; \
+            ARGS+=("-chdir=$p"); \
+            shift \
+            ;; \
+          *) \
+            ARGS+=("$1"); \
+            shift \
+            ;; \
+        esac; \
+      done; \
+      echo "→ terraform ${ARGS[*]}"; \
+      if command -v mise >/dev/null 2>&1; then \
+        exec mise exec terraform -- terraform "${ARGS[@]}"; \
+      else \
+        exec terraform "${ARGS[@]}"; \
+      fi' -- {{args}}

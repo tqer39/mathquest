@@ -1,0 +1,44 @@
+locals {
+  contact = {
+    postal_address = {
+      region_code         = var.contact_country_code
+      postal_code         = var.contact_postal_code
+      administrative_area = var.contact_administrative_area
+      locality            = var.contact_locality
+      address_lines       = var.contact_address_lines
+      recipients          = [var.contact_recipient]
+      organization        = null
+    }
+    email_address = var.contact_email
+    phone_number  = var.contact_phone
+    fax_number    = null
+  }
+}
+
+resource "cloudflare_zone" "root" {
+  account_id = var.cloudflare_account_id
+  zone       = var.root_domain
+}
+
+resource "google_clouddomains_registration" "root" {
+  domain_name = var.root_domain
+  location    = "global"
+
+  yearly_price {
+    currency_code = var.yearly_price_currency
+    units         = var.yearly_price_units
+  }
+
+  contact_settings {
+    privacy            = "PRIVATE_CONTACT_DATA"
+    registrant_contact = local.contact
+    admin_contact      = local.contact
+    technical_contact  = local.contact
+  }
+
+  dns_settings {
+    custom_dns {
+      name_servers = cloudflare_zone.root.name_servers
+    }
+  }
+}

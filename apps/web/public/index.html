@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>算数クイズ（API版）</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>算数クイズ（API版）</h1>
+      <p class="tagline">Hono API と連携</p>
+    </header>
+    <main class="app-main">
+      <section class="controls">
+        <div class="control-group">
+          <label for="mode">出題</label>
+          <select id="mode">
+            <option value="add">たし算</option>
+            <option value="sub">ひき算</option>
+            <option value="mul">かけ算</option>
+            <option value="mix" selected>ミックス</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="range">数の大きさ</label>
+          <select id="range">
+            <option value="10">0〜10</option>
+            <option value="20" selected>0〜20</option>
+            <option value="100">0〜100</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="questions">問題数</label>
+          <select id="questions">
+            <option value="5">5問</option>
+            <option value="10" selected>10問</option>
+            <option value="20">20問</option>
+          </select>
+        </div>
+        <button id="startBtn" class="primary">スタート</button>
+      </section>
+
+      <section id="game" class="game hidden">
+        <div class="status-bar">
+          <div>
+            問題: <span id="qIndex">0</span>/<span id="qTotal">10</span>
+          </div>
+          <div>正解: <span id="correct">0</span></div>
+        </div>
+        <div class="question" id="question">1 + 1 = ?</div>
+        <div class="answer-area">
+          <input
+            id="answer"
+            class="answer-input"
+            type="text"
+            inputmode="numeric"
+          />
+          <button id="submitBtn" class="primary">こたえる</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+        <div class="numpad">
+          <button data-key="7">7</button><button data-key="8">8</button
+          ><button data-key="9">9</button> <button data-key="4">4</button
+          ><button data-key="5">5</button><button data-key="6">6</button>
+          <button data-key="1">1</button><button data-key="2">2</button
+          ><button data-key="3">3</button>
+          <button data-key="0" class="wide">0</button
+          ><button data-key="-">−</button><button data-key="back">⌫</button>
+        </div>
+        <div class="actions">
+          <button id="skipBtn" class="secondary">スキップ</button>
+          <button id="endBtn" class="secondary">おわる</button>
+        </div>
+      </section>
+
+      <section id="result" class="result hidden">
+        <h2>結果</h2>
+        <p>
+          <span id="finalCorrect">0</span> / <span id="finalTotal">0</span> 正解
+        </p>
+        <button id="againBtn" class="primary">もういちど</button>
+      </section>
+    </main>
+    <footer class="app-footer"><small>© ed-games</small></footer>
+    <script src="/assets/main.js"></script>
+  </body>
+</html>

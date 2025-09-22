@@ -90,7 +90,7 @@ resource "aws_iam_policy" "deploy_deny_specifics" {
 }
 
 resource "aws_iam_role" "this" {
-  name               = "${var.aws_env_name}-${var.repository}-deploy-${var.app_env_name}"
+  name               = "${var.aws_env_name}-${var.repository}-terraform-deploy-${var.app_env_name}"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 

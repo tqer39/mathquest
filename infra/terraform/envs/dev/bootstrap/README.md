@@ -12,6 +12,21 @@
 - AWS CLI が認証済み
   - `AWS_PROFILE` で指定する、もしくは `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` を環境変数として設定
 - Terraform 1.13.2 (`mise install terraform` などでインストール)
+- Cloudflare API Token（D1/KV/Turnstile を作成できる権限）
+
+## Cloudflare Workers リソースの初期化
+
+`cf-app-resources` モジュールを通じて、開発環境向けの Cloudflare D1・Workers KV・Turnstile（任意）も同時にブートストラップします。
+
+変数は `variables.tf` を参照してください。最低限、以下の項目を `terraform.tfvars` 等で指定します。
+
+```hcl
+cloudflare_api_token   = "cf-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+cloudflare_account_id  = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+turnstile_allowed_domains = ["dev.mathquest.app"] # 開発環境で Turnstile を利用する場合
+```
+
+Turnstile の利用を見送る場合は `turnstile_allowed_domains = []` のままで構いません。
 
 ## 事前に用意するリソース（例）
 

@@ -19,6 +19,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
+      # pre-commit の terraform-fmt 用
       - uses: jdx/mise-action@v2
         with:
           cache: true

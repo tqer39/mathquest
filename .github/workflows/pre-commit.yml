@@ -22,6 +22,7 @@ jobs:
       # pre-commit の terraform-fmt 用
       - uses: jdx/mise-action@v2
         with:
+          version: 2025.9.13
           cache: true
 
       - run: mise install

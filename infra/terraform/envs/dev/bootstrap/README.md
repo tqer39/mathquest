@@ -28,8 +28,6 @@ turnstile_allowed_domains = ["dev.mathquest.app"] # 開発環境で Turnstile �
 
 Turnstile の利用を見送る場合は `turnstile_allowed_domains = []` のままで構いません。
 
-## 事前に用意するリソース（例）
-
 ```sh
 # S3 バケット作成（東京リージョン）
 aws s3api create-bucket \

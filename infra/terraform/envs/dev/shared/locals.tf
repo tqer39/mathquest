@@ -1,17 +1,23 @@
 locals {
-  aws_env = "dev"
-  app_env = "dev"
-  prefix  = "mathquest"
+  aws_account_id   = "072693953877"
+  aws_env_name     = "dev"
+  app_env_name     = "dev"
+  organization     = "tqer39"
+  prefix           = "mathquest"
+  repository_owner = "tqer39"
+  repository_name  = "mathquest"
   region = {
     apne1 = "ap-northeast-1"
   }
 }
 
 locals {
-  common_tags = {
-    "envs"       = local.app_env
+  base_tags = {
+    "env"        = local.app_env_name
     "IaC"        = "Terraform"
     "product"    = "mathquest"
-    "repository" = "tqer39/mathquest"
+    "repository" = "${local.repository_owner}/${local.repository_name}"
   }
+
+  common_tags = local.base_tags
 }

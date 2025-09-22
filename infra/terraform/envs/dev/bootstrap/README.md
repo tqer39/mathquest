@@ -1,14 +1,13 @@
 # dev/bootstrap: AWS S3 に tfstate を保管する初期化
 
-このディレクトリは、Terraform の状態ファイル (`tfstate`) を保存するための **AWS S3 バケット** と
-状態ロック用 **DynamoDB テーブル** を Terraform 管理下に置くためのブートストラップです。
+このディレクトリは、Terraform の状態ファイル (`tfstate`) を保存するための **AWS S3 バケット** を Terraform 管理下に置くためのブートストラップです。
 
-> ⚠️ 初回実行前に S3 バケットと DynamoDB テーブルを手動で作成してください。
-> Terraform の `backend "s3"` は `terraform init` 実行時にこれらのリソースが存在している必要があります。
+> ⚠️ 初回実行前に S3 バケットを手動で作成してください。
+> Terraform の `backend "s3"` は `terraform init` 実行時にこのリソースが存在している必要があります。
 
 ## 前提条件
 
-- AWS アカウント（適切な IAM 権限: S3/DynamoDB の読み書き）
+- AWS アカウント（適切な IAM 権限: S3 の読み書き）
 - AWS CLI が認証済み
   - `AWS_PROFILE` で指定する、もしくは `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` を環境変数として設定
 - Terraform 1.13.2 (`mise install terraform` などでインストール)
@@ -34,16 +33,9 @@ aws s3api create-bucket \
   --bucket mathquest-dev-tfstate \
   --region ap-northeast-1 \
   --create-bucket-configuration LocationConstraint=ap-northeast-1
-
-# DynamoDB テーブル作成（状態ロック用）
-aws dynamodb create-table \
-  --table-name mathquest-dev-terraform-lock \
-  --attribute-definitions AttributeName=LockID,AttributeType=S \
-  --key-schema AttributeName=LockID,KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST
 ```
 
-バケット名・テーブル名・リージョンは `variables.tf` の既定値と揃えておくとスムーズです。
+バケット名やリージョンは `variables.tf` の既定値と揃えておくとスムーズです。
 
 ## 認証方法
 
@@ -65,9 +57,6 @@ aws dynamodb create-table \
    ```sh
    terraform -chdir=dev/bootstrap import \
      module.tfstate_backend.aws_s3_bucket.state mathquest-dev-tfstate
-
-   terraform -chdir=dev/bootstrap import \
-     module.tfstate_backend.aws_dynamodb_table.lock mathquest-dev-terraform-lock
    ```
 
 3. 設定反映
@@ -87,15 +76,13 @@ aws dynamodb create-table \
 ## トラブルシューティング
 
 - `NoSuchBucket` / `ResourceNotFoundException` が表示される
-  - S3 バケット / DynamoDB テーブルが正しいリージョンに作成済みか確認してください。
+  - S3 バケットが正しいリージョンに作成済みか確認してください。
 - `ExpiredToken` / 認証エラー
   - `AWS_PROFILE` もしくは認証情報の有効期限を再確認してください。MFA 併用時は `AWS_SESSION_TOKEN` も必要です。
-- `OperationAborted: A conflicting conditional operation is currently in progress`（DynamoDB）
-  - まれに発生します。数秒待ってから再実行してください。
 
 ## 次のステップ
 
-`envs/dev` や `envs/prod` 側の Terraform でも、バックエンドを下記のように設定して S3 + DynamoDB を利用してください。
+`envs/dev` や `envs/prod` 側の Terraform でも、バックエンドを下記のように設定して S3 を利用してください。
 
 ```hcl
 terraform {
@@ -103,11 +90,10 @@ terraform {
     bucket         = "mathquest-dev-tfstate"
     key            = "dev/bootstrap.tfstate"
     region         = "ap-northeast-1"
-    dynamodb_table = "mathquest-dev-terraform-lock"
     encrypt        = true
   }
 }
 ```
 
 本ディレクトリを適用後は、`terraform state list` に `module.tfstate_backend.aws_s3_bucket.state` などが表示され、
-以後 S3 バケット / DynamoDB テーブルも IaC で管理できます。
+以後 S3 バケットも IaC で管理できます。

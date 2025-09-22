@@ -27,15 +27,7 @@ turnstile_allowed_domains = ["dev.mathquest.app"] # 開発環境で Turnstile �
 
 Turnstile の利用を見送る場合は `turnstile_allowed_domains = []` のままで構いません。
 
-```sh
-# S3 バケット作成（東京リージョン）
-aws s3api create-bucket \
-  --bucket mathquest-dev-tfstate \
-  --region ap-northeast-1 \
-  --create-bucket-configuration LocationConstraint=ap-northeast-1
-```
-
-バケット名やリージョンは `variables.tf` の既定値と揃えておくとスムーズです。
+バケットの作成例や命名ルールは、運用ポリシーに沿って任意に決めてください。リージョンは `variables.tf` の既定値と合わせておくとスムーズです。
 
 ## 認証方法
 
@@ -56,7 +48,7 @@ aws s3api create-bucket \
 
    ```sh
    terraform -chdir=dev/bootstrap import \
-     module.tfstate_backend.aws_s3_bucket.state mathquest-dev-tfstate
+     module.tfstate_backend.aws_s3_bucket.state <既存バケット名>
    ```
 
 3. 設定反映
@@ -87,10 +79,10 @@ aws s3api create-bucket \
 ```hcl
 terraform {
   backend "s3" {
-    bucket         = "mathquest-dev-tfstate"
-    key            = "dev/bootstrap.tfstate"
-    region         = "ap-northeast-1"
-    encrypt        = true
+    bucket  = "<任意の S3 バケット名>"
+    key     = "dev/bootstrap.tfstate"
+    region  = "ap-northeast-1"
+    encrypt = true
   }
 }
 ```

@@ -8,6 +8,11 @@ variable "aws_env_name" {
   description = "(Required) AWS Environment name"
 }
 
+variable "app_env_name" {
+  type        = string
+  description = "(Required) Application environment name"
+}
+
 variable "organization" {
   type        = string
   description = "(Required) GitHub organization name"

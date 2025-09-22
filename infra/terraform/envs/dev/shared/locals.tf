@@ -1,6 +1,6 @@
 locals {
   aws_account_id   = "072693953877"
-  aws_env_name     = "dev"
+  aws_env_name     = "portfolio"
   app_env_name     = "dev"
   organization     = "tqer39"
   prefix           = "mathquest"

@@ -25,6 +25,17 @@ yearly_price_currency = "USD"
 yearly_price_units    = 12
 ```
 
+プロジェクト名や Turnstile の設定を変更したい場合は、必要に応じて以下を追加で上書きしてください。
+
+```hcl
+project_slug                 = "ed-games"
+environment_name             = "prod"
+d1_database_name             = "ed_games"
+turnstile_additional_domains = ["app.sansu.dev"]
+turnstile_widget_mode        = "managed"
+turnstile_region             = "world"
+```
+
 ## 実行
 
 ```sh
@@ -38,3 +49,14 @@ terraform apply -var-file=terraform.tfvars
 - `cloudflare_nameservers` — Cloudflare の NS（レジストラに設定されます）
 - `cloudflare_zone_id` — 作成された Zone ID
 - `registration_state` — 登録状態
+- `d1_database` — Workers からバインドする D1 の ID / 名称
+- `kv_namespaces` — 各バインディング（`KV_FREE_TRIAL` など）の Namespace 情報
+- `turnstile_widget` — Turnstile ウィジェットの site key（秘密鍵は `turnstile_widget_secret`）
+
+## 作成される Cloudflare リソース
+
+- D1 データベース: 既定値は `ed_games`
+- Workers KV: `KV_FREE_TRIAL`, `KV_AUTH_SESSION`, `KV_RATE_LIMIT`, `KV_IDEMPOTENCY`
+- Turnstile ウィジェット: `project_slug-environment_name-auth` の命名で作成
+
+`terraform apply` 後に出力される ID を `apps/edge/wrangler.toml` の `kv_namespaces` や `d1_databases` に反映し、Turnstile の `site_key` / `secret` は `wrangler secret put` で投入してください。

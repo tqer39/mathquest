@@ -7,6 +7,21 @@ binding = "KV_FREE_TRIAL"
 id = "kv_free_trial_id"
 preview_id = "kv_free_trial_preview"
 
+[[kv_namespaces]]
+binding = "KV_AUTH_SESSION"
+id = "kv_auth_session_id"
+preview_id = "kv_auth_session_preview"
+
+[[kv_namespaces]]
+binding = "KV_RATE_LIMIT"
+id = "kv_rate_limit_id"
+preview_id = "kv_rate_limit_preview"
+
+[[kv_namespaces]]
+binding = "KV_IDEMPOTENCY"
+id = "kv_idempotency_id"
+preview_id = "kv_idempotency_preview"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "ed_games"

@@ -1,5 +1,5 @@
 module "deploy_role" {
-  source = "../../../modules/deploy_role"
+  source = "../../../modules/deploy-role"
 
   aws_account_id = local.aws_account_id
   aws_env_name   = local.aws_env_name

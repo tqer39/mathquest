@@ -37,9 +37,9 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
   - `wrangler kv namespace create KV_IDEMPOTENCY`
   - `wrangler dev` 実行時はプレビュー用 namespace が自動で割り当てられますが、明示的に作成して `wrangler.toml` の `kv_namespaces` に id を設定することも可能です。
 - D1 のローカル準備（任意）
-  - DB 作成: `wrangler d1 create ed_games`
+  - DB 作成: `wrangler d1 create mathquest`
   - 生成された `database_id` を `apps/edge/wrangler.toml` の `d1_databases` に反映
-  - マイグレーションがある場合: `wrangler d1 migrations apply ed_games`
+  - マイグレーションがある場合: `wrangler d1 migrations apply mathquest`
 - データ永続化（開発用）
   - `wrangler dev --persist` を使うと KV/D1 のローカルデータを `.wrangler` ディレクトリに保持できます。
 

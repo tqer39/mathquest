@@ -29,7 +29,7 @@ variable "cloudflare_account_id" {
 variable "project_slug" {
   description = "リソース命名に利用するスラッグ"
   type        = string
-  default     = "ed-games"
+  default     = "mathquest"
 }
 
 variable "environment_name" {
@@ -41,7 +41,7 @@ variable "environment_name" {
 variable "d1_database_name" {
   description = "D1 データベース名"
   type        = string
-  default     = "ed_games"
+  default     = "mathquest"
 }
 
 variable "turnstile_additional_domains" {

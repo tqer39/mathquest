@@ -77,7 +77,7 @@ const Layout: FC<{ title?: string; children?: any }> = ({
         <p>無料3回まで → 以降はサインイン</p>
       </header>
       <main class="wrap">${children}</main>
-      <footer><small>© ed-games</small></footer>
+      <footer><small>© mathquest</small></footer>
       <script type="module">
         const api = (p) => p;
         const byId = (id) => document.getElementById(id);

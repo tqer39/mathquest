@@ -1,5 +1,5 @@
 {
-  "name": "@ed-games/app",
+  "name": "@mathquest/app",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,7 +16,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@ed-games/domain": "*"
+    "@mathquest/domain": "*"
   },
   "devDependencies": {
     "typescript": "^5.5.0"

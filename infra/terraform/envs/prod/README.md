@@ -28,9 +28,9 @@ yearly_price_units    = 12
 プロジェクト名や Turnstile の設定を変更したい場合は、必要に応じて以下を追加で上書きしてください。
 
 ```hcl
-project_slug                 = "ed-games"
+project_slug                 = "mathquest"
 environment_name             = "prod"
-d1_database_name             = "ed_games"
+d1_database_name             = "mathquest"
 turnstile_additional_domains = ["app.sansu.dev"]
 turnstile_widget_mode        = "managed"
 turnstile_region             = "world"
@@ -55,7 +55,7 @@ terraform apply -var-file=terraform.tfvars
 
 ## 作成される Cloudflare リソース
 
-- D1 データベース: 既定値は `ed_games`
+- D1 データベース: 既定値は `mathquest`
 - Workers KV: `KV_FREE_TRIAL`, `KV_AUTH_SESSION`, `KV_RATE_LIMIT`, `KV_IDEMPOTENCY`
 - Turnstile ウィジェット: `project_slug-environment_name-auth` の命名で作成
 

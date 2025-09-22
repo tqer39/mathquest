@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import type { Mode } from '@ed-games/domain';
-import { generateQuestion, checkAnswer as check } from '@ed-games/domain';
+import type { Mode } from '@mathquest/domain';
+import { generateQuestion, checkAnswer as check } from '@mathquest/domain';
 
 export const quiz = new Hono();
 

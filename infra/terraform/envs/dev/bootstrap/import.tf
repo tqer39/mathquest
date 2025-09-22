@@ -1,5 +1,11 @@
-import {
-  to = cloudflare_r2_bucket.this
-  # Cloudflare R2 バケットの import ID 形式: "<account_id>/<bucket_name>"
-  id = "${var.account_id}/${var.bucket_name}"
-}
+# 既存のリソースを取り込む場合は以下の import ブロックを参考にしてください。
+#
+# import {
+#   to = module.tfstate_backend.aws_s3_bucket.state
+#   id = var.bucket_name
+# }
+#
+# import {
+#   to = module.tfstate_backend.aws_dynamodb_table.lock
+#   id = var.dynamodb_table_name
+# }

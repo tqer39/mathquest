@@ -1,16 +1,29 @@
-variable "account_id" {
-  type        = string
-  description = "Cloudflare Account ID"
-}
-
 variable "bucket_name" {
   type        = string
-  description = "R2 バケット名 (dev)"
-  default     = "mathquest-dev"
+  description = "tfstate を保存する S3 バケット名"
+  default     = "mathquest-dev-tfstate"
 }
 
-variable "cloudflare_api_token" {
+variable "dynamodb_table_name" {
   type        = string
-  description = "Cloudflare API Token (未設定時は環境変数を使用)"
-  default     = ""
+  description = "Terraform の状態ロックに使用する DynamoDB テーブル名"
+  default     = "mathquest-dev-terraform-lock"
+}
+
+variable "aws_region" {
+  type        = string
+  description = "AWS リージョン"
+  default     = "ap-northeast-1"
+}
+
+variable "aws_profile" {
+  type        = string
+  description = "利用する AWS プロファイル名。環境変数認証を使う場合は null のままでOK"
+  default     = null
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "S3 バケット / DynamoDB に付与する共通タグ"
+  default     = {}
 }

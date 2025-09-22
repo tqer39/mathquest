@@ -52,10 +52,14 @@ repos:
           - 'textlint-rule-no-dropping-the-ra@3.0.0'
           - 'textlint-rule-terminology@5.2.14'
 
-  - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.90.0
+  - repo: local
     hooks:
-      - id: terraform_fmt
+      - id: terraform-fmt
+        name: Terraform fmt
+        language: system
+        entry: bash -lc 'mise exec terraform -- terraform fmt -recursive'
+        types_or: [terraform, hcl]
+        pass_filenames: false
 
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: v0.11.0

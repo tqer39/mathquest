@@ -19,6 +19,13 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
+      - uses: jdx/mise-action@v2
+        with:
+          version: latest
+          cache: true
+
+      - run: mise install
+
       - uses: pre-commit/action@v3.0.1
         with:
           extra_args: -a --show-diff-on-failure

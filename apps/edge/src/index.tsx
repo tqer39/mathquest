@@ -19,6 +19,9 @@ app.use('*', i18n());
 // Avoid noisy errors for favicon requests during local dev
 app.get('/favicon.ico', (c) => c.body(null, 204));
 
+// Simple health endpoint for手動確認
+app.get('/hello', (c) => c.text('Hello World'));
+
 // SSR renderer
 app.get(
   '*',

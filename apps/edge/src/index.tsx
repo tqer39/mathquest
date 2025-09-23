@@ -16,6 +16,9 @@ app.use('*', secureHeaders());
 app.use('*', prettyJSON());
 app.use('*', i18n());
 
+// Avoid noisy errors for favicon requests during local dev
+app.get('/favicon.ico', (c) => c.body(null, 204));
+
 // SSR renderer
 app.get(
   '*',

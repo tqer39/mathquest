@@ -137,59 +137,9 @@ js-install:
 
 # Wrap terraform with convenient -chdir handling
 # Usage examples:
-#   just tf -- -chdir dev/bootstrap init -reconfigure
-#   just tf -- -chdir infra/terraform/envs/dev/bootstrap plan
+#   just tf -- -chdir=dev/bootstrap init -reconfigure
+#   just tf -- -chdir=infra/terraform/envs/dev/bootstrap plan
 #   just tf -- version
-# 下記のラッパーコマンドを貼り付けた場合も解釈されます:
-#   cf-vault exec <profile> -- aws-vault exec <profile> -- terraform ...
 tf *args:
-    @bash -lc 'set -euo pipefail; \
-      BASE="infra/terraform/envs"; \
-      ROOT="$(pwd)"; \
-      ARGS=(); \
-      while [[ $# -gt 0 ]]; do \
-        case "$1" in \
-          cf-vault) \
-            shift; \
-            [[ "$1" == "exec" ]] && shift; \
-            [[ $# -gt 0 ]] && shift; \
-            [[ "$1" == "--" ]] && shift; \
-            if [[ "$1" == "aws-vault" ]]; then \
-              shift; \
-              [[ "$1" == "exec" ]] && shift; \
-              [[ $# -gt 0 ]] && shift; \
-              [[ "$1" == "--" ]] && shift; \
-            fi; \
-            [[ "$1" == "terraform" ]] && shift; \
-            continue \
-            ;; \
-          --) \
-            shift; \
-            continue \
-            ;; \
-          -chdir=*) \
-            p="${1#-chdir=}"; \
-            [[ "$p" == ./* ]] && p="${p#./}"; \
-            if [[ "$p" == infra/terraform/envs/* ]]; then \
-              p="${p#infra/terraform/envs/}"; \
-            elif [[ "$p" == "$ROOT"/infra/terraform/envs/* ]]; then \
-              p="${p#$ROOT/infra/terraform/envs/}"; \
-            fi; \
-            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
-              p="$BASE/$p"; \
-            fi; \
-            ARGS+=("-chdir=$p"); \
-            shift \
-            ;; \
-          *) \
-            ARGS+=("$1"); \
-            shift \
-            ;; \
-        esac; \
-      done; \
-      echo "→ terraform ${ARGS[*]}"; \
-      if command -v mise >/dev/null 2>&1; then \
-        exec mise exec terraform -- terraform "${ARGS[@]}"; \
-      else \
-        exec terraform "${ARGS[@]}"; \
-      fi' -- {{args}}
+    @echo "→ make terraform-cf ARGS='{{args}}'"
+    @exec make terraform-cf ARGS="{{args}}"

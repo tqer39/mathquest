@@ -305,6 +305,8 @@ wrangler.toml # Wrangler 設定
 
 AWS / Cloudflare 認証を用意した端末では、`just tf` 経由で Terraform CLI を直接実行できる。
 
+- Cloudflare API Token は macOS なら `cf-vault add mathquest` を実行し、キーチェーンに保存しておく。
+
 ```bash
 just tf -- -chdir=dev/bootstrap init -reconfigure  # 初期化（backend 再設定）
 just tf -- -chdir=dev/bootstrap validate           # 設定検証

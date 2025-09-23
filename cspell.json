@@ -5,7 +5,9 @@
     ".gitignore",
     ".vscode",
     ".pre-commit-config.yaml",
-    "pyproject.toml"
+    "pyproject.toml",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml"
   ],
   "words": [
     "apne",

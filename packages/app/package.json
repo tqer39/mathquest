@@ -12,11 +12,11 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -b tsconfig.json",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mathquest/domain": "*"
+    "@mathquest/domain": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.5.0"

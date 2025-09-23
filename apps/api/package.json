@@ -9,8 +9,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@mathquest/app": "*",
-    "@mathquest/domain": "*",
+    "@mathquest/app": "workspace:*",
+    "@mathquest/domain": "workspace:*",
     "@hono/node-server": "^1.11.0",
     "hono": "^4.4.3"
   },

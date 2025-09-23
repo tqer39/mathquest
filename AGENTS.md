@@ -41,8 +41,7 @@
 
 ## Security & Configuration Tips
 
-- Do not commit secrets; hooks detect AWS creds and private keys.
-- Secretlint runs via pre-commit to detect hard-coded credentials (recommend preset).
+- Do not commit secrets; pre-commit runs `detect-aws-credentials`, `detect-private-key`, and `secretlint` (recommend preset) to catch hard-coded credentials.
 - GitHub Actions require `OPENAI_API_KEY` for PR description generation.
 - Tool versions are managed by mise (`.tool-versions`, Node.js pinned).
 

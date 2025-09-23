@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AWS_ACCOUNT_ID: '072693953877'
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   AWS_ENV_NAME: dev
   OIDC_IAM_ROLE: portfolio-mathquest-terraform-deploy-dev
   CHECK_DIFF: ${{ inputs.CHECK_DIFF || github.event.inputs.CHECK_DIFF || '_false' }}
@@ -69,8 +69,9 @@ jobs:
 
       - name: Terraform Plan
         uses: ./.github/actions/terraform-plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         with:
-          AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
           AWS_ENV_NAME: ${{ env.AWS_ENV_NAME }}
           CHECK_DIFF: ${{ env.CHECK_DIFF }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -89,6 +90,8 @@ jobs:
       - name: Terraform Apply
         if: env.TF_PLAN_STATUS == 'has-diff' && contains(fromJSON('["push", "workflow_dispatch"]'), github.event_name)
         uses: ./.github/actions/terraform-apply
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         with:
           working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
 

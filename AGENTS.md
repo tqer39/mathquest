@@ -53,7 +53,7 @@
 ## 🎯 プロジェクト概要
 
 - 小学生向け算数アプリ（Hono-SSR + Cloudflare Workers で SSR）
-- **3回無料トライアル → 以降は会員登録必須**
+- **学習データの保存は会員登録が必須**（未登録ユーザーの学習履歴はブラウザ `localStorage` で保持）
 - **認証**：Better Auth（メールマジックリンク、Google、2FAオプション/TOTP）
 - **学年別対応**：小学1〜6年（初期単元プリセット済み）
 - **UI言語**：ユーザーエージェント / `Accept-Language` で `ja` / `en` を自動選択（Cookie/クエリで上書き可）
@@ -81,9 +81,9 @@
 - **Read**：頻出読み取りは KV に短TTLで read-through。miss時は D1 → KV 格納。
 - **整合性**：更新時に該当キーを削除/更新（まずは削除運用）。
 
-### 4) エッジ・ミドルウェア（無料3回/i18n/守り）
+### 4) エッジ・ミドルウェア（匿名学習/i18n/守り）
 
-- **無料3回**：匿名ID（Cookie）＋ KV の原子的インクリメント。閾値超でログイン導線へ。
+- **匿名学習**：ログイン前はブラウザ `localStorage` に学習履歴を保存し、サーバー側では識別情報を持たない。
 - **i18n**：`Accept-Language` → Cookie上書き。
 - **防御**：Turnstile 検証、KV で簡易レート制限（固定窓 or トークンバケット）。
 
@@ -129,7 +129,7 @@ apis/ # APIエンドポイント
 middleware/ # セッション/i18n/Turnstile/RateLimit/Idempotency
 views/ # SSR共通レイアウト/パーシャル
 application/ # アプリケーション層
-usecases/ # 無料回数判定/プロフィール更新/学年進行
+usecases/ # 匿名学習同期/プロフィール更新/学年進行
 domain/ # ドメイン層（純粋TS）
 entities/ # User/Profile/Progress
 services/ # ProblemGenerator（学年別初期単元）
@@ -163,7 +163,7 @@ wrangler.toml # Wrangler 設定
 ## 🌐 インフラ構成
 
 - **Workers (Hono-SSR)**：アプリ本体
-- **KV**：匿名回数カウンタ（3回無料判定）、レート制限、Idempotencyキー
+- **KV**：レート制限、Idempotency キー、（必要に応じて）匿名学習データの一時退避
 - **D1**：会員・進捗・2FA・監査ログ
 - **Pages**：静的資産（画像/効果音/固定JS）
 - **Turnstile**：登録/ログインフォーム保護
@@ -278,7 +278,7 @@ wrangler.toml # Wrangler 設定
 | Edge-SSR BFF（モノリス）    | 可能 | Hono on WorkersでSSR+BFF同居。ルーティング/ミドルウェアで整理。 |
 | Hexagonal（DDD）            | 可能 | `domain` 純TS、外部I/Oはアダプタ層に隔離。                      |
 | CQRS-lite + KVキャッシュ    | 可能 | KVは最終的整合。強整合が必要な箇所はD1直読みに絞る。            |
-| 無料3回（KV原子）           | 可能 | KV の原子的カウンタを使用。匿名IDは Cookie で管理。             |
+| 匿名学習のローカル保持      | 可能 | ブラウザ `localStorage` に保存し、会員登録後にサーバーへ同期。  |
 | Turnstile/Rate-limit        | 可能 | ミドルウェアで検証・制限。過剰制限は UX に注意。                |
 | Idempotency/Circuit Breaker | 可能 | KV に短命キー。CB は簡易実装（将来 Queues 導入余地）。          |
 | 認証（Better Auth）         | 可能 | Google OAuth クライアントは手動作成→Secrets 注入。              |
@@ -299,4 +299,4 @@ wrangler.toml # Wrangler 設定
 4. **Wrangler Secrets** に Resend API / OAuth / Turnstile を投入
 5. **D1 マイグレーション** を適用（`wrangler d1 migrations apply`）
 6. **Workers/Pages** をデプロイ（`wrangler deploy`, `wrangler pages deploy`）
-7. **E2E** で「3回無料 → ログイン導線」確認
+7. **E2E** で「匿名で学習 → 会員登録 → 学習履歴同期」確認

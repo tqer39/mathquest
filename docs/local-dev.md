@@ -7,8 +7,8 @@
 
 前提
 
-- Bun がインストール済み（`bun --version`）
-- 初回は依存導入: ルートで `bun install`
+- pnpm がインストール済み（`pnpm --version`）
+- 初回は依存導入: ルートで `pnpm install`
 
 ## 1) Node ローカルモード（最短）
 
@@ -16,8 +16,8 @@
   - `just dev-node`
   - API: <http://localhost:8787> / Web: <http://localhost:8788>
 - 個別起動（手動）
-  - 別ターミナル1: `bun run dev:api`
-  - 別ターミナル2: `bun run dev:web`
+  - 別ターミナル1: `pnpm --filter @mathquest/api run dev`
+  - 別ターミナル2: `pnpm --filter @mathquest/web run dev`
 - 動作確認
   - ヘルスチェック: `curl http://localhost:8787/healthz`
   - ブラウザで Web を開く: <http://localhost:8788>
@@ -27,7 +27,7 @@
 Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 もローカルでエミュレート可能です。
 
 - 起動
-  - `bun run dev:edge`
+  - `pnpm --filter @mathquest/edge run dev`
   - または `just dev-edge`
   - Wrangler が表示するローカル URL にアクセス
 - KV のローカル準備（任意）
@@ -46,7 +46,7 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
 ## よくある質問（FAQ）
 
 - ポートを変えたい
-  - API: `PORT=8080 bun run dev:api`
+  - API: `PORT=8080 pnpm --filter @mathquest/api run dev`
   - Web 側の API 呼び先は `apps/web/public/main.js` の `http://localhost:8787` を合わせてください。
 - CORS でエラーになる
   - API 側（`apps/api`）は CORS を許可済みですが、URL を確認してください。
@@ -57,9 +57,7 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
 
 - すべての対象ファイルを整形
   - `just format`
-  - または `bun run format`
 - ステージ済みのみ整形（コミット前など）
   - `just format-staged`
-  - または `bun run format:staged`
 
 pre-commit の Prettier フックを拡張しており、`js/ts/tsx/json/css/html/md/yaml` が対象です。

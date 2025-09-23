@@ -1,18 +1,21 @@
 {
   "name": "mathquest",
   "private": true,
-  "packageManager": "bun@1.1.8",
+  "packageManager": "pnpm@9.12.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build": "bun run --filter @mathquest/domain build && bun run --filter @mathquest/app build && bun run --filter @mathquest/api build && bun run --filter @mathquest/web build",
-    "dev:api": "bun run --filter @mathquest/api dev",
-    "dev:web": "bun run --filter @mathquest/web dev",
-    "dev:edge": "bun run --filter @mathquest/domain build && bun run --filter @mathquest/edge dev",
-    "clean": "bun run --filter @mathquest/domain clean && bun run --filter @mathquest/app clean && bun run --filter @mathquest/api clean && bun run --filter @mathquest/web clean",
+    "build": "pnpm --filter @mathquest/domain run build && pnpm --filter @mathquest/app run build && pnpm --filter @mathquest/api run build && pnpm --filter @mathquest/web run build",
+    "dev:api": "pnpm --filter @mathquest/api run dev",
+    "dev:web": "pnpm --filter @mathquest/web run dev",
+    "dev:edge": "pnpm --filter @mathquest/domain run build && pnpm --filter @mathquest/edge run dev",
+    "clean": "pnpm --filter @mathquest/domain run clean && pnpm --filter @mathquest/app run clean && pnpm --filter @mathquest/api run clean && pnpm --filter @mathquest/web run clean",
     "format": "pre-commit run prettier --all-files",
     "format:staged": "pre-commit run prettier"
+  },
+  "devDependencies": {
+    "wrangler": "4"
   }
 }

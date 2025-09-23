@@ -145,6 +145,7 @@ js-install:
 tf *args:
     @bash -lc 'set -euo pipefail; \
       BASE="infra/terraform/envs"; \
+      ROOT="$(pwd)"; \
       ARGS=(); \
       while [[ $# -gt 0 ]]; do \
         case "$1" in \
@@ -166,16 +167,14 @@ tf *args:
             shift; \
             continue \
             ;; \
-          -chdir) \
-            shift; p="$1"; \
-            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
-              p="$BASE/$p"; \
-            fi; \
-            ARGS+=("-chdir=$p"); \
-            shift \
-            ;; \
           -chdir=*) \
             p="${1#-chdir=}"; \
+            [[ "$p" == ./* ]] && p="${p#./}"; \
+            if [[ "$p" == infra/terraform/envs/* ]]; then \
+              p="${p#infra/terraform/envs/}"; \
+            elif [[ "$p" == "$ROOT"/infra/terraform/envs/* ]]; then \
+              p="${p#$ROOT/infra/terraform/envs/}"; \
+            fi; \
             if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
               p="$BASE/$p"; \
             fi; \

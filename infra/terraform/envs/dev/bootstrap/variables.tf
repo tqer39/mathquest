@@ -1,12 +1,7 @@
-variable "cloudflare_api_token" {
-  description = "Cloudflare API Token（Workers/KV の管理権限が必要）"
-  type        = string
-  sensitive   = true
-}
-
 variable "cloudflare_account_id" {
   description = "Cloudflare Account ID（リソース作成先）"
   type        = string
+  default     = "3c9a0adf6781e171e263a64f78c41ec4"
 }
 
 variable "project_slug" {

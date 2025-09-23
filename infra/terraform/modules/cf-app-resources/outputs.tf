@@ -22,7 +22,7 @@ output "turnstile_widget" {
   value = try({
     id       = cloudflare_turnstile_widget.auth[0].id
     name     = cloudflare_turnstile_widget.auth[0].name
-    site_key = cloudflare_turnstile_widget.auth[0].site_key
+    site_key = cloudflare_turnstile_widget.auth[0].id
   }, null)
 }
 

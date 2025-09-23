@@ -58,7 +58,7 @@
 - **学年別対応**：小学1〜6年（初期単元プリセット済み）
 - **UI言語**：ユーザーエージェント / `Accept-Language` で `ja` / `en` を自動選択（Cookie/クエリで上書き可）
 - **インフラ**：Cloudflare（Workers, KV, D1, Pages, Turnstile, R2）、Terraform管理、CI/CDはGitHub Actions
-- **メール送信**：Mailgun（`mail.<domain>` サブドメイン）
+- **メール送信**：Resend（カスタムドメイン送信）
 
 ---
 
@@ -72,7 +72,7 @@
 
 ### 2) DDD + ポート/アダプタ（Hexagonal）
 
-- **層**：`domain/*`（純TS） ←→ `application/usecases/*` ←→ `infrastructure/*`（D1/KV/Mailgun/OAuth のアダプタ）。
+- **層**：`domain/*`（純TS） ←→ `application/usecases/*` ←→ `infrastructure/*`（D1/KV/Resend/OAuth のアダプタ）。
 - **テスト**：ドメインはI/Oレスで高速UT、アダプタは契約テスト。
 
 ### 3) CQRS-lite & Read-through Cache
@@ -94,7 +94,7 @@
 
 ### 6) 認証（Better Auth アダプタ）
 
-- **手段**：メールマジックリンク（Mailgun）、Google OAuth、任意TOTP。
+- **手段**：メールマジックリンク（Resend）、Google OAuth、任意TOTP。
 - **保管**：シークレットは Wrangler Secrets に投入（Terraformでは管理しない）。
 
 ### 7) 配信分離：Pages（静的） × Workers（SSR/API）
@@ -137,7 +137,7 @@ repositories/ # ポート定義
 infrastructure/ # インフラ層
 repositories/ # D1/KV 実装
 auth/ # Better Auth 設定
-mail/ # Mailgun 実装
+mail/ # Resend 実装
 i18n/ # 多言語辞書/検出
 interface/ # Controllerアダプタ
 http/ # PlayController/AuthController
@@ -178,14 +178,14 @@ wrangler.toml # Wrangler 設定
 - Cloudflare **Pages プロジェクト**（※後述のとおり**ビルド/配信物のアップロードはCI**）
 - Cloudflare **Turnstile ウィジェット**
 - **Google Cloud Domains 登録**（`google_clouddomains_registration`）
-- **Mailgun用 DNS**（SPF/DKIM/MX/CNAME を Cloudflare DNS として IaC）
+- **Resend 用 DNS**（SPF/DKIM/CNAME を Cloudflare DNS として IaC）
 
 ### ⚠️ 管理できない/部分的
 
 - **Pages のデプロイ実体**：Terraform不可、CIで `wrangler pages deploy`
 - **D1 マイグレーション適用**：Terraform不可、CIで `wrangler d1 migrations apply`
 - **Google OAuth クライアント登録**：手動（GCP Console）、発行値は Secrets で注入
-- **Mailgun ドメイン登録/検証**：手動（DNSはTerraformで用意）、APIキーも Secrets で注入
+- **Resend ドメイン登録/検証**：手動（DNSはTerraformで用意）、APIキーも Secrets で注入
 
 ---
 
@@ -198,7 +198,7 @@ wrangler.toml # Wrangler 設定
 
 ### 1. `terraform apply`（インフラ一式作成）
 
-- 作成対象：Zone/DNS、Workers/KV/D1/R2、Pagesプロジェクト、Turnstileウィジェット、Mailgun用DNS、GCD登録。
+- 作成対象：Zone/DNS、Workers/KV/D1/R2、Pagesプロジェクト、Turnstileウィジェット、Resend 用 DNS、GCD登録。
 - 出力：KV/D1識別子、Pagesプロジェクト名、Turnstileサイトキー 等。
 
 ### 2. Google OAuth クライアント（**手動**）
@@ -206,10 +206,10 @@ wrangler.toml # Wrangler 設定
 - OAuth同意画面 → WebアプリのクライアントID/Secret 発行。
 - **Redirect URI**：`https://<domain>/auth/callback` などを登録。
 
-### 3. Mailgun ドメイン登録・検証（**手動**）
+### 3. Resend ドメイン登録・検証（**手動**）
 
-- Mailgun に `mail.<domain>` を追加 → 表示された **SPF/TXT, DKIM/TXT, MX(2件), CNAME(任意)** を **Cloudflare DNS（Terraform）** に反映。
-- 検証完了後、**Private API Key** を取得。
+- Resend ダッシュボードで送信ドメイン（例: `mail.<domain>`）を追加 → 表示された **SPF/TXT, DKIM/CNAME** を **Cloudflare DNS（Terraform）** に反映。
+- 検証完了後、**Resend API Key** を取得。
 
 ### 4. Secrets 注入（**CI から Wrangler**）
 
@@ -243,7 +243,7 @@ wrangler.toml # Wrangler 設定
 
 ## 🔐 認証フロー（Better Auth）
 
-- **メールマジックリンク**（Mailgun経由送信）
+- **メールマジックリンク**（Resend 経由送信）
 - **Google アカウントログイン**（GCP Console でクライアント発行）
 - **2FA（TOTP）** 任意設定（D1 にシード保存、レート制限/ロックアウトあり）
 
@@ -253,14 +253,13 @@ wrangler.toml # Wrangler 設定
 - 手動上書き：Cookie / クエリ
 - 辞書：`infrastructure/i18n/messages/{ja,en}.ts`
 
-## 📬 メール（Mailgun）
+## 📬 メール（Resend）
 
-- サブドメイン：`mail.<domain>`
+- サブドメイン：`mail.<domain>`（または Resend 推奨の任意サブドメイン）
 - 必須レコード例：
-  - MX: `mxa.mailgun.org` / `mxb.mailgun.org`
-  - SPF (TXT): `v=spf1 include:mailgun.org ~all`
-  - DKIM (TXT): Mailgun発行値（公開鍵）
-  - CNAME（任意）: トラッキング用
+  - SPF (TXT): Resend が提示する値を設定
+  - DKIM (CNAME/TXT): Resend が提示するキーを設定
+- 詳細な DNS レコードは Resend ダッシュボードの指示に従い、Terraform で管理
 
 ## 🌏 ドメイン
 
@@ -295,9 +294,9 @@ wrangler.toml # Wrangler 設定
 ## 🧭 次の作業ステップ（更新版）
 
 1. **Terraform 適用** → Zone/DNS/KV/D1/Pages/Turnstile/R2 作成
-2. **Mailgun** に `mail.<domain>` 追加 → DNS 検証完了（TXT/MX/CNAME 反映）
+2. **Resend** で送信ドメインを追加 → DNS 検証完了（SPF/TXT/CNAME 反映）
 3. **Google OAuth** クライアント発行 → Redirect URI 設定
-4. **Wrangler Secrets** に Mailgun/API/OAuth/Turnstile を投入
+4. **Wrangler Secrets** に Resend API / OAuth / Turnstile を投入
 5. **D1 マイグレーション** を適用（`wrangler d1 migrations apply`）
 6. **Workers/Pages** をデプロイ（`wrangler deploy`, `wrangler pages deploy`）
 7. **E2E** で「3回無料 → ログイン導線」確認

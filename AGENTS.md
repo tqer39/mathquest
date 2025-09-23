@@ -300,3 +300,16 @@ wrangler.toml # Wrangler 設定
 5. **D1 マイグレーション** を適用（`wrangler d1 migrations apply`）
 6. **Workers/Pages** をデプロイ（`wrangler deploy`, `wrangler pages deploy`）
 7. **E2E** で「匿名で学習 → 会員登録 → 学習履歴同期」確認
+
+### ローカルからの Terraform 操作
+
+AWS / Cloudflare 認証を用意した端末では、`just tf` 経由で Terraform CLI を直接実行できる。
+
+```bash
+just tf -- -chdir=dev/bootstrap init -reconfigure  # 初期化（backend 再設定）
+just tf -- -chdir=dev/bootstrap validate           # 設定検証
+just tf -- -chdir=dev/bootstrap plan               # 差分確認
+just tf -- -chdir=dev/bootstrap apply -auto-approve# 適用
+```
+
+`-chdir=dev/bootstrap` を他環境ディレクトリに差し替えることで同じフローを使い回せる。

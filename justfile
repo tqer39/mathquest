@@ -140,12 +140,28 @@ js-install:
 #   just tf -- -chdir dev/bootstrap init -reconfigure
 #   just tf -- -chdir infra/terraform/envs/dev/bootstrap plan
 #   just tf -- version
+# 下記のラッパーコマンドを貼り付けた場合も解釈されます:
+#   cf-vault exec <profile> -- aws-vault exec <profile> -- terraform ...
 tf *args:
     @bash -lc 'set -euo pipefail; \
       BASE="infra/terraform/envs"; \
       ARGS=(); \
       while [[ $# -gt 0 ]]; do \
         case "$1" in \
+          cf-vault) \
+            shift; \
+            [[ "$1" == "exec" ]] && shift; \
+            [[ $# -gt 0 ]] && shift; \
+            [[ "$1" == "--" ]] && shift; \
+            if [[ "$1" == "aws-vault" ]]; then \
+              shift; \
+              [[ "$1" == "exec" ]] && shift; \
+              [[ $# -gt 0 ]] && shift; \
+              [[ "$1" == "--" ]] && shift; \
+            fi; \
+            [[ "$1" == "terraform" ]] && shift; \
+            continue \
+            ;; \
           --) \
             shift; \
             continue \

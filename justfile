@@ -137,9 +137,9 @@ js-install:
 
 # Wrap terraform with convenient -chdir handling
 # Usage examples:
-#   just tf -- -chdir=dev/bootstrap init -reconfigure
-#   just tf -- -chdir=infra/terraform/envs/dev/bootstrap plan
-#   just tf -- version
+#   just tf -chdir=dev/bootstrap init -reconfigure
+#   just tf -chdir=infra/terraform/envs/dev/bootstrap plan
+#   just tf version
 tf *args:
     @echo "→ make terraform-cf ARGS='{{args}}'"
     @exec make terraform-cf ARGS="{{args}}"

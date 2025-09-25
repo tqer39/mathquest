@@ -1,5 +1,5 @@
 import { html } from 'hono/html';
-import type { FC } from 'hono/jsx';
+import type { FC, JSX } from 'hono/jsx';
 
 export type DocumentProps = {
   lang: 'ja' | 'en';

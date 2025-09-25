@@ -23,9 +23,9 @@ app.get('/favicon.ico', (c) => c.body(null, 204));
 app.get('/hello', (c) => c.text('Hello World'));
 
 // SSR renderer
-app.get(
+app.use(
   '*',
-  jsxRenderer((props, c) => {
+  jsxRenderer<{ title?: string; description?: string }>((props, c) => {
     const lang = c.get('lang') ?? 'ja';
     return (
       <Document lang={lang} title={props.title} description={props.description}>

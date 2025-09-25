@@ -56,13 +56,15 @@ repos:
     hooks:
       - id: secretlint
         name: secretlint
-        language: node
-        entry: secretlint
-        types: [text]
-        pass_filenames: true
-        additional_dependencies:
-          - 'secretlint@7.1.0'
-          - '@secretlint/secretlint-rule-preset-recommend@7.1.0'
+        # language: node
+        # entry: secretlint
+        language: docker_image
+        entry: secretlint/secretlint:latest secretlint
+        # types: [text]
+        # pass_filenames: true
+        # additional_dependencies:
+        #   - 'secretlint@7.1.0'
+        #   - '@secretlint/secretlint-rule-preset-recommend@7.1.0'
 
   - repo: local
     hooks:

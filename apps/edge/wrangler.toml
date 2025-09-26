@@ -26,7 +26,7 @@ preview_id = "kv_idempotency_preview"
 binding = "DB"
 database_name = "mathquest"
 database_id = "d1_mathquest_id"
-migrations_dir = "../infra/migrations"
+migrations_dir = "../../infra/migrations"
 
 [vars]
 DEFAULT_LANG = "ja"

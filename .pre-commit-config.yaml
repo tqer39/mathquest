@@ -47,7 +47,7 @@ repos:
         entry: textlint
         require_serial: false
         additional_dependencies:
-          - 'textlint@15.2.1'
+          - 'textlint@15.2.2'
           - 'textlint-filter-rule-allowlist@4.0.0'
           - 'textlint-rule-ja-no-space-between-full-width@2.4.2'
           - 'textlint-filter-rule-comments@1.2.2'
@@ -103,6 +103,11 @@ repos:
   # Optional: rulesync drift check
   - repo: local
     hooks:
+      - id: rulesync-update
+        name: rulesync apply (auto-update)
+        language: system
+        entry: bash -lc 'bash scripts/rulesync-update.sh'
+        pass_filenames: false
       - id: rulesync-check
         name: rulesync check drift
         language: system

@@ -116,12 +116,12 @@ const HOME_SCRIPT = html`<script type="module">
   const applyActiveGradeStyles = () => {
     gradeButtons.forEach((button) => {
       const isActive = button.dataset.gradeId === state.selectedGrade;
-      button.classList.toggle('border-sky-500', isActive);
-      button.classList.toggle('bg-white', isActive);
+      button.classList.toggle('border-[var(--mq-primary)]', isActive);
+      button.classList.toggle('bg-[var(--mq-surface-strong)]', isActive);
       button.classList.toggle('shadow-xl', isActive);
       button.classList.toggle('ring-2', isActive);
-      button.classList.toggle('ring-sky-200', isActive);
-      button.classList.toggle('text-slate-900', isActive);
+      button.classList.toggle('ring-[var(--mq-accent)]', isActive);
+      button.classList.toggle('text-[var(--mq-ink)]', isActive);
       button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
   };
@@ -216,6 +216,7 @@ const HOME_SCRIPT = html`<script type="module">
       showFeedback('error', '数字だけを入力してね');
       return;
     }
+    const preset = currentPreset();
     const response = await fetch('/apis/quiz/answers/check', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -224,6 +225,9 @@ const HOME_SCRIPT = html`<script type="module">
         b: Number(questionEl.dataset.b),
         op: questionEl.dataset.op,
         value,
+        gradeId: state.selectedGrade,
+        mode: preset.mode,
+        max: preset.max,
       }),
     });
     if (!response.ok) {
@@ -301,20 +305,34 @@ const HOME_SCRIPT = html`<script type="module">
 </script>`;
 
 export const Home: FC = () => (
-  <div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-10">
-    <header class="flex flex-col gap-6 rounded-3xl bg-gradient-to-r from-sky-500 via-sky-400 to-blue-500 p-8 text-white shadow-xl lg:flex-row lg:items-center lg:justify-between">
-      <div class="space-y-2">
-        <p class="text-sm font-semibold uppercase tracking-widest text-sky-100">
+  <div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-10">
+    <nav class="flex items-center justify-between rounded-full border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
+          MQ
+        </span>
+        <span class="text-lg font-semibold tracking-tight text-[var(--mq-ink)]">
+          MathQuest
+        </span>
+      </div>
+      <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
+        算数の冒険を、やさしいデザインで
+      </p>
+    </nav>
+
+    <header class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-r from-[var(--mq-primary-soft)] via-white to-[var(--mq-accent)] p-8 text-[var(--mq-ink)] shadow-xl lg:flex-row lg:items-center lg:justify-between">
+      <div class="space-y-3">
+        <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#6c7c90]">
           じぶんのペースで算数練習
         </p>
         <h1 class="text-3xl font-extrabold sm:text-4xl">MathQuest</h1>
-        <p class="max-w-xl text-sm sm:text-base text-sky-100">
+        <p class="max-w-xl text-sm sm:text-base text-[#4f6076]">
           ボタンを押して、算数ミッションにチャレンジ！学習記録はブラウザに保存。記録を残したくなったら、会員登録でクラウドにバックアップできます。
         </p>
       </div>
       <button
         id="start-button"
-        class="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-lg font-semibold text-sky-600 shadow-lg shadow-sky-900/20 transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-6 py-3 text-lg font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
         type="button"
       >
         スタート！
@@ -322,9 +340,9 @@ export const Home: FC = () => (
     </header>
 
     <section class="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-      <article class="flex flex-col gap-6 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
+      <article class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-8">
         <div class="space-y-4">
-          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <span class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             学年や単元をえらんでね
           </span>
           <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -335,17 +353,17 @@ export const Home: FC = () => (
                 data-mode={preset.mode}
                 data-max={preset.max}
                 aria-pressed={index === 0 ? 'true' : 'false'}
-                class="grade-button rounded-2xl border-2 border-transparent bg-white/70 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                class="grade-button rounded-2xl border border-transparent bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                 type="button"
               >
-                <p class="text-sm font-bold text-slate-500">{preset.label}</p>
-                <p class="text-base font-semibold text-slate-900">
+                <p class="text-sm font-bold text-[#5e718a]">{preset.label}</p>
+                <p class="text-base font-semibold text-[var(--mq-ink)]">
                   {preset.description}
                 </p>
               </button>
             ))}
           </div>
-          <p class="rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-700">
+          <p class="rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-3 text-sm text-[var(--mq-ink)]">
             <span class="font-semibold" id="grade-name">
               {gradePresets[0].label} のもんだい
             </span>
@@ -353,33 +371,33 @@ export const Home: FC = () => (
           </p>
         </div>
 
-        <div class="rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-500 p-6 text-white shadow-inner">
-          <p class="text-sm font-medium text-sky-100">もんだい</p>
+        <div class="rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-br from-[var(--mq-accent)] via-white to-[var(--mq-primary-soft)] p-6 text-[var(--mq-ink)] shadow-inner">
+          <p class="text-sm font-medium text-[#5e718a]">もんだい</p>
           <p
             id="question"
-            class="mt-4 rounded-2xl bg-white/15 p-6 text-center text-5xl font-extrabold tracking-wider shadow-lg backdrop-blur"
+            class="mt-4 rounded-2xl bg-white/70 p-6 text-center text-5xl font-extrabold tracking-wider text-[var(--mq-ink)] shadow-lg backdrop-blur"
           >
             0 + 0 = ？
           </p>
-          <p class="mt-2 text-xs text-sky-100">
+          <p class="mt-2 text-xs text-[#5e718a]">
             スタートを押すと新しい問題が届くよ！
           </p>
         </div>
 
         <div class="flex flex-col gap-5 lg:flex-row">
           <div class="flex-1 space-y-4">
-            <div class="rounded-3xl border-4 border-sky-200 bg-sky-50 p-6 text-center">
-              <p class="text-sm font-semibold text-slate-500">こたえ</p>
+            <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-center">
+              <p class="text-sm font-semibold text-[#5e718a]">こたえ</p>
               <p
                 id="answer-display"
-                class="mt-2 text-4xl font-extrabold tracking-[0.35em] text-slate-900"
+                class="mt-2 text-4xl font-extrabold tracking-[0.35em] text-[var(--mq-ink)]"
               >
                 ？
               </p>
             </div>
             <p
               id="feedback"
-              class="rounded-2xl bg-sky-100 px-4 py-2 text-center text-sm font-semibold text-sky-700 transition-opacity duration-200 ease-out opacity-0"
+              class="rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-2 text-center text-sm font-semibold text-[var(--mq-primary-strong)] opacity-0 transition-opacity duration-200 ease-out"
               data-variant="info"
             ></p>
           </div>
@@ -390,7 +408,7 @@ export const Home: FC = () => (
                 <button
                   key={digit}
                   type="button"
-                  class="rounded-2xl bg-white px-4 py-5 text-2xl font-extrabold text-slate-800 shadow hover:-translate-y-0.5 hover:bg-sky-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                  class="rounded-2xl bg-white px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                   data-keypad="digit"
                   data-value={digit}
                 >
@@ -399,14 +417,14 @@ export const Home: FC = () => (
               ))}
               <button
                 type="button"
-                class="rounded-2xl bg-white px-4 py-5 text-xl font-semibold text-slate-800 shadow hover:-translate-y-0.5 hover:bg-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500"
+                class="rounded-2xl bg-white px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-secondary)]"
                 data-keypad="delete"
               >
                 ⌫
               </button>
               <button
                 type="button"
-                class="rounded-2xl bg-white px-4 py-5 text-2xl font-extrabold text-slate-800 shadow hover:-translate-y-0.5 hover:bg-sky-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+                class="rounded-2xl bg-white px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                 data-keypad="digit"
                 data-value="0"
               >
@@ -414,7 +432,7 @@ export const Home: FC = () => (
               </button>
               <button
                 type="button"
-                class="rounded-2xl bg-sky-600 px-4 py-5 text-2xl font-extrabold text-white shadow-lg shadow-sky-500/40 transition hover:-translate-y-0.5 hover:bg-sky-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600"
+                class="rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
                 data-keypad="submit"
               >
                 OK
@@ -424,47 +442,49 @@ export const Home: FC = () => (
         </div>
       </article>
 
-      <aside class="flex flex-col gap-5 rounded-3xl bg-white p-6 shadow-lg sm:p-7">
-        <h2 class="text-lg font-semibold text-slate-700">きろく</h2>
-        <ul class="space-y-3 text-sm text-slate-600">
-          <li class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+      <aside class="flex flex-col gap-5 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-7">
+        <h2 class="text-lg font-semibold text-[var(--mq-ink)]">きろく</h2>
+        <ul class="space-y-3 text-sm text-[#4f6076]">
+          <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
             <span>こたえた問題</span>
-            <span id="stats-total" class="font-semibold text-slate-900">
+            <span id="stats-total" class="font-semibold text-[var(--mq-ink)]">
               0問
             </span>
           </li>
-          <li class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+          <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
             <span>せいかい</span>
-            <span id="stats-correct" class="font-semibold text-emerald-600">
+            <span id="stats-correct" class="font-semibold text-[#2e7c79]">
               0問
             </span>
           </li>
-          <li class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
+          <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
             <span>れんしゅうきろく</span>
-            <span id="stats-streak" class="font-semibold text-sky-600">
+            <span id="stats-streak" class="font-semibold text-[#4a7bb7]">
               0れんしょう
             </span>
           </li>
-          <li class="rounded-2xl bg-slate-50 px-4 py-3 text-xs text-slate-500">
-            <span class="font-semibold text-slate-600">さいしゅう更新日</span>
-            <span id="stats-last-played" class="mt-1 block text-slate-700">
+          <li class="rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-xs text-[#5e718a]">
+            <span class="font-semibold text-[var(--mq-ink)]">
+              さいしゅう更新日
+            </span>
+            <span id="stats-last-played" class="mt-1 block text-[#4f6076]">
               まだ記録はありません
             </span>
           </li>
         </ul>
-        <p class="rounded-2xl bg-amber-50 px-4 py-3 text-xs text-amber-800">
+        <p class="rounded-2xl bg-[var(--mq-secondary)] px-4 py-3 text-xs text-[#7a5544]">
           学習記録はブラウザに保存されています。会員登録すると、サーバーに同期してどこからでも続きができます。
         </p>
         <button
           id="reset-progress"
           type="button"
-          class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500"
+          class="rounded-2xl border border-[var(--mq-outline)] px-4 py-2 text-sm font-semibold text-[#4f6076] transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
         >
           学習記録をリセット
         </button>
         <a
           href="/auth/signin"
-          class="inline-flex items-center justify-center rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/40 transition hover:-translate-y-0.5 hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500"
+          class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
         >
           会員登録・サインインはこちら
         </a>

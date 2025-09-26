@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "WRANGLER_LOG_PATH=.wrangler/logs wrangler dev --live-reload",
+    "drizzle:generate": "drizzle-kit generate",
     "clean": "rm -rf dist",
     "test": "vitest",
     "deploy": "wrangler deploy",
@@ -12,11 +13,13 @@
   },
   "dependencies": {
     "hono": "^4.4.3",
-    "@mathquest/domain": "workspace:*"
+    "@mathquest/domain": "workspace:*",
+    "drizzle-orm": "^0.36.1"
   },
   "devDependencies": {
     "wrangler": "^3.76.0",
     "typescript": "^5.5.0",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "drizzle-kit": "^0.26.1"
   }
 }

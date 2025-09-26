@@ -30,6 +30,8 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
   - `pnpm --filter @mathquest/edge run dev`
   - または `just dev-edge`
   - Wrangler が表示するローカル URL にアクセス
+  - ローカルモードでは `--live-reload` を有効化しているため、ソース更新時にブラウザも自動でリロードされます。
+  - Wrangler のデバッグログは `apps/edge/.wrangler/logs/` に保存されます（リポジトリ外への書き込みを避けるため）。
 - KV のローカル準備（任意）
   - `wrangler kv namespace create KV_FREE_TRIAL`
   - `wrangler kv namespace create KV_AUTH_SESSION`
@@ -40,6 +42,7 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
   - DB 作成: `wrangler d1 create mathquest`
   - 生成された `database_id` を `apps/edge/wrangler.toml` の `d1_databases` に反映
   - マイグレーションがある場合: `wrangler d1 migrations apply mathquest`
+  - スキーマ変更時は `pnpm drizzle:generate` で SQL を生成し、上記コマンドで適用
 - データ永続化（開発用）
   - `wrangler dev --persist` を使うと KV/D1 のローカルデータを `.wrangler` ディレクトリに保持できます。
 

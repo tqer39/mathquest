@@ -1,0 +1,19 @@
+name: D1 Migrations (dev)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  apply-dev:
+    name: Apply migrations to dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply migrations
+        uses: ./.github/d1-migrations
+        with:
+          environment: dev
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

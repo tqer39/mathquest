@@ -1,0 +1,19 @@
+name: D1 Migrations (prod)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  apply-prod:
+    name: Apply migrations to prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply migrations
+        uses: ./.github/d1-migrations
+        with:
+          environment: prod
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -87,6 +87,11 @@ repos:
   # Optional: rulesync drift check
   - repo: local
     hooks:
+      - id: rulesync-update
+        name: rulesync apply (auto-update)
+        language: system
+        entry: bash -lc 'bash scripts/rulesync-update.sh'
+        pass_filenames: false
       - id: rulesync-check
         name: rulesync check drift
         language: system

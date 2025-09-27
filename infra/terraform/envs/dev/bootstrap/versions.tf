@@ -9,6 +9,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "5.10.1"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.6.3"
+    }
   }
   backend "s3" {
     bucket  = "terraform-tfstate-tqer39-072693953877-ap-northeast-1"

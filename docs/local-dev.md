@@ -7,8 +7,8 @@
 
 前提
 
-- Bun がインストール済み（`bun --version`）
-- 初回は依存導入: ルートで `bun install`
+- pnpm がインストール済み（`pnpm --version`）
+- 初回は依存導入: ルートで `pnpm install`
 
 ## 1) Node ローカルモード（最短）
 
@@ -16,8 +16,8 @@
   - `just dev-node`
   - API: <http://localhost:8787> / Web: <http://localhost:8788>
 - 個別起動（手動）
-  - 別ターミナル1: `bun run dev:api`
-  - 別ターミナル2: `bun run dev:web`
+  - 別ターミナル1: `pnpm --filter @mathquest/api run dev`
+  - 別ターミナル2: `pnpm --filter @mathquest/web run dev`
 - 動作確認
   - ヘルスチェック: `curl http://localhost:8787/healthz`
   - ブラウザで Web を開く: <http://localhost:8788>
@@ -27,23 +27,29 @@
 Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 もローカルでエミュレート可能です。
 
 - 起動
-  - `bun run dev:edge`
+  - `pnpm --filter @mathquest/edge run dev`
   - または `just dev-edge`
   - Wrangler が表示するローカル URL にアクセス
+  - ローカルモードでは `--live-reload` を有効化しているため、ソース更新時にブラウザも自動でリロードされます。
+  - Wrangler のデバッグログは `apps/edge/.wrangler/logs/` に保存されます（リポジトリ外への書き込みを避けるため）。
 - KV のローカル準備（任意）
   - `wrangler kv namespace create KV_FREE_TRIAL`
+  - `wrangler kv namespace create KV_AUTH_SESSION`
+  - `wrangler kv namespace create KV_RATE_LIMIT`
+  - `wrangler kv namespace create KV_IDEMPOTENCY`
   - `wrangler dev` 実行時はプレビュー用 namespace が自動で割り当てられますが、明示的に作成して `wrangler.toml` の `kv_namespaces` に id を設定することも可能です。
 - D1 のローカル準備（任意）
-  - DB 作成: `wrangler d1 create ed_games`
+  - DB 作成: `wrangler d1 create mathquest`
   - 生成された `database_id` を `apps/edge/wrangler.toml` の `d1_databases` に反映
-  - マイグレーションがある場合: `wrangler d1 migrations apply ed_games`
+  - マイグレーションがある場合: `wrangler d1 migrations apply mathquest`
+  - スキーマ変更時は `pnpm drizzle:generate` で SQL を生成し、上記コマンドで適用
 - データ永続化（開発用）
   - `wrangler dev --persist` を使うと KV/D1 のローカルデータを `.wrangler` ディレクトリに保持できます。
 
 ## よくある質問（FAQ）
 
 - ポートを変えたい
-  - API: `PORT=8080 bun run dev:api`
+  - API: `PORT=8080 pnpm --filter @mathquest/api run dev`
   - Web 側の API 呼び先は `apps/web/public/main.js` の `http://localhost:8787` を合わせてください。
 - CORS でエラーになる
   - API 側（`apps/api`）は CORS を許可済みですが、URL を確認してください。
@@ -54,9 +60,7 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
 
 - すべての対象ファイルを整形
   - `just format`
-  - または `bun run format`
 - ステージ済みのみ整形（コミット前など）
   - `just format-staged`
-  - または `bun run format:staged`
 
 pre-commit の Prettier フックを拡張しており、`js/ts/tsx/json/css/html/md/yaml` が対象です。

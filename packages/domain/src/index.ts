@@ -41,3 +41,10 @@ export const generateQuestion = (config: QuizConfig): Question => {
 };
 
 export const checkAnswer = (q: Question, input: number) => input === q.answer;
+
+export const evaluateQuestion = (input: Pick<Question, 'a' | 'b' | 'op'>) =>
+  input.op === '+'
+    ? input.a + input.b
+    : input.op === '-'
+      ? input.a - input.b
+      : input.a * input.b;

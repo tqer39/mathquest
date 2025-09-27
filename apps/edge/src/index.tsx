@@ -5,9 +5,9 @@ import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import type { Env } from './env';
 import { i18n } from './middlewares/i18n';
-import { freeTrial } from './middlewares/free-trial';
 import { quiz } from './routes/apis/quiz';
 import { Home } from './routes/pages/home';
+import { Document } from './views/layouts/document';
 
 const app = new Hono<{ Bindings: Env; Variables: { lang: 'ja' | 'en' } }>();
 
@@ -16,28 +16,33 @@ app.use('*', secureHeaders());
 app.use('*', prettyJSON());
 app.use('*', i18n());
 
+// Avoid noisy errors for favicon requests during local dev
+app.get('/favicon.ico', (c) => c.body(null, 204));
+
+// Simple health endpoint for手動確認
+app.get('/hello', (c) => c.text('Hello World'));
+
 // SSR renderer
-app.get(
+app.use(
   '*',
-  jsxRenderer((_, c) => {
+  jsxRenderer<{ title?: string; description?: string }>((props, c) => {
     const lang = c.get('lang') ?? 'ja';
     return (
-      <html lang={lang}>
-        <head>
-          <meta charSet="utf-8" />
-          <title>Math App</title>
-        </head>
-        <body>{/* The page content will be injected here */}</body>
-      </html>
+      <Document lang={lang} title={props.title} description={props.description}>
+        {props.children}
+      </Document>
     );
   })
 );
 
 // Public top
-app.get('/', (c) => c.render(<Home />));
-
-// Free trial gating for pages under /play (example)
-app.use('/play/*', freeTrial());
+app.get('/', (c) =>
+  c.render(<Home />, {
+    title: 'MathQuest | じぶんのペースで楽しく算数練習',
+    description:
+      '学年別の単元から選んで算数を練習。匿名で始めて、記録を残したくなったら会員登録できる学習アプリです。',
+  })
+);
 
 // Dummy signin page for redirect target
 app.get('/auth/signin', (c) => c.text('サインイン（ダミー）'));

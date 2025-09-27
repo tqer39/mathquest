@@ -13,16 +13,16 @@
 - `apps/web`: フロントエンド（Hono 静的配信）
   - API を呼び出す最小のUI（算数クイズ）
 
-## 主要コマンド（ローカル/Bun）
+## 主要コマンド（ローカル/pnpm）
 
 - 事前準備（初回）: `just setup`
-  - Homebrew 経由のツール導入 → mise によるツール（node/bun 等）導入 → pre-commit 設定
-- 依存関係のインストール（ルート）: `bun install`
-- ビルド: `bun run build`
-- API 起動: `bun run dev:api` → <http://localhost:8787>
-- Web 起動: `bun run dev:web` → <http://localhost:8788>
+  - Homebrew 経由のツール導入 → mise によるツール（node/pnpm 等）導入 → pre-commit 設定
+- 依存関係のインストール（ルート）: `pnpm install`
+- ビルド: `pnpm run build`
+- API 起動: `pnpm --filter @mathquest/api run dev` → <http://localhost:8787>
+- Web 起動: `pnpm --filter @mathquest/web run dev` → <http://localhost:8788>
   - Web は API を `http://localhost:8787` に呼びます。両方起動してください。
-- Edge-SSR 起動（Workers）: `bun run dev:edge` → Wrangler のURLにアクセス
+- Edge-SSR 起動（Workers）: `pnpm --filter @mathquest/edge run dev` → Wrangler のURLにアクセス
   - KV/D1 は wrangler.toml のバインディングを環境に合わせて設定してください。
 
 ## API 概要
@@ -46,11 +46,9 @@
 
 `games/math-quiz/` はクライアントサイド完結の実装です。API を使う版に差し替える場合は、問題生成と採点の呼び出しを `/v1/...` に置き換えていけば移行できます。
 
-## Bun が未インストールの場合
+## pnpm の導入について
 
 - mise 経由（推奨）
-  - `.tool-versions` に `bun 1.1.8` を追加済みなので、`just setup` もしくは `just install` を実行すると bun が導入されます。
-- Homebrew（macOS/Linux）
-  - `brew install oven-sh/bun/bun`
-- 公式スクリプト
-  - `curl -fsSL https://bun.sh/install | bash`（必要に応じて PATH 設定）
+  - `.tool-versions` に `pnpm` を追加して `mise install` を実行
+- npm 経由
+  - `npm install -g pnpm`

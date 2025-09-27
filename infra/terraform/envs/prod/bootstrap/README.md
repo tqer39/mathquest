@@ -9,11 +9,11 @@
 
 1. R2 バケットを手動作成（どちらか）
 
-- Cloudflare ダッシュボード → R2 → Create bucket（例: `ed-games-tfstate`）
+- Cloudflare ダッシュボード → R2 → Create bucket（例: `mathquest-tfstate`）
 - もしくは wrangler
 
   ```sh
-  wrangler r2 bucket create ed-games-tfstate
+  wrangler r2 bucket create mathquest-tfstate
   ```
 
 1. `terraform.tfvars` を用意
@@ -21,7 +21,7 @@
 ```hcl
 cloudflare_api_token  = "cf-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 cloudflare_account_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-r2_bucket_name        = "ed-games-tfstate"
+r2_bucket_name        = "mathquest-tfstate"
 ```
 
 1. 取り込み実行（import ブロックを使用）
@@ -39,7 +39,7 @@ terraform apply  # state に取り込み
 ```hcl
 terraform {
   backend "s3" {
-    bucket                      = "ed-games-tfstate"
+    bucket                      = "mathquest-tfstate"
     key                         = "prod/terraform.tfstate"
     endpoint                    = "https://${var.cloudflare_account_id}.r2.cloudflarestorage.com"
     region                      = "auto"

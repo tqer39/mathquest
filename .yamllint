@@ -5,6 +5,9 @@ yaml-files:
   - '*.yml'
   - '.yamllint'
 
+ignore:
+  - pnpm-lock.yaml
+
 rules:
   braces: enable
   brackets: enable
@@ -30,3 +33,4 @@ rules:
   trailing-spaces: enable
   truthy:
     level: warning
+    check-keys: false

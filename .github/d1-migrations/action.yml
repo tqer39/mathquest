@@ -1,0 +1,42 @@
+name: 'Apply D1 migrations'
+description: 'Run pnpm install and apply Cloudflare D1 migrations via Wrangler'
+
+inputs:
+  apiToken:
+    description: 'Cloudflare API token'
+    required: true
+  accountId:
+    description: 'Cloudflare account ID'
+    required: true
+  environment:
+    description: 'Wrangler environment name to apply migrations against'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9.12.0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: pnpm
+
+    - name: Install dependencies
+      run: pnpm install --no-frozen-lockfile
+      shell: bash
+
+    - name: Apply migrations
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ inputs.apiToken }}
+        accountId: ${{ inputs.accountId }}
+        workingDirectory: apps/edge
+        command: d1 migrations apply mathquest --env ${{ inputs.environment }}

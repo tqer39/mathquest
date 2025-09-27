@@ -2,6 +2,8 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 
+exclude: ^pnpm-lock\.yaml$
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -51,6 +53,20 @@ repos:
           - 'textlint-filter-rule-comments@1.2.2'
           - 'textlint-rule-no-dropping-the-ra@3.0.0'
           - 'textlint-rule-terminology@5.2.15'
+
+  - repo: local
+    hooks:
+      - id: secretlint
+        name: secretlint
+        # language: node
+        # entry: secretlint
+        language: docker_image
+        entry: secretlint/secretlint:latest secretlint
+        # types: [text]
+        # pass_filenames: true
+        # additional_dependencies:
+        #   - 'secretlint@7.1.0'
+        #   - '@secretlint/secretlint-rule-preset-recommend@7.1.0'
 
   - repo: local
     hooks:

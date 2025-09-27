@@ -1,19 +1,25 @@
 {
-  "name": "@ed-games/edge",
+  "name": "@mathquest/edge",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "WRANGLER_LOG_PATH=.wrangler/logs wrangler dev --live-reload",
+    "drizzle:generate": "drizzle-kit generate",
+    "clean": "rm -rf dist",
+    "test": "vitest",
     "deploy": "wrangler deploy",
     "types": "wrangler types"
   },
   "dependencies": {
     "hono": "^4.4.3",
-    "@ed-games/domain": "workspace:*"
+    "@mathquest/domain": "workspace:*",
+    "drizzle-orm": "^0.36.1"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0",
+    "drizzle-kit": "^0.26.1"
   }
 }

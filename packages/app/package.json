@@ -1,5 +1,5 @@
 {
-  "name": "@ed-games/app",
+  "name": "@mathquest/app",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,11 +12,11 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -b tsconfig.json",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@ed-games/domain": "*"
+    "@mathquest/domain": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.5.0"

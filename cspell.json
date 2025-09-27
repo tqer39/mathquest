@@ -5,7 +5,9 @@
     ".gitignore",
     ".vscode",
     ".pre-commit-config.yaml",
-    "pyproject.toml"
+    "pyproject.toml",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml"
   ],
   "words": [
     "apne",
@@ -17,8 +19,6 @@
     "awslabs",
     "bobheadxi",
     "buildscript",
-    "bun",
-    "Bun",
     "bypassers",
     "chdir",
     "Chiyoda",
@@ -48,6 +48,7 @@
     "jacobbednarz",
     "justfile",
     "kentaro",
+    "Kaku",
     "lintable",
     "linuxbrew",
     "markdownlint",
@@ -91,6 +92,8 @@
     "tqer",
     "usecases",
     "vercel",
-    "Vercel"
+    "Vercel",
+    "AUTOINCREMENT",
+    "rgba"
   ]
 }

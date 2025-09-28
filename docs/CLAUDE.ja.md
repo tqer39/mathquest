@@ -97,6 +97,7 @@ pre-commit run --all-files
 - **スペルチェック**: cspell（cspell.json設定を使用）
 - **Markdownリンティング**: markdownlint-cli2（自動修正付き）
 - **日本語テキストリンティング**: 日本語固有のルールを持つtextlint
+- **シークレット検知**: secretlint（推奨プリセットでハードコードされた資格情報を検出）
 - **シェルスクリプトリンティング**: shellcheck
 - **GitHub Actions**: actionlint、ワークフローファイル用prettier
 - **Terraform**: terraform_fmt

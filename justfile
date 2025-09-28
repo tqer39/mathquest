@@ -24,11 +24,11 @@ setup:
     fi
     @just ai-install
     pre-commit install
-    @if command -v bun >/dev/null 2>&1; then \
-        echo "→ Installing JS dependencies with bun..."; \
-        bun install; \
+    @if command -v pnpm >/dev/null 2>&1; then \
+        echo "→ Installing JS dependencies with pnpm..."; \
+        pnpm install; \
     else \
-        echo "⚠ bun not found. Skip 'bun install'. Run 'mise install' or install bun and re-run 'just setup'."; \
+        echo "⚠ pnpm not found. Install pnpm (npm install -g pnpm) してから再実行してください。"; \
     fi
     @echo "Setup complete!"
 
@@ -81,11 +81,11 @@ status:
 install:
     @echo "Installing tools with mise..."
     mise install
-    @if command -v bun >/dev/null 2>&1; then \
-        echo "→ Installing JS dependencies with bun..."; \
-        bun install; \
+    @if command -v pnpm >/dev/null 2>&1; then \
+        echo "→ Installing JS dependencies with pnpm..."; \
+        pnpm install; \
     else \
-        echo "⚠ bun not found. Skip 'bun install'. Run 'mise install' or install bun and re-run 'just install'."; \
+        echo "⚠ pnpm not found. Install pnpm (npm install -g pnpm) してから再実行してください。"; \
     fi
 
 # Update mise tools
@@ -115,66 +115,31 @@ rulesync args='':
 dev-node:
     @echo "Starting API (8787) and Web (8788)..."
     bash -lc 'set -euo pipefail; \
-      (bun run dev:api & pid_api=$!; \
-       bun run dev:web & pid_web=$!; \
+      (pnpm --filter @mathquest/api run dev & pid_api=$!; \
+       pnpm --filter @mathquest/web run dev & pid_web=$!; \
        trap "kill $$pid_api $$pid_web 2>/dev/null || true" INT TERM EXIT; \
        wait)'
 
 # Run Edge SSR (Cloudflare Workers via Wrangler)
 dev-edge:
     @echo "Starting Edge SSR (Wrangler dev)..."
-    bun run dev:edge
+    pnpm --filter @mathquest/edge run dev
 
-# Install JS dependencies with bun (can be run independently)
+# Install JS dependencies with pnpm (can be run independently)
 js-install:
-    @if command -v bun >/dev/null 2>&1; then \
-        echo "Installing JS dependencies with bun..."; \
-        bun install; \
+    @if command -v pnpm >/dev/null 2>&1; then \
+        echo "Installing JS dependencies with pnpm..."; \
+        pnpm install; \
     else \
-        echo "⚠ bun not found. Run 'mise install' or 'brew install oven-sh/bun/bun'"; \
+        echo "⚠ pnpm not found. npm install -g pnpm などで導入してください"; \
         exit 1; \
     fi
 
 # Wrap terraform with convenient -chdir handling
 # Usage examples:
-#   just tf -- -chdir dev/bootstrap init -reconfigure
-#   just tf -- -chdir infra/terraform/envs/dev/bootstrap plan
-#   just tf -- version
+#   just tf -chdir=dev/bootstrap init -reconfigure
+#   just tf -chdir=infra/terraform/envs/dev/bootstrap plan
+#   just tf version
 tf *args:
-    @bash -lc 'set -euo pipefail; \
-      BASE="infra/terraform/envs"; \
-      ARGS=(); \
-      while [[ $# -gt 0 ]]; do \
-        case "$1" in \
-          --) \
-            shift; \
-            continue \
-            ;; \
-          -chdir) \
-            shift; p="$1"; \
-            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
-              p="$BASE/$p"; \
-            fi; \
-            ARGS+=("-chdir=$p"); \
-            shift \
-            ;; \
-          -chdir=*) \
-            p="${1#-chdir=}"; \
-            if [[ "$p" != /* && "$p" != ./* && "$p" != ../* && "$p" != infra/* ]]; then \
-              p="$BASE/$p"; \
-            fi; \
-            ARGS+=("-chdir=$p"); \
-            shift \
-            ;; \
-          *) \
-            ARGS+=("$1"); \
-            shift \
-            ;; \
-        esac; \
-      done; \
-      echo "→ terraform ${ARGS[*]}"; \
-      if command -v mise >/dev/null 2>&1; then \
-        exec mise exec terraform -- terraform "${ARGS[@]}"; \
-      else \
-        exec terraform "${ARGS[@]}"; \
-      fi' -- {{args}}
+    @echo "→ make terraform-cf ARGS='{{args}}'"
+    @exec make terraform-cf ARGS="{{args}}"

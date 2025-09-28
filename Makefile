@@ -86,3 +86,27 @@ endif
 	@echo "  just help    - Show available tasks"
 	@echo "  just setup   - Setup development environment"
 	@echo "  just lint    - Run code quality checks"
+
+.PHONY: terraform-cf
+terraform-cf: ## Run terraform via cf-vault + aws-vault (ARGS="-chdir=... plan")
+	@set -- $(ARGS); \
+	NORMALIZED=""; \
+	while [ $$# -gt 0 ]; do \
+	  ARG="$$1"; shift; \
+	  case "$$ARG" in \
+	    -chdir=*) \
+	      PATH_ARG="$${ARG#-chdir=}"; \
+	      case "$$PATH_ARG" in \
+	        ./*) PATH_ARG="$${PATH_ARG#./}" ;; \
+	      esac; \
+	      case "$$PATH_ARG" in \
+	        /*|infra/*|../*|./*) ;; \
+	        *) PATH_ARG="infra/terraform/envs/$$PATH_ARG" ;; \
+	      esac; \
+	      NORMALIZED="$$NORMALIZED -chdir=$$PATH_ARG" ;; \
+	    *) NORMALIZED="$$NORMALIZED $$ARG" ;; \
+	  esac; \
+	done; \
+	NORMALIZED="$${NORMALIZED# }"; \
+	echo "→ cf-vault exec mathquest -- aws-vault exec portfolio -- terraform $$NORMALIZED"; \
+	cf-vault exec mathquest -- aws-vault exec portfolio -- terraform $$NORMALIZED

@@ -1,4 +1,4 @@
-name = "ed-games-edge"
+name = "mathquest-edge"
 main = "src/index.tsx"
 compatibility_date = "2024-09-01"
 
@@ -7,10 +7,26 @@ binding = "KV_FREE_TRIAL"
 id = "kv_free_trial_id"
 preview_id = "kv_free_trial_preview"
 
+[[kv_namespaces]]
+binding = "KV_AUTH_SESSION"
+id = "kv_auth_session_id"
+preview_id = "kv_auth_session_preview"
+
+[[kv_namespaces]]
+binding = "KV_RATE_LIMIT"
+id = "kv_rate_limit_id"
+preview_id = "kv_rate_limit_preview"
+
+[[kv_namespaces]]
+binding = "KV_IDEMPOTENCY"
+id = "kv_idempotency_id"
+preview_id = "kv_idempotency_preview"
+
 [[d1_databases]]
 binding = "DB"
-database_name = "ed_games"
-database_id = "d1_ed_games_id"
+database_name = "mathquest"
+database_id = "d1_mathquest_id"
+migrations_dir = "../../infra/migrations"
 
 [vars]
 DEFAULT_LANG = "ja"

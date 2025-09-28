@@ -10,6 +10,6 @@ variable "cloudflare_account_id" {
 }
 
 variable "r2_bucket_name" {
-  description = "tfstate を保存する R2 バケット名（例: ed-games-tfstate）"
+  description = "tfstate を保存する R2 バケット名（例: mathquest-tfstate）"
   type        = string
 }

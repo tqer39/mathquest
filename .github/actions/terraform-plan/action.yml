@@ -4,9 +4,6 @@ name: Terraform Plan
 description: Terraform Plan
 
 inputs:
-  AWS_ACCOUNT_ID:
-    description: AWS アカウント ID
-    required: true
   AWS_ENV_NAME:
     description: 環境名
     required: true
@@ -93,7 +90,7 @@ runs:
       env:
         SLACK_CHANNEL: '#ntf_gh_private-lab'
         SLACK_COLOR: danger
-        SLACK_TITLE: '${{ inputs.AWS_ENV_NAME }}(${{ inputs.AWS_ACCOUNT_ID }}): ${{ env.ERROR_MSG }}'
+        SLACK_TITLE: '${{ inputs.AWS_ENV_NAME }}(${{ env.AWS_ACCOUNT_ID }}): ${{ env.ERROR_MSG }}'
         SLACK_MESSAGE: "<!subteam^U0RFFAK9U> 確認してください。\npath: `${{ inputs.working-directory }}`"
         SLACK_LINK_NAMES: 'true'
         SLACK_USERNAME: github-bot

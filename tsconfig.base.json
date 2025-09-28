@@ -4,6 +4,11 @@
     "module": "ES2020",
     "moduleResolution": "Node",
     "lib": ["ES2020", "DOM"],
+    "baseUrl": "./",
+    "paths": {
+      "@mathquest/domain": ["packages/domain/src"],
+      "@mathquest/domain/*": ["packages/domain/src/*"]
+    },
     "strict": true,
     "noEmitOnError": true,
     "skipLibCheck": true,

@@ -25,15 +25,9 @@ locals {
   }
 }
 
-resource "random_uuid" "d1_database" {
-  keepers = {
-    name = local.d1_name
-  }
-}
-
 resource "cloudflare_d1_database" "app" {
   account_id = var.cloudflare_account_id
-  name       = random_uuid.d1_database.result
+  name       = local.d1_name
 }
 
 resource "cloudflare_workers_kv_namespace" "kv" {

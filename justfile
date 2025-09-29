@@ -3,6 +3,9 @@
 # Use bash for all recipes to avoid zsh/sh incompatibilities
 set shell := ["bash", "-c"]
 
+# Common paths
+edge_dir := "apps/edge"
+
 # Packages: AI CLI tools installed via Node.js (managed by mise)
 ai_cli_pkgs := "@anthropic-ai/claude-code @google/gemini-cli @openai/codex"
 
@@ -124,6 +127,21 @@ dev-node:
 dev-edge:
     @echo "Starting Edge SSR (Wrangler dev)..."
     pnpm --filter @mathquest/edge run dev
+
+# Cloudflare D1 (local) utilities
+d1-local-migrate:
+    @echo "Applying local D1 migrations..."
+    @cd {{edge_dir}} && pnpm exec wrangler d1 migrations apply DB --local
+
+d1-local-query query="SELECT name FROM sqlite_master WHERE type='table';":
+    @if [ -z "{{query}}" ]; then \
+        echo "Usage: just d1-local-query \"<SQL>\"" && exit 1; \
+    fi
+    @cd {{edge_dir}} && pnpm exec wrangler d1 execute DB --local --command "{{query}}"
+
+d1-local-reset:
+    @echo "Resetting local D1 state (.wrangler/state)..."
+    @cd {{edge_dir}} && rm -rf .wrangler/state && mkdir -p .wrangler/state
 
 # Install JS dependencies with pnpm (can be run independently)
 js-install:

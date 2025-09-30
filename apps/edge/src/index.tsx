@@ -7,6 +7,7 @@ import type { Env } from './env';
 import { i18n } from './middlewares/i18n';
 import { quiz } from './routes/apis/quiz';
 import { Home } from './routes/pages/home';
+import { resolveCurrentUser } from './application/session/current-user';
 import { Document } from './views/layouts/document';
 
 const app = new Hono<{ Bindings: Env; Variables: { lang: 'ja' | 'en' } }>();
@@ -37,7 +38,7 @@ app.use(
 
 // Public top
 app.get('/', (c) =>
-  c.render(<Home />, {
+  c.render(<Home currentUser={resolveCurrentUser(c.env)} />, {
     title: 'MathQuest | じぶんのペースで楽しく算数練習',
     description:
       '学年別の単元から選んで算数を練習。匿名で始めて、記録を残したくなったら会員登録できる学習アプリです。',

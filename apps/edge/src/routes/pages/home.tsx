@@ -1,5 +1,6 @@
 import type { FC } from 'hono/jsx';
 import { html } from 'hono/html';
+import type { CurrentUser } from '../../application/session/current-user';
 
 const gradePresets = [
   {
@@ -304,9 +305,31 @@ const HOME_SCRIPT = html`<script type="module">
   nextQuestion();
 </script>`;
 
-export const Home: FC = () => (
+type HomeProps = {
+  currentUser: CurrentUser | null;
+};
+
+const renderUserSummary = (user: CurrentUser) => (
+  <div class="flex items-center gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-3 shadow-sm">
+    <span
+      class="flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white"
+      style={{ backgroundColor: user.avatarColor }}
+      aria-hidden="true"
+    >
+      {user.displayName.split(' ').join('').slice(0, 2)}
+    </span>
+    <div class="space-y-1 text-[var(--mq-ink)]">
+      <p class="text-sm font-semibold">{user.displayName}</p>
+      <p class="text-xs text-[#5e718a]">
+        {user.grade} / {user.badges.join('・')}
+      </p>
+    </div>
+  </div>
+);
+
+export const Home: FC<HomeProps> = ({ currentUser }) => (
   <div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-10">
-    <nav class="flex items-center justify-between rounded-full border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur">
+    <nav class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-3">
         <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
           MQ
@@ -315,9 +338,18 @@ export const Home: FC = () => (
           MathQuest
         </span>
       </div>
-      <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
-        算数の冒険を、やさしいデザインで
-      </p>
+      {currentUser ? (
+        <div class="flex items-center gap-4">
+          <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
+            ようこそ！今日も冒険をつづけましょう
+          </p>
+          {renderUserSummary(currentUser)}
+        </div>
+      ) : (
+        <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
+          算数の冒険を、やさしいデザインで
+        </p>
+      )}
     </nav>
 
     <header class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-r from-[var(--mq-primary-soft)] via-white to-[var(--mq-accent)] p-8 text-[var(--mq-ink)] shadow-xl lg:flex-row lg:items-center lg:justify-between">

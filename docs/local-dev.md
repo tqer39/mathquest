@@ -32,6 +32,7 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
   - Wrangler が表示するローカル URL にアクセス
   - ローカルモードでは `--live-reload` を有効化しているため、ソース更新時にブラウザも自動でリロードされます。
   - Wrangler のデバッグログは `apps/edge/.wrangler/logs/` に保存されます（リポジトリ外への書き込みを避けるため）。
+  - ログイン検証は Better Auth を経由せず、デフォルトでモックユーザーが使用されます（`USE_MOCK_USER=false` で無効化可能）。
 - KV のローカル準備（任意）
   - `wrangler kv namespace create KV_FREE_TRIAL`
   - `wrangler kv namespace create KV_AUTH_SESSION`

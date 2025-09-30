@@ -7,4 +7,5 @@ export type Env = {
   KV_IDEMPOTENCY: KVNamespace;
   DB: D1Database;
   DEFAULT_LANG: string;
+  USE_MOCK_USER?: string;
 };

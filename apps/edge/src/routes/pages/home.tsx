@@ -252,7 +252,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           </li>
           <li class="rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-xs text-[#5e718a]">
             <span class="font-semibold text-[var(--mq-ink)]">
-              さいしゅう更新日
+              さいごに学習した日
             </span>
             <span id="stats-last-played" class="mt-1 block text-[#4f6076]">
               まだ記録はありません

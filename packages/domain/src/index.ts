@@ -25,15 +25,24 @@ export const pickOp = (mode: Mode): Question['op'] => {
 
 export const generateQuestion = (config: QuizConfig): Question => {
   const op = pickOp(config.mode);
-  let a = randInt(config.max);
-  let b = randInt(config.max);
+  let a: number;
+  let b: number;
 
-  if (op === '-') {
+  if (op === '+') {
+    a = randInt(config.max);
+    const remaining = Math.max(config.max - a, 0);
+    b = randInt(remaining);
+  } else if (op === '-') {
+    a = randInt(config.max);
+    b = randInt(config.max);
     if (b > a) [a, b] = [b, a];
-  }
-  if (op === '×') {
-    a = randInt(Math.max(10, Math.floor(config.max / 2)));
-    b = randInt(Math.max(10, Math.floor(config.max / 2)));
+  } else if (op === '×') {
+    const upper = Math.max(10, Math.floor(config.max / 2));
+    a = randInt(upper);
+    b = randInt(upper);
+  } else {
+    a = randInt(config.max);
+    b = randInt(config.max);
   }
 
   const answer = op === '+' ? a + b : op === '-' ? a - b : a * b;

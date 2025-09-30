@@ -7,6 +7,16 @@ describe('generateQuizQuestion', () => {
     expect(question.op).toBe('+');
     expect(question.a).toBeLessThanOrEqual(10);
     expect(question.b).toBeLessThanOrEqual(10);
+    expect(question.a + question.b).toBeLessThanOrEqual(10);
+  });
+
+  it('keeps addition sums within max value', () => {
+    const max = 10;
+    for (let i = 0; i < 100; i += 1) {
+      const question = generateQuizQuestion({ mode: 'add', max });
+      expect(question.op).toBe('+');
+      expect(question.a + question.b).toBeLessThanOrEqual(max);
+    }
   });
 
   it('falls back to defaults when payload is empty', () => {

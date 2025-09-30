@@ -29,9 +29,10 @@ export const generateQuestion = (config: QuizConfig): Question => {
   let b: number;
 
   if (op === '+') {
-    a = randInt(config.max);
-    const remaining = Math.max(config.max - a, 0);
-    b = randInt(remaining);
+    do {
+      a = randInt(config.max);
+      b = randInt(config.max);
+    } while (a + b > config.max);
   } else if (op === '-') {
     a = randInt(config.max);
     b = randInt(config.max);

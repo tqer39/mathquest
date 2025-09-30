@@ -15,6 +15,8 @@ export type Question = {
 const pick = <T>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];
 const randInt = (n: number) => Math.floor(Math.random() * (n + 1));
+const randIntInclusive = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
 
 export const pickOp = (mode: Mode): Question['op'] => {
   if (mode === 'mix') return pick(['+', '-', '×'] as const);
@@ -29,10 +31,8 @@ export const generateQuestion = (config: QuizConfig): Question => {
   let b: number;
 
   if (op === '+') {
-    do {
-      a = randInt(config.max);
-      b = randInt(config.max);
-    } while (a + b > config.max);
+    a = randInt(config.max);
+    b = randIntInclusive(0, config.max - a);
   } else if (op === '-') {
     a = randInt(config.max);
     b = randInt(config.max);

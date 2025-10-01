@@ -60,7 +60,7 @@ just status
 このセットアップでは、ツールの責任範囲を明確に分離しています：
 
 - **brew**: システムレベルの開発ツール（git、pre-commit、mise、just、uv）
-- **mise**: Node.jsのバージョン管理のみ
+- **mise**: Node.js と Cloudflare Wrangler CLI のバージョン管理
 - **uv**: Pythonパッケージ・プロジェクト管理
 - **pre-commit**: すべてのリンティングツールを自動処理（個別インストール不要）
 

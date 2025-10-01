@@ -8,6 +8,7 @@
 前提
 
 - pnpm がインストール済み（`pnpm --version`）
+- Cloudflare Wrangler が mise 経由で導入済み（`mise install` 後に `wrangler --version` が通ること）
 - 初回は依存導入: ルートで `pnpm install`
 
 ## 1) Node ローカルモード（最短）

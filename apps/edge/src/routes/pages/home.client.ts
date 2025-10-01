@@ -39,6 +39,7 @@ const MODULE_SOURCE = `
   const workingContainer = $('#working-container');
   const workingEmpty = $('#working-empty');
   const workingList = $('#working-steps');
+  const STEP_COLORS = ['#2563eb', '#16a34a', '#f97316', '#d946ef'];
 
   const playSound = (variant) => {
     if (!soundEnabled) return;
@@ -150,6 +151,26 @@ const MODULE_SOURCE = `
     updateWorkingVisibility();
   };
 
+  const updateKeypadState = () => {
+    keypadButtons.forEach((button) => {
+      const action = button.dataset.keypad;
+      if (!action) return;
+      const awaiting = workingEnabled && state.awaitingAdvance;
+      const shouldDisable = awaiting && action !== 'submit';
+      if (shouldDisable) {
+        button.setAttribute('disabled', 'true');
+        button.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        button.removeAttribute('disabled');
+        button.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      if (action === 'submit') {
+        button.textContent = awaiting ? '»' : '=';
+        button.setAttribute('aria-label', awaiting ? 'つぎの問題へ' : 'こたえを送信');
+      }
+    });
+  };
+
   const applyWorkingLines = () => {
     if (!workingList || !workingEmpty) return;
     if (!cachedWorkingLines || cachedWorkingLines.length === 0) {
@@ -157,11 +178,20 @@ const MODULE_SOURCE = `
       workingEmpty.classList.remove('hidden');
       return;
     }
-    const items = cachedWorkingLines.map((line) => {
+    const items = cachedWorkingLines.map((entry) => {
       const li = document.createElement('li');
       li.className =
         'rounded-2xl bg-white/70 px-4 py-3 text-center text-base font-semibold shadow-sm';
-      li.textContent = line;
+      li.textContent = entry.text;
+      if (entry.color) {
+        li.style.color = entry.color;
+        li.style.borderLeft = '4px solid ' + entry.color;
+        li.style.paddingLeft = '12px';
+      } else {
+        li.style.color = '';
+        li.style.borderLeft = '';
+        li.style.paddingLeft = '';
+      }
       return li;
     });
     workingList.replaceChildren(...items);
@@ -176,46 +206,112 @@ const MODULE_SOURCE = `
     return NaN;
   };
 
+  const renderQuestionExpression = (question, highlightColors) => {
+    if (!questionEl || !question) return;
+    const extras = Array.isArray(question.extras) ? question.extras : [];
+    const tokenSpecs = [
+      { text: String(question.a), step: 0 },
+      { text: question.op, step: 0 },
+      { text: String(question.b), step: 0 },
+    ];
+    extras.forEach((extra, index) => {
+      const stepIndex = index + 1;
+      tokenSpecs.push({ text: extra.op, step: stepIndex });
+      tokenSpecs.push({ text: String(extra.value), step: stepIndex });
+    });
+    const equalsTokenIndex = tokenSpecs.length;
+    tokenSpecs.push({ text: '=', step: null });
+    tokenSpecs.push({ text: '？', step: null });
+
+    const ariaLabel = tokenSpecs
+      .map((token) => token.text)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    questionEl.setAttribute('aria-label', ariaLabel);
+    questionEl.dataset.expression = ariaLabel;
+
+    const elements = tokenSpecs.map((token, index) => {
+      const span = document.createElement('span');
+      span.className =
+        'inline-flex min-w-[2.75ch] items-center justify-center px-2';
+      span.textContent = token.text;
+      const color =
+        typeof token.step === 'number' &&
+        highlightColors &&
+        highlightColors.length > token.step
+          ? highlightColors[token.step]
+          : null;
+      if (color && index !== equalsTokenIndex && index !== equalsTokenIndex + 1) {
+        span.style.color = color;
+        span.style.textDecorationLine = 'underline';
+        span.style.textDecorationColor = color;
+        span.style.textDecorationThickness = '4px';
+        span.style.textUnderlineOffset = '10px';
+      } else {
+        span.style.color = '';
+        span.style.textDecorationLine = '';
+        span.style.textDecorationColor = '';
+        span.style.textDecorationThickness = '';
+        span.style.textUnderlineOffset = '';
+      }
+      return span;
+    });
+
+    questionEl.replaceChildren(...elements);
+  };
+
   const renderWorkingSteps = (question, correctAnswer) => {
     if (!question) {
       cachedWorkingLines = [];
-      if (workingEnabled) applyWorkingLines();
+      applyWorkingLines();
+      if (state.currentQuestion) renderQuestionExpression(state.currentQuestion);
       return;
     }
     const extras = Array.isArray(question.extras) ? question.extras : [];
-    const steps = [];
+    const lines = [];
+    const colorForStep = (index) => STEP_COLORS[index % STEP_COLORS.length];
+
     const firstResult = evaluatePrimary(question.a, question.b, question.op);
     if (Number.isFinite(firstResult)) {
-      steps.push(
-        String(question.a) +
+      lines.push({
+        text:
+          String(question.a) +
           ' ' +
           question.op +
           ' ' +
           String(question.b) +
           ' = ' +
-          String(firstResult)
-      );
+          String(firstResult),
+        color: colorForStep(0),
+      });
     }
+
     let current = firstResult;
-    extras.forEach((extra) => {
+    extras.forEach((extra, index) => {
       if (!extra || (extra.op !== '+' && extra.op !== '-')) return;
       if (!Number.isFinite(current)) return;
       const value = Number(extra.value);
       if (!Number.isFinite(value)) return;
       const next = extra.op === '+' ? current + value : current - value;
-      steps.push(
-        String(current) + ' ' + extra.op + ' ' + String(value) + ' = ' + String(next)
-      );
+      lines.push({
+        text:
+          String(current) + ' ' + extra.op + ' ' + String(value) + ' = ' + String(next),
+        color: colorForStep(index + 1),
+      });
       current = next;
     });
-    if (typeof correctAnswer === 'number' && steps.length > 0) {
-      steps[steps.length - 1] = steps[steps.length - 1].replace(
-        /=\s*[^=]+$/,
-        '= ' + correctAnswer
-      );
+
+    if (typeof correctAnswer === 'number' && lines.length > 0) {
+      const last = lines[lines.length - 1];
+      last.text = last.text.replace(/=\s*[^=]+$/, '= ' + correctAnswer);
     }
-    cachedWorkingLines = steps;
-    if (workingEnabled) applyWorkingLines();
+
+    cachedWorkingLines = lines;
+    applyWorkingLines();
+
+    const highlightColors = lines.map((line) => line.color);
+    renderQuestionExpression(question, highlightColors);
   };
 
   soundToggleButton?.addEventListener('click', () => {
@@ -237,8 +333,20 @@ const MODULE_SOURCE = `
       console.warn('failed to persist working preference', e);
     }
     updateWorkingToggle();
-    if (workingEnabled) applyWorkingLines();
-    else state.awaitingAdvance = false;
+    if (workingEnabled) {
+      applyWorkingLines();
+      if (cachedWorkingLines.length > 0 && state.currentQuestion) {
+        const colors = cachedWorkingLines.map((entry, index) =>
+          entry.color ?? STEP_COLORS[index % STEP_COLORS.length]
+        );
+        renderQuestionExpression(state.currentQuestion, colors);
+      }
+    } else {
+      state.awaitingAdvance = false;
+      applyWorkingLines();
+      if (state.currentQuestion) renderQuestionExpression(state.currentQuestion);
+    }
+    updateKeypadState();
   });
 
   const applyActiveGradeStyles = () => {
@@ -312,6 +420,7 @@ const MODULE_SOURCE = `
   const nextQuestion = async () => {
     state.awaitingAdvance = false;
     renderWorkingSteps(null);
+    updateKeypadState();
     const preset = currentPreset();
     const response = await fetch('/apis/quiz/questions/next', {
       method: 'POST',
@@ -336,30 +445,14 @@ const MODULE_SOURCE = `
     } else {
       delete questionEl.dataset.extras;
     }
-    const expression = question.expression
-      ? String(question.expression)
-      : String(question.a) + ' ' + question.op + ' ' + String(question.b);
-    questionEl.dataset.expression = expression;
-    const tokens = expression
-      .split(/\s+/)
-      .filter((token) => token.length > 0);
-    tokens.push('=');
-    tokens.push('？');
-    questionEl.setAttribute('aria-label', tokens.join(' '));
-    const fragments = tokens.map((token) => {
-      const span = document.createElement('span');
-      span.className =
-        'inline-flex min-w-[2.75ch] items-center justify-center px-2';
-      span.textContent = token;
-      return span;
-    });
-    questionEl.replaceChildren(...fragments);
+    renderQuestionExpression(question);
     setAnswerBuffer('');
   };
 
   const submitAnswer = async () => {
     if (workingEnabled && state.awaitingAdvance) {
       state.awaitingAdvance = false;
+      updateKeypadState();
       await nextQuestion();
       return;
     }
@@ -417,6 +510,7 @@ const MODULE_SOURCE = `
     renderWorkingSteps(currentQuestion, correctAnswer);
     if (workingEnabled) {
       state.awaitingAdvance = true;
+      updateKeypadState();
       return;
     }
     await nextQuestion();
@@ -447,6 +541,13 @@ const MODULE_SOURCE = `
   });
 
   document.addEventListener('keydown', (event) => {
+    if (workingEnabled && state.awaitingAdvance) {
+      if (event.key === 'Enter') {
+        playSound('ok');
+        submitAnswer();
+      }
+      return;
+    }
     if (event.key >= '0' && event.key <= '9') {
       setAnswerBuffer(state.answerBuffer + event.key);
       playSound('keypad');
@@ -478,6 +579,7 @@ const MODULE_SOURCE = `
   attachKeypad();
   applyWorkingLines();
   updateWorkingToggle();
+  updateKeypadState();
   updateSoundToggle();
   nextQuestion();
 })();

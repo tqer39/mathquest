@@ -73,7 +73,7 @@ const renderUserSummary = (user: CurrentUser) => (
 );
 
 export const Home: FC<HomeProps> = ({ currentUser }) => (
-  <div class="mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-10">
+  <div class="flex min-h-screen w-full flex-col gap-10 px-4 py-8 sm:px-8 lg:px-16 xl:px-24">
     <nav class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-3">
         <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
@@ -134,13 +134,13 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
       </button>
     </header>
 
-    <section class="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+    <section class="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,1.35fr)]">
       <article class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-8">
         <div class="space-y-4">
           <span class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             学年や単元をえらんでね
           </span>
-          <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
             {gradePresets.map((preset, index) => (
               <button
                 key={preset.id}
@@ -166,7 +166,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           </p>
         </div>
 
-        <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
+        <div class="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-stretch">
           <div class="flex flex-col gap-6">
             <div class="rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-br from-[var(--mq-accent)] via-white to-[var(--mq-primary-soft)] p-6 text-[var(--mq-ink)] shadow-inner">
               <p class="text-sm font-medium text-[#5e718a]">もんだい</p>
@@ -222,7 +222,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
             </div>
           </div>
 
-          <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-lg">
+          <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-lg xl:h-full xl:min-h-[32rem]">
             <p class="text-sm font-semibold text-[#5e718a]">テンキー</p>
             <div class="mt-4 grid grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
@@ -256,7 +256,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
                 class="rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
                 data-keypad="submit"
               >
-                OK
+                =
               </button>
             </div>
           </div>

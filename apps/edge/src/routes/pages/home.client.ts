@@ -223,7 +223,20 @@ const MODULE_SOURCE = `
       ? String(question.expression)
       : String(question.a) + ' ' + question.op + ' ' + String(question.b);
     questionEl.dataset.expression = expression;
-    questionEl.textContent = expression + ' = ？';
+    const tokens = expression
+      .split(/\s+/)
+      .filter((token) => token.length > 0);
+    tokens.push('=');
+    tokens.push('？');
+    questionEl.setAttribute('aria-label', tokens.join(' '));
+    const fragments = tokens.map((token) => {
+      const span = document.createElement('span');
+      span.className =
+        'inline-flex min-w-[2.75ch] items-center justify-center px-2';
+      span.textContent = token;
+      return span;
+    });
+    questionEl.replaceChildren(...fragments);
     setAnswerBuffer('');
   };
 

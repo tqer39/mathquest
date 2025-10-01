@@ -162,7 +162,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           <p class="text-sm font-medium text-[#5e718a]">もんだい</p>
           <p
             id="question"
-            class="mt-4 rounded-2xl bg-white/70 p-6 text-center text-5xl font-extrabold tracking-wider text-[var(--mq-ink)] shadow-lg backdrop-blur"
+            class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl bg-white/70 p-6 text-5xl font-extrabold leading-tight text-center text-[var(--mq-ink)] shadow-lg backdrop-blur"
           >
             0 + 0 = ？
           </p>

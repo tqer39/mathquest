@@ -166,60 +166,65 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           </p>
         </div>
 
-        <div class="rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-br from-[var(--mq-accent)] via-white to-[var(--mq-primary-soft)] p-6 text-[var(--mq-ink)] shadow-inner">
-          <p class="text-sm font-medium text-[#5e718a]">もんだい</p>
-          <p
-            id="question"
-            class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl bg-white/70 p-6 text-5xl font-extrabold leading-tight text-center text-[var(--mq-ink)] shadow-lg backdrop-blur"
-          >
-            0 + 0 = ？
-          </p>
-          <p class="mt-2 text-xs text-[#5e718a]">
-            スタートを押すと新しい問題が届くよ！
-          </p>
-        </div>
-
-        <div
-          id="working-container"
-          class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-inner"
-          data-visible="on"
-        >
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-sm font-semibold text-[#5e718a]">途中式</p>
-            <span class="text-xs text-[#6c7c90]">こたえの後に表示されるよ</span>
-          </div>
-          <p
-            id="working-empty"
-            class="mt-4 rounded-2xl bg-white/60 px-4 py-3 text-center text-xs font-medium text-[#6c7c90]"
-          >
-            こたえを送信すると、計算の流れがここに出るよ。
-          </p>
-          <ol
-            id="working-steps"
-            class="mt-4 space-y-2 text-lg font-semibold text-[var(--mq-ink)]"
-          ></ol>
-        </div>
-
-        <div class="flex flex-col gap-5 lg:flex-row">
-          <div class="flex-1 space-y-4">
-            <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-center">
-              <p class="text-sm font-semibold text-[#5e718a]">こたえ</p>
+        <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
+          <div class="flex flex-col gap-6">
+            <div class="rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-br from-[var(--mq-accent)] via-white to-[var(--mq-primary-soft)] p-6 text-[var(--mq-ink)] shadow-inner">
+              <p class="text-sm font-medium text-[#5e718a]">もんだい</p>
               <p
-                id="answer-display"
-                class="mt-2 text-4xl font-extrabold tracking-[0.35em] text-[var(--mq-ink)]"
+                id="question"
+                class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl bg-white/70 p-6 text-5xl font-extrabold leading-tight text-center text-[var(--mq-ink)] shadow-lg backdrop-blur"
               >
-                ？
+                0 + 0 = ？
+              </p>
+              <p class="mt-2 text-xs text-[#5e718a]">
+                スタートを押すと新しい問題が届くよ！
               </p>
             </div>
-            <p
-              id="feedback"
-              class="rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-2 text-center text-sm font-semibold text-[var(--mq-primary-strong)] opacity-0 transition-opacity duration-200 ease-out"
-              data-variant="info"
-            ></p>
+
+            <div
+              id="working-container"
+              class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-inner"
+              data-visible="on"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-sm font-semibold text-[#5e718a]">途中式</p>
+                <span class="text-xs text-[#6c7c90]">
+                  こたえの後に表示されるよ
+                </span>
+              </div>
+              <p
+                id="working-empty"
+                class="mt-4 rounded-2xl bg-white/60 px-4 py-3 text-center text-xs font-medium text-[#6c7c90]"
+              >
+                こたえを送信すると、計算の流れがここに出るよ。
+              </p>
+              <ol
+                id="working-steps"
+                class="mt-4 space-y-2 text-lg font-semibold text-[var(--mq-ink)]"
+              ></ol>
+            </div>
+
+            <div class="space-y-4">
+              <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-center">
+                <p class="text-sm font-semibold text-[#5e718a]">こたえ</p>
+                <p
+                  id="answer-display"
+                  class="mt-2 text-4xl font-extrabold tracking-[0.35em] text-[var(--mq-ink)]"
+                >
+                  ？
+                </p>
+              </div>
+              <p
+                id="feedback"
+                class="rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-2 text-center text-sm font-semibold text-[var(--mq-primary-strong)] opacity-0 transition-opacity duration-200 ease-out"
+                data-variant="info"
+              ></p>
+            </div>
           </div>
 
-          <div class="flex-1">
-            <div class="grid grid-cols-3 gap-3">
+          <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-lg">
+            <p class="text-sm font-semibold text-[#5e718a]">テンキー</p>
+            <div class="mt-4 grid grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
                 <button
                   key={digit}

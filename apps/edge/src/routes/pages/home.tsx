@@ -73,8 +73,14 @@ const renderUserSummary = (user: CurrentUser) => (
 );
 
 export const Home: FC<HomeProps> = ({ currentUser }) => (
-  <div class="flex min-h-screen w-full flex-col gap-10 px-4 py-8 sm:px-8 lg:px-16 xl:px-24">
-    <nav class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+  <div
+    id="app-root"
+    class="flex min-h-screen w-full flex-col gap-10 px-4 py-8 sm:px-8 lg:px-16 xl:px-24"
+  >
+    <nav
+      id="top-nav"
+      class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+    >
       <div class="flex items-center gap-3">
         <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
           MQ
@@ -112,10 +118,21 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         >
           🧮 途中式: ON
         </button>
+        <button
+          id="toggle-focus"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+          data-state="off"
+        >
+          🎯 集中: OFF
+        </button>
       </div>
     </nav>
 
-    <header class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-r from-[var(--mq-primary-soft)] via-white to-[var(--mq-accent)] p-8 text-[var(--mq-ink)] shadow-xl lg:flex-row lg:items-center lg:justify-between">
+    <header
+      id="hero"
+      class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-r from-[var(--mq-primary-soft)] via-white to-[var(--mq-accent)] p-8 text-[var(--mq-ink)] shadow-xl lg:flex-row lg:items-center lg:justify-between"
+    >
       <div class="space-y-3">
         <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#6c7c90]">
           じぶんのペースで算数練習
@@ -136,7 +153,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
 
     <section class="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,1.35fr)]">
       <article class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-8">
-        <div class="space-y-4">
+        <div id="grade-panel" class="space-y-4">
           <span class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             学年や単元をえらんでね
           </span>
@@ -164,6 +181,31 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
             </span>
             ：<span id="grade-description">{gradePresets[0].description}</span>
           </p>
+          <fieldset
+            id="question-count-panel"
+            class="rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-3 text-[var(--mq-ink)]"
+          >
+            <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
+              問題数
+            </legend>
+            <div class="mt-2 flex flex-wrap gap-3 text-sm font-semibold">
+              {[10, 20, 40].map((count) => (
+                <label
+                  key={count}
+                  class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)]"
+                >
+                  <input
+                    type="radio"
+                    name="question-count"
+                    value={count}
+                    defaultChecked={count === 10}
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  {count}問
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </div>
 
         <div class="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-stretch">
@@ -222,7 +264,10 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
             </div>
           </div>
 
-          <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-lg xl:h-full xl:min-h-[32rem]">
+          <div
+            data-keypad-card
+            class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-lg xl:h-full xl:min-h-[32rem]"
+          >
             <p class="text-sm font-semibold text-[#5e718a]">テンキー</p>
             <div class="mt-4 grid grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
@@ -263,7 +308,10 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         </div>
       </article>
 
-      <aside class="flex flex-col gap-5 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-7">
+      <aside
+        id="stats-panel"
+        class="flex flex-col gap-5 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-7"
+      >
         <h2 class="text-lg font-semibold text-[var(--mq-ink)]">きろく</h2>
         <ul class="space-y-3 text-sm text-[#4f6076]">
           <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
@@ -279,9 +327,9 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
             </span>
           </li>
           <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
-            <span>れんしゅうきろく</span>
+            <span>連続正解</span>
             <span id="stats-streak" class="font-semibold text-[#4a7bb7]">
-              0れんしょう
+              0問
             </span>
           </li>
           <li class="rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-xs text-[#5e718a]">

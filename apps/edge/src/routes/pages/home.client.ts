@@ -50,6 +50,10 @@ const MODULE_SOURCE = `
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
   );
+  const focusExitButton = document.getElementById('focus-exit');
+  const questionCountDefaultLabel = document.getElementById('question-count-default');
+  const questionCountSaveButton = document.getElementById('question-count-save');
+  const questionCountToast = document.getElementById('question-count-toast');
   const STEP_COLORS = ['#2563eb', '#16a34a', '#f97316', '#d946ef'];
 
   const playSound = (variant) => {
@@ -128,6 +132,54 @@ const MODULE_SOURCE = `
     return false;
   };
 
+  const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
+
+  const loadQuestionCountDefault = () => {
+    try {
+      const raw = localStorage.getItem(QUESTION_COUNT_STORAGE_KEY);
+      const value = Number(raw);
+      if (Number.isFinite(value) && value > 0) return value;
+    } catch (e) {
+      console.warn('failed to read question count preference', e);
+    }
+    return DEFAULT_SESSION_TOTAL;
+  };
+
+  let questionCountDefault = loadQuestionCountDefault();
+
+  const updateQuestionCountDefaultLabel = () => {
+    if (questionCountDefaultLabel) {
+      questionCountDefaultLabel.textContent =
+        '現在の初期値: ' + questionCountDefault + '問';
+    }
+  };
+
+  const applyQuestionCountDefault = () => {
+    let matched = false;
+    questionCountRadios.forEach((radio) => {
+      const value = Number(radio.value);
+      if (value === questionCountDefault) {
+        radio.checked = true;
+        matched = true;
+      }
+    });
+    if (!matched && questionCountRadios[0]) {
+      questionCountDefault = Number(questionCountRadios[0].value);
+      questionCountRadios[0].checked = true;
+      try {
+        localStorage.setItem(
+          QUESTION_COUNT_STORAGE_KEY,
+          String(questionCountDefault)
+        );
+      } catch (e) {
+        console.warn('failed to persist question count preference', e);
+      }
+    }
+    updateQuestionCountDefaultLabel();
+  };
+
+  applyQuestionCountDefault();
+
   const loadWorkingEnabled = () => {
     try {
       const raw = localStorage.getItem(WORKING_STORAGE_KEY);
@@ -146,7 +198,7 @@ const MODULE_SOURCE = `
     selectedGrade: 'grade-1',
     awaitingAdvance: false,
     sessionActive: false,
-    sessionTotal: DEFAULT_SESSION_TOTAL,
+    sessionTotal: questionCountDefault,
     sessionAnswered: 0,
     lastAnswer: null,
   };
@@ -155,6 +207,9 @@ const MODULE_SOURCE = `
   let workingEnabled = loadWorkingEnabled();
   let focusEnabled = loadFocusEnabled();
   let cachedWorkingLines = [];
+  let feedbackTimer = null;
+  let questionCountToastTimer = null;
+  const FEEDBACK_HIDE_DELAY = 2000;
 
   const updateSoundToggle = () => {
     if (!soundToggleButton) return;
@@ -195,10 +250,8 @@ const MODULE_SOURCE = `
       if (active) el.classList.add('hidden');
       else el.classList.remove('hidden');
     });
-    if (workingContainer) {
-      if (active) workingContainer.classList.add('hidden');
-      else updateWorkingVisibility();
-    }
+    updateWorkingVisibility();
+    if (focusExitButton) focusExitButton.classList.toggle('hidden', !active);
     if (rootEl) rootEl.dataset.focusMode = active ? 'on' : 'off';
   };
 
@@ -386,6 +439,15 @@ const MODULE_SOURCE = `
     }
     showFeedback('info', message || 'セッションが終了したよ');
     updateKeypadState();
+    if (focusEnabled) {
+      focusEnabled = false;
+      try {
+        localStorage.setItem(FOCUS_STORAGE_KEY, 'false');
+      } catch (e) {
+        console.warn('failed to persist focus preference', e);
+      }
+      updateFocusToggle();
+    }
     applyFocusLayout();
   };
 
@@ -436,6 +498,7 @@ const MODULE_SOURCE = `
         renderQuestionExpression(state.currentQuestion, undefined, state.lastAnswer);
     }
     updateKeypadState();
+    if (!workingEnabled) hideFeedback();
   });
 
   questionCountRadios.forEach((radio) => {
@@ -443,6 +506,42 @@ const MODULE_SOURCE = `
       if (!radio.checked) return;
       if (!state.sessionActive) state.sessionTotal = selectedQuestionTotal();
     });
+  });
+
+  questionCountSaveButton?.addEventListener('click', () => {
+    questionCountDefault = selectedQuestionTotal();
+    try {
+      localStorage.setItem(
+        QUESTION_COUNT_STORAGE_KEY,
+        String(questionCountDefault)
+      );
+    } catch (e) {
+      console.warn('failed to persist question count preference', e);
+    }
+    if (!state.sessionActive) state.sessionTotal = questionCountDefault;
+    applyQuestionCountDefault();
+    if (questionCountToast) {
+      questionCountToast.textContent =
+        '初期値を ' + questionCountDefault + '問に更新しました';
+      questionCountToast.classList.remove('hidden');
+      if (questionCountToastTimer) clearTimeout(questionCountToastTimer);
+      questionCountToastTimer = window.setTimeout(() => {
+        questionCountToast.classList.add('hidden');
+        questionCountToastTimer = null;
+      }, 2000);
+    }
+  });
+
+  focusExitButton?.addEventListener('click', () => {
+    if (!focusEnabled) return;
+    focusEnabled = false;
+    try {
+      localStorage.setItem(FOCUS_STORAGE_KEY, 'false');
+    } catch (e) {
+      console.warn('failed to persist focus preference', e);
+    }
+    updateFocusToggle();
+    applyFocusLayout();
   });
 
   const applyActiveGradeStyles = () => {
@@ -465,13 +564,29 @@ const MODULE_SOURCE = `
     lastPlayedEl.textContent = toDateString(state.progress.lastAnsweredAt);
   };
 
+  const hideFeedback = () => {
+    if (feedbackTimer) {
+      clearTimeout(feedbackTimer);
+      feedbackTimer = null;
+    }
+    if (feedbackEl) feedbackEl.classList.add('opacity-0');
+  };
+
   const showFeedback = (type, message) => {
+    if (!feedbackEl) return;
+    if (feedbackTimer) {
+      clearTimeout(feedbackTimer);
+      feedbackTimer = null;
+    }
     feedbackEl.textContent = message;
     feedbackEl.dataset.variant = type;
     feedbackEl.classList.remove('opacity-0');
-    setTimeout(() => {
-      feedbackEl.classList.add('opacity-0');
-    }, 2000);
+    if (!workingEnabled) {
+      feedbackTimer = window.setTimeout(() => {
+        feedbackEl.classList.add('opacity-0');
+        feedbackTimer = null;
+      }, FEEDBACK_HIDE_DELAY);
+    }
   };
 
   const setAnswerBuffer = (value) => {
@@ -551,6 +666,7 @@ const MODULE_SOURCE = `
     if (workingEnabled && state.awaitingAdvance) {
       state.awaitingAdvance = false;
       updateKeypadState();
+      hideFeedback();
       await nextQuestion();
       return;
     }
@@ -636,6 +752,7 @@ const MODULE_SOURCE = `
   });
 
   startButton.addEventListener('click', () => {
+    hideFeedback();
     state.selectedGrade = state.progress.lastGrade
       ? String(state.progress.lastGrade)
       : state.selectedGrade;
@@ -693,6 +810,7 @@ const MODULE_SOURCE = `
     renderProgress();
     setAnswerBuffer('');
     feedbackEl.textContent = '';
+    hideFeedback();
     playSound('ok');
   });
 

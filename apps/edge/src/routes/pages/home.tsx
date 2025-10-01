@@ -46,6 +46,62 @@ const gradePresets = [
     mode: 'mix',
     max: 300,
   },
+  {
+    id: 'practice-add-two',
+    label: 'たし算（2項）',
+    description: 'たし算のみでくり返し練習（最大50）',
+    mode: 'add',
+    max: 50,
+  },
+  {
+    id: 'practice-sub-two',
+    label: 'ひき算（2項）',
+    description: 'ひき算のみでくり返し練習（最大50）',
+    mode: 'sub',
+    max: 50,
+  },
+  {
+    id: 'practice-add-three',
+    label: 'たし算（3項）',
+    description: '3つの数をたす練習（最大60）',
+    mode: 'add',
+    max: 60,
+  },
+  {
+    id: 'practice-add-four',
+    label: 'たし算（4項）',
+    description: '4つの数をたす練習（最大80）',
+    mode: 'add',
+    max: 80,
+  },
+  {
+    id: 'practice-add-mixed-digits',
+    label: '一桁＋二桁のたし算',
+    description: '一桁と二桁のたし算を重点練習',
+    mode: 'add',
+    max: 120,
+  },
+  {
+    id: 'practice-sub-double-digit',
+    label: '二桁同士のひき算',
+    description: '二桁と二桁のひき算（答えは0以上）',
+    mode: 'sub',
+    max: 99,
+  },
+  {
+    id: 'practice-mix-three',
+    label: 'たし算・ひき算（3項）',
+    description: 'たし算とひき算を交えた3項の練習',
+    mode: 'mix',
+    max: 70,
+  },
+  {
+    id: 'practice-mix-four',
+    label: 'たし算・ひき算（4項）',
+    description: 'たし算とひき算を交えた4項の練習',
+    mode: 'mix',
+    max: 90,
+  },
 ] as const;
 
 export type GradePreset = (typeof gradePresets)[number];
@@ -152,7 +208,15 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
     </header>
 
     <section class="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,1.35fr)]">
-      <article class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-8">
+      <article class="relative flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-8">
+        <button
+          id="focus-exit"
+          type="button"
+          class="hidden absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--mq-outline)] bg-white text-lg font-bold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+          aria-label="集中モードを解除"
+        >
+          ×
+        </button>
         <div id="grade-panel" class="space-y-4">
           <span class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             学年や単元をえらんでね
@@ -204,6 +268,27 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
                   {count}問
                 </label>
               ))}
+            </div>
+            <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#4f6076]">
+              <span
+                id="question-count-default"
+                class="font-semibold text-[var(--mq-ink)]"
+              >
+                現在の初期値: 10問
+              </span>
+              <button
+                id="question-count-save"
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+              >
+                現在の選択を初期値にする
+              </button>
+              <span
+                id="question-count-toast"
+                class="hidden text-xs font-semibold text-[var(--mq-primary-strong)]"
+              >
+                初期値を更新しました
+              </span>
             </div>
           </fieldset>
         </div>
@@ -258,8 +343,9 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
               </div>
               <p
                 id="feedback"
-                class="rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-2 text-center text-sm font-semibold text-[var(--mq-primary-strong)] opacity-0 transition-opacity duration-200 ease-out"
+                class="min-h-[48px] rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-3 text-center text-sm font-semibold text-[var(--mq-primary-strong)] opacity-0 transition-opacity duration-200 ease-out"
                 data-variant="info"
+                aria-live="polite"
               ></p>
             </div>
           </div>

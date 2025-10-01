@@ -336,9 +336,11 @@ const MODULE_SOURCE = `
     if (workingEnabled) {
       applyWorkingLines();
       if (cachedWorkingLines.length > 0 && state.currentQuestion) {
-        const colors = cachedWorkingLines.map((entry, index) =>
-          entry.color ?? STEP_COLORS[index % STEP_COLORS.length]
-        );
+        const colors = cachedWorkingLines.map((entry, index) => {
+          return entry && entry.color
+            ? entry.color
+            : STEP_COLORS[index % STEP_COLORS.length];
+        });
         renderQuestionExpression(state.currentQuestion, colors);
       }
     } else {

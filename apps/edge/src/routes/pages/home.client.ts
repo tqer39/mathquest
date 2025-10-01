@@ -199,7 +199,11 @@ const MODULE_SOURCE = `
     const response = await fetch('/apis/quiz/questions/next', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ mode: preset.mode, max: preset.max }),
+      body: JSON.stringify({
+        mode: preset.mode,
+        max: preset.max,
+        gradeId: state.selectedGrade,
+      }),
     });
     if (!response.ok) {
       showFeedback('error', '問題の取得に失敗しました');
@@ -210,13 +214,22 @@ const MODULE_SOURCE = `
     questionEl.dataset.a = String(question.a);
     questionEl.dataset.b = String(question.b);
     questionEl.dataset.op = question.op;
-    questionEl.textContent =
-      String(question.a) + ' ' + question.op + ' ' + String(question.b) + ' = ？';
+    if (Array.isArray(question.extras) && question.extras.length > 0) {
+      questionEl.dataset.extras = JSON.stringify(question.extras);
+    } else {
+      delete questionEl.dataset.extras;
+    }
+    const expression = question.expression
+      ? String(question.expression)
+      : String(question.a) + ' ' + question.op + ' ' + String(question.b);
+    questionEl.dataset.expression = expression;
+    questionEl.textContent = expression + ' = ？';
     setAnswerBuffer('');
   };
 
   const submitAnswer = async () => {
-    if (!state.currentQuestion) {
+    const currentQuestion = state.currentQuestion;
+    if (!currentQuestion) {
       showFeedback('info', 'スタートボタンで問題をはじめましょう');
       return;
     }
@@ -234,9 +247,14 @@ const MODULE_SOURCE = `
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        a: Number(questionEl.dataset.a),
-        b: Number(questionEl.dataset.b),
-        op: questionEl.dataset.op,
+        question: {
+          a: currentQuestion.a,
+          b: currentQuestion.b,
+          op: currentQuestion.op,
+          extras: Array.isArray(currentQuestion.extras)
+            ? currentQuestion.extras
+            : [],
+        },
         value,
         gradeId: state.selectedGrade,
         mode: preset.mode,

@@ -12,6 +12,8 @@ export const quizResults = sqliteTable('quiz_results', {
   correctAnswer: integer('correct_answer').notNull(),
   userAnswer: integer('user_answer').notNull(),
   isCorrect: integer('is_correct', { mode: 'boolean' }).notNull(),
+  expression: text('expression').notNull().default(''),
+  extrasJson: text('extras_json').notNull().default('[]'),
   answeredAt: text('answered_at')
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

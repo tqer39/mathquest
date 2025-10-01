@@ -7,7 +7,7 @@ const gradePresets = [
   {
     id: 'grade-1',
     label: '小1',
-    description: '10までのたし算',
+    description: '10までのたし算・ひき算',
     mode: 'add',
     max: 10,
   },

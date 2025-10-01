@@ -104,6 +104,14 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         >
           🔊 効果音: ON
         </button>
+        <button
+          id="toggle-steps"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+          data-state="on"
+        >
+          🧮 途中式: ON
+        </button>
       </div>
     </nav>
 
@@ -169,6 +177,27 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           <p class="mt-2 text-xs text-[#5e718a]">
             スタートを押すと新しい問題が届くよ！
           </p>
+        </div>
+
+        <div
+          id="working-container"
+          class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-inner"
+          data-visible="on"
+        >
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-sm font-semibold text-[#5e718a]">途中式</p>
+            <span class="text-xs text-[#6c7c90]">こたえの後に表示されるよ</span>
+          </div>
+          <p
+            id="working-empty"
+            class="mt-4 rounded-2xl bg-white/60 px-4 py-3 text-center text-xs font-medium text-[#6c7c90]"
+          >
+            こたえを送信すると、計算の流れがここに出るよ。
+          </p>
+          <ol
+            id="working-steps"
+            class="mt-4 space-y-2 text-lg font-semibold text-[var(--mq-ink)]"
+          ></ol>
         </div>
 
         <div class="flex flex-col gap-5 lg:flex-row">

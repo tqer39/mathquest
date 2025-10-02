@@ -7,6 +7,7 @@ import type { Env } from './env';
 import { i18n } from './middlewares/i18n';
 import { quiz } from './routes/apis/quiz';
 import { Home } from './routes/pages/home';
+import { resolveCurrentUser } from './application/session/current-user';
 import { Document } from './views/layouts/document';
 
 const app = new Hono<{ Bindings: Env; Variables: { lang: 'ja' | 'en' } }>();
@@ -37,14 +38,45 @@ app.use(
 
 // Public top
 app.get('/', (c) =>
-  c.render(<Home />, {
+  c.render(<Home currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
     title: 'MathQuest | じぶんのペースで楽しく算数練習',
     description:
       '学年別の単元から選んで算数を練習。匿名で始めて、記録を残したくなったら会員登録できる学習アプリです。',
   })
 );
 
-// Dummy signin page for redirect target
+app.get('/auth/guest-login', (c) => {
+  const profileParam = c.req.query('profile');
+  const profileIndex = Number(profileParam);
+  const index =
+    Number.isInteger(profileIndex) && profileIndex >= 0 ? profileIndex : 0;
+  const maxAge = 60 * 60 * 24 * 30;
+  const response = c.redirect('/', 302);
+  response.headers.append(
+    'Set-Cookie',
+    `mq_guest=1; Path=/; Max-Age=${maxAge}; SameSite=Lax`
+  );
+  response.headers.append(
+    'Set-Cookie',
+    `mq_guest_profile=${index}; Path=/; Max-Age=${maxAge}; SameSite=Lax`
+  );
+  return response;
+});
+
+app.get('/auth/logout', (c) => {
+  const response = c.redirect('/', 302);
+  response.headers.append(
+    'Set-Cookie',
+    'mq_guest=; Path=/; Max-Age=0; SameSite=Lax'
+  );
+  response.headers.append(
+    'Set-Cookie',
+    'mq_guest_profile=; Path=/; Max-Age=0; SameSite=Lax'
+  );
+  return response;
+});
+
+// Dummy signin page for non-local redirect target
 app.get('/auth/signin', (c) => c.text('サインイン（ダミー）'));
 
 // BFF API

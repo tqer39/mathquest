@@ -132,6 +132,13 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
   <div
     id="app-root"
     class="flex min-h-screen w-full flex-col gap-10 px-4 py-8 sm:px-8 lg:px-16 xl:px-24"
+    data-user-state={
+      currentUser
+        ? currentUser.id.startsWith('guest-')
+          ? 'guest'
+          : 'member'
+        : 'none'
+    }
   >
     <nav
       id="top-nav"
@@ -438,6 +445,7 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           学習記録をリセット
         </button>
         <a
+          id="signin-link"
           href="/auth/signin"
           class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
         >

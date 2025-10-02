@@ -47,6 +47,7 @@ const MODULE_SOURCE = `
   const heroEl = document.getElementById('hero');
   const gradePanelEl = document.getElementById('grade-panel');
   const statsPanelEl = document.getElementById('stats-panel');
+  const signinLink = document.getElementById('signin-link');
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
   );
@@ -55,6 +56,12 @@ const MODULE_SOURCE = `
   const questionCountSaveButton = document.getElementById('question-count-save');
   const questionCountToast = document.getElementById('question-count-toast');
   const STEP_COLORS = ['#2563eb', '#16a34a', '#f97316', '#d946ef'];
+  const GUEST_PROFILES = [
+    { id: 'guest-001', grade: '小1', avatarColor: '#f97316' },
+    { id: 'guest-002', grade: '小2', avatarColor: '#16a34a' },
+    { id: 'guest-003', grade: '小3', avatarColor: '#2563eb' },
+    { id: 'guest-004', grade: '小4', avatarColor: '#d946ef' },
+  ];
 
   const playSound = (variant) => {
     if (!soundEnabled) return;
@@ -274,6 +281,12 @@ const MODULE_SOURCE = `
         button.setAttribute('aria-label', awaiting ? 'つぎの問題へ' : 'こたえを送信');
       }
     });
+  };
+
+  const handleScroll = () => {
+    if (!rootEl) return;
+    const shouldStick = window.scrollY > 48;
+    rootEl.dataset.sticky = shouldStick ? 'on' : 'off';
   };
 
   const applyWorkingLines = () => {
@@ -542,6 +555,26 @@ const MODULE_SOURCE = `
     }
     updateFocusToggle();
     applyFocusLayout();
+  });
+
+  const hostname = window.location.hostname;
+  const isLocalHost =
+    hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.local');
+
+  signinLink?.addEventListener('click', (event) => {
+    if (!isLocalHost) return;
+    event.preventDefault();
+    if (rootEl && rootEl.dataset.userState === 'guest') {
+      document.cookie = 'mq_guest=; path=/; max-age=0';
+      document.cookie = 'mq_guest_profile=; path=/; max-age=0';
+      window.location.href = '/';
+      return;
+    }
+    const profileIndex = Math.floor(Math.random() * GUEST_PROFILES.length);
+    const maxAge = 60 * 60 * 24 * 30;
+    document.cookie = 'mq_guest=1; path=/; max-age=' + maxAge;
+    document.cookie = 'mq_guest_profile=' + profileIndex + '; path=/; max-age=' + maxAge;
+    window.location.href = '/';
   });
 
   const applyActiveGradeStyles = () => {
@@ -826,6 +859,8 @@ const MODULE_SOURCE = `
   applyFocusLayout();
   updateKeypadState();
   updateSoundToggle();
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  handleScroll();
   nextQuestion();
 })();
 `;

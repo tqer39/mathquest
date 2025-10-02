@@ -16,17 +16,77 @@ const fallbackUser: CurrentUser = {
   badges: ['九九マスター', 'れんしゅう王'],
 };
 
+const guestProfiles: readonly CurrentUser[] = [
+  {
+    id: 'guest-001',
+    displayName: 'ゲスト そら',
+    grade: '小1',
+    avatarColor: '#f97316',
+    badges: ['はじめてのさんすう'],
+  },
+  {
+    id: 'guest-002',
+    displayName: 'ゲスト りん',
+    grade: '小2',
+    avatarColor: '#16a34a',
+    badges: ['チャレンジャー'],
+  },
+  {
+    id: 'guest-003',
+    displayName: 'ゲスト ひなた',
+    grade: '小3',
+    avatarColor: '#2563eb',
+    badges: ['九九マスター'],
+  },
+  {
+    id: 'guest-004',
+    displayName: 'ゲスト かえで',
+    grade: '小4',
+    avatarColor: '#d946ef',
+    badges: ['計算名人'],
+  },
+];
+
 const shouldUseMockUser = (env: Env): boolean => {
   const flag = (env as Record<string, string | undefined>).USE_MOCK_USER;
-  if (typeof flag === 'string') {
-    return flag !== 'false';
-  }
-  return true;
+  if (flag === 'true') return true;
+  if (flag === 'false') return false;
+  return false;
 };
 
-export const resolveCurrentUser = (env: Env): CurrentUser | null => {
-  if (!shouldUseMockUser(env)) {
-    return null;
+const parseCookie = (header: string | null): Map<string, string> => {
+  const map = new Map<string, string>();
+  if (!header) return map;
+  header.split(';').forEach((part) => {
+    const [rawKey, ...rawValue] = part.trim().split('=');
+    if (!rawKey) return;
+    const key = rawKey.trim();
+    const value = rawValue.join('=').trim();
+    if (key) map.set(key, decodeURIComponent(value));
+  });
+  return map;
+};
+
+const resolveGuestFromCookie = (
+  cookies: Map<string, string>
+): CurrentUser | null => {
+  if (cookies.get('mq_guest') !== '1') return null;
+  const index = Number(cookies.get('mq_guest_profile'));
+  if (Number.isInteger(index) && index >= 0 && index < guestProfiles.length) {
+    return guestProfiles[index];
   }
-  return fallbackUser;
+  return guestProfiles[0] ?? null;
+};
+
+export const resolveCurrentUser = (
+  env: Env,
+  req: Request
+): CurrentUser | null => {
+  const cookies = parseCookie(req.headers.get('Cookie'));
+  const guest = resolveGuestFromCookie(cookies);
+  if (guest) return guest;
+  if (shouldUseMockUser(env)) {
+    return fallbackUser;
+  }
+  return null;
 };

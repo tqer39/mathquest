@@ -21,6 +21,11 @@ export const Document: FC<DocumentProps> = ({
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>${title}</title>
       <meta name="description" content=${description} />
+      <link
+        rel="icon"
+        type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2378c2c3'/%3E%3Ctext x='50%25' y='54%25' text-anchor='middle' fill='%231f2a4a' font-family='Zen Kaku Gothic New, sans-serif' font-size='28' font-weight='700'%3EMQ%3C/text%3E%3C/svg%3E"
+      />
       <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
       <link
         rel="stylesheet"
@@ -51,6 +56,42 @@ export const Document: FC<DocumentProps> = ({
             'Noto Sans JP',
             sans-serif;
           min-height: 100vh;
+        }
+        #top-nav {
+          position: sticky;
+          top: 1.5rem;
+          z-index: 40;
+          transition: all 0.25s ease;
+        }
+        #app-root[data-sticky='on'] #top-nav {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          margin: 0 auto;
+          border-radius: 0;
+          padding-block: 0.75rem;
+          padding-inline: min(6vw, 3.5rem);
+          background: var(--mq-surface-strong);
+          box-shadow: 0 10px 24px rgba(31, 42, 74, 0.15);
+          border-bottom: 1px solid var(--mq-outline);
+        }
+        #app-root[data-sticky='on'] {
+          padding-top: 128px;
+        }
+        #app-root[data-focus-mode='on'] {
+          padding-top: 32px;
+        }
+        #app-root[data-focus-mode='on'] #top-nav {
+          display: none;
+        }
+        #feedback[data-variant='success'] {
+          background: rgba(22, 163, 74, 0.12);
+          color: #166534;
+        }
+        #feedback[data-variant='error'] {
+          background: rgba(239, 68, 68, 0.15);
+          color: #b91c1c;
         }
       </style>
     </head>

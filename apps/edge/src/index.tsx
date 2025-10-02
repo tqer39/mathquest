@@ -38,7 +38,7 @@ app.use(
 
 // Public top
 app.get('/', (c) =>
-  c.render(<Home currentUser={resolveCurrentUser(c.env)} />, {
+  c.render(<Home currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
     title: 'MathQuest | じぶんのペースで楽しく算数練習',
     description:
       '学年別の単元から選んで算数を練習。匿名で始めて、記録を残したくなったら会員登録できる学習アプリです。',

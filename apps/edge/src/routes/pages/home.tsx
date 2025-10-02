@@ -111,7 +111,7 @@ type HomeProps = {
 };
 
 const renderUserSummary = (user: CurrentUser) => (
-  <div class="hidden items-center gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-3 shadow-sm sm:flex">
+  <div class="flex items-center gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-3 shadow-sm">
     <span
       class="flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white"
       style={{ backgroundColor: user.avatarColor }}
@@ -153,18 +153,9 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         </span>
       </div>
       <div class="flex items-center gap-3 sm:gap-4">
-        {currentUser ? (
-          <>
-            <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
-              ようこそ！今日も冒険をつづけましょう
-            </p>
-            {renderUserSummary(currentUser)}
-          </>
-        ) : (
-          <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
-            算数の冒険を、やさしいデザインで
-          </p>
-        )}
+        <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
+          算数の冒険を、やさしいデザインで
+        </p>
         <button
           id="toggle-sound"
           type="button"
@@ -189,6 +180,15 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         >
           🎯 集中: OFF
         </button>
+        {currentUser ? (
+          <button
+            id="logout-button"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+          >
+            ログアウト
+          </button>
+        ) : null}
       </div>
     </nav>
 
@@ -406,6 +406,9 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         class="flex flex-col gap-5 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-7"
       >
         <h2 class="text-lg font-semibold text-[var(--mq-ink)]">きろく</h2>
+        {currentUser ? (
+          <div class="sm:max-w-none">{renderUserSummary(currentUser)}</div>
+        ) : null}
         <ul class="space-y-3 text-sm text-[#4f6076]">
           <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
             <span>こたえた問題</span>
@@ -444,13 +447,15 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         >
           学習記録をリセット
         </button>
-        <a
-          id="signin-link"
-          href="/auth/signin"
-          class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
-        >
-          会員登録・サインインはこちら
-        </a>
+        {currentUser ? null : (
+          <button
+            id="guest-login-button"
+            type="button"
+            class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
+          >
+            ゲストでログイン
+          </button>
+        )}
       </aside>
     </section>
 

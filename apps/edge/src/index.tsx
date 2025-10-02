@@ -45,7 +45,38 @@ app.get('/', (c) =>
   })
 );
 
-// Dummy signin page for redirect target
+app.get('/auth/guest-login', (c) => {
+  const profileParam = c.req.query('profile');
+  const profileIndex = Number(profileParam);
+  const index =
+    Number.isInteger(profileIndex) && profileIndex >= 0 ? profileIndex : 0;
+  const maxAge = 60 * 60 * 24 * 30;
+  const response = c.redirect('/', 302);
+  response.headers.append(
+    'Set-Cookie',
+    `mq_guest=1; Path=/; Max-Age=${maxAge}; SameSite=Lax`
+  );
+  response.headers.append(
+    'Set-Cookie',
+    `mq_guest_profile=${index}; Path=/; Max-Age=${maxAge}; SameSite=Lax`
+  );
+  return response;
+});
+
+app.get('/auth/logout', (c) => {
+  const response = c.redirect('/', 302);
+  response.headers.append(
+    'Set-Cookie',
+    'mq_guest=; Path=/; Max-Age=0; SameSite=Lax'
+  );
+  response.headers.append(
+    'Set-Cookie',
+    'mq_guest_profile=; Path=/; Max-Age=0; SameSite=Lax'
+  );
+  return response;
+});
+
+// Dummy signin page for non-local redirect target
 app.get('/auth/signin', (c) => c.text('サインイン（ダミー）'));
 
 // BFF API

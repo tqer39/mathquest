@@ -1,0 +1,40 @@
+---
+name: macOS Setup Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos-setup:
+    runs-on: macos-14
+    timeout-minutes: 45
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_INSTALL_CLEANUP: '1'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Show system info
+        run: |
+          sw_vers
+          uname -a
+
+      - name: Run make bootstrap
+        run: make bootstrap
+
+      - name: Install just for setup task
+        run: brew install just
+
+      - name: Confirm just availability
+        run: just --version
+
+      - name: Run just setup
+        run: just setup

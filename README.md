@@ -64,15 +64,15 @@ This setup clearly separates tool responsibilities:
 - **uv**: Python package and project management
 - **pre-commit**: Handles all linting tools automatically (no need to install separately)
 
-### Automated AI CLI Tools
+### Optional AI CLI Tools
 
-The setup automatically installs AI development tools during `just setup` (or manually via `just ai-install`):
+`just setup` no longer installs AI development CLIs automatically. Install them manually if you want the tooling support (for example: `mise exec node -- npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex`).
 
 - **Claude Code CLI**: `@anthropic-ai/claude-code` - For AI-assisted development
 - **Gemini CLI**: `@google/gemini-cli` - Alternative AI assistant
 - **OpenAI Codex CLI**: `@openai/codex` - OpenAI CLI for code workflows
 
-This approach ensures clean separation of concerns and avoids conflicts between system tools and language-specific versions.
+Keeping the installation manual lets each developer decide which AI tools to keep in their environment.
 
 ## Optional: rulesync
 

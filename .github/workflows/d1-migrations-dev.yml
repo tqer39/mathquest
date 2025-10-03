@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Apply migrations
-        uses: ./.github/d1-migrations
+        uses: ./.github/actions/d1-migrations
         with:
           environment: dev
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

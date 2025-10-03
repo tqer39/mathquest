@@ -1,0 +1,140 @@
+name: Terraform - prod
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_call:
+    inputs:
+      CHECK_DIFF:
+        description: '差分チェックフラグ'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      CHECK_DIFF:
+        description: '差分チェックフラグ'
+        required: true
+        type: choice
+        default: '_true'
+        options:
+          - '_true'
+          - '_false'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_ACCOUNT_ID: '072693953877'
+  AWS_ENV_NAME: prod
+  OIDC_IAM_ROLE: portfolio-mathquest-terraform-deploy-prod
+  CHECK_DIFF: ${{ inputs.CHECK_DIFF || github.event.inputs.CHECK_DIFF || '_false' }}
+
+jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/set-matrix
+        id: set-matrix
+        with:
+          AWS_ENV_NAME: ${{ env.AWS_ENV_NAME }}
+
+  terraform-prod:
+    needs: [set-matrix]
+    if: ${{ needs.set-matrix.outputs.matrix != '["_empty"]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      deployments: write
+      pull-requests: write
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/aws-credential
+        with:
+          oidc-iam-role: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/${{ env.OIDC_IAM_ROLE }}
+
+      - name: Terraform Plan
+        uses: ./.github/actions/terraform-plan
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        with:
+          AWS_ENV_NAME: ${{ env.AWS_ENV_NAME }}
+          CHECK_DIFF: ${{ env.CHECK_DIFF }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_PROD }}
+          working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
+
+      - name: Start Deployment
+        if: env.TF_PLAN_STATUS == 'has-diff' && github.ref == 'refs/heads/main'
+        uses: bobheadxi/deployments@v1
+        id: deployment
+        with:
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
+          env: ${{ env.AWS_ENV_NAME }}
+
+      - name: Terraform Apply
+        if: env.TF_PLAN_STATUS == 'has-diff' && contains(fromJSON('["push", "workflow_dispatch"]'), github.event_name)
+        uses: ./.github/actions/terraform-apply
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        with:
+          working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
+
+      - name: Finish Deployment
+        if: env.TF_PLAN_STATUS == 'has-diff' && always() && github.ref == 'refs/heads/main'
+        uses: bobheadxi/deployments@v1
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          env: ${{ steps.deployment.outputs.env }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+
+  delete-pr-comments:
+    needs: [terraform-prod]
+    if: contains(fromJSON('["pull_request"]'), github.event_name)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check and delete comments
+        run: |
+          chmod +x ./.github/scripts/delete_pr_comments.sh
+          ./.github/scripts/delete_pr_comments.sh \
+            "tqer39" \
+            "mathquest" \
+            "${{ env.AWS_ENV_NAME }}" \
+            "${{ github.event.pull_request.number }}" \
+            "${{ secrets.GITHUB_TOKEN }}"
+
+  workflow-result-terraform-prod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [terraform-prod]
+    if: always()
+    steps:
+      - name: Failure
+        if: >-
+          contains(needs.*.result, 'failure')
+          || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "workflow failure"
+          exit 1
+      - name: Success
+        run: |
+          echo "workflow success"

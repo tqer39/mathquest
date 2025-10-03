@@ -58,9 +58,9 @@ fix:
     pre-commit run trailing-whitespace --all-files
     pre-commit run markdownlint-cli2 --all-files
 
-# Format all supported files with Prettier (via pre-commit hook)
+# Format all supported files (Biome + Prettier via package script)
 format:
-    pre-commit run prettier --all-files
+    pnpm run format
 
 # Format only staged files (typical git commit flow)
 format-staged:

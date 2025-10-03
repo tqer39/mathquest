@@ -1,0 +1,2 @@
+# JavaScript/TypeScript handled by Biome
+**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts,json,jsonc}

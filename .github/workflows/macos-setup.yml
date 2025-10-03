@@ -30,9 +30,6 @@ jobs:
       - name: Run make bootstrap
         run: make bootstrap
 
-      - name: Install just for setup task
-        run: brew install just
-
       - name: Confirm just availability
         run: just --version
 

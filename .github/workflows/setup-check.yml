@@ -5,7 +5,19 @@ on:
   push:
     branches:
       - main
+    paths:
+      - Makefile
+      - justfile
+      - Brewfile
+      - .tool-versions
+      - .github/workflows/setup-check.yml
   pull_request:
+    paths:
+      - Makefile
+      - justfile
+      - Brewfile
+      - .tool-versions
+      - .github/workflows/setup-check.yml
   workflow_dispatch:
 
 concurrency:

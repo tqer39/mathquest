@@ -64,15 +64,15 @@ just status
 - **uv**: Pythonパッケージ・プロジェクト管理
 - **pre-commit**: すべてのリンティングツールを自動処理（個別インストール不要）
 
-### 自動AI CLIツール
+### AI CLI ツール（任意）
 
-`just setup` の実行時に AI 開発ツールが自動的にインストールされます（個別に入れたい場合は `just ai-install`）：
+`just setup` では AI 開発ツールを自動インストールしません。必要な開発者だけが個別に導入してください（例：`mise exec node -- npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex`）。
 
 - **Claude Code CLI**: `@anthropic-ai/claude-code` - AI 支援開発用
 - **Gemini CLI**: `@google/gemini-cli` - 代替 AI アシスタント
 - **OpenAI Codex CLI**: `@openai/codex` - OpenAI 製のコード向け CLI
 
-このアプローチにより、関心事の明確な分離が保証され、システムツールと言語固有のバージョンとの間の競合が回避されます。
+それぞれの開発者が好みの AI ツールを選べるようにするための方針です。
 
 ## 追加ツール: rulesync（任意導入）
 

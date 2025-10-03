@@ -6,9 +6,6 @@ set shell := ["bash", "-c"]
 # Common paths
 edge_dir := "apps/edge"
 
-# Packages: AI CLI tools installed via Node.js (managed by mise)
-ai_cli_pkgs := "@anthropic-ai/claude-code @google/gemini-cli @openai/codex"
-
 # Show available commands
 help:
     @just --list
@@ -25,7 +22,6 @@ setup:
         echo "⚠ mise not found. Please run 'make bootstrap' first."; \
         exit 1; \
     fi
-    @just ai-install
     pre-commit install
     @if command -v pnpm >/dev/null 2>&1; then \
         echo "→ Installing JS dependencies with pnpm..."; \
@@ -34,11 +30,6 @@ setup:
         echo "⚠ pnpm not found. Install pnpm (npm install -g pnpm) してから再実行してください。"; \
     fi
     @echo "Setup complete!"
-
-# Install AI CLI tools only (can be run independently)
-ai-install:
-    @echo "→ Installing Node.js AI CLI tools..."
-    mise exec node -- npm install -g {{ai_cli_pkgs}}
 
 # Run pre-commit hooks on all files
 lint:

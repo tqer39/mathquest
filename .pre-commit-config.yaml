@@ -93,7 +93,7 @@ repos:
           - --no-install
           - biome
           - check
-          - --write
+          - --apply
           - --error-on-warnings
         additional_dependencies:
           - '@biomejs/biome@1.7.3'

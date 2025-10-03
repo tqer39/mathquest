@@ -49,6 +49,10 @@ const MODULE_SOURCE = `
   const statsPanelEl = document.getElementById('stats-panel');
   const logoutButton = document.getElementById('logout-button');
   const guestLoginButton = document.getElementById('guest-login-button');
+  const emailLoginButton = document.getElementById('email-login-button');
+  const emailLoginFeedback = document.getElementById('email-login-feedback');
+  const emailLoginDefaultLabel =
+    emailLoginButton?.textContent ?? 'メールでログインリンクを送信';
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
   );
@@ -69,6 +73,48 @@ const MODULE_SOURCE = `
       audio.addEventListener('ended', () => audio.remove(), { once: true });
     } catch (e) {
       console.warn('sound playback failed', e);
+    }
+  };
+
+  const applyEmailFeedbackColor = (variant) => {
+    if (!emailLoginFeedback) return;
+    emailLoginFeedback.classList.remove(
+      'text-[#4f6076]',
+      'text-[#2e7c79]',
+      'text-[#b91c1c]'
+    );
+    if (variant === 'success') {
+      emailLoginFeedback.classList.add('text-[#2e7c79]');
+    } else if (variant === 'error') {
+      emailLoginFeedback.classList.add('text-[#b91c1c]');
+    } else {
+      emailLoginFeedback.classList.add('text-[#4f6076]');
+    }
+  };
+
+  const showEmailLoginFeedback = (message, variant = 'info') => {
+    if (!emailLoginFeedback) return;
+    applyEmailFeedbackColor(variant);
+    emailLoginFeedback.dataset.variant = variant;
+    emailLoginFeedback.textContent = message;
+    emailLoginFeedback.classList.remove('hidden');
+  };
+
+  const hideEmailLoginFeedback = () => {
+    if (!emailLoginFeedback) return;
+    emailLoginFeedback.classList.add('hidden');
+  };
+
+  const setEmailLoginButtonState = (state) => {
+    if (!emailLoginButton) return;
+    if (state === 'pending') {
+      emailLoginButton.dataset.state = 'pending';
+      emailLoginButton.setAttribute('disabled', 'true');
+      emailLoginButton.textContent = '送信中...';
+    } else {
+      emailLoginButton.dataset.state = 'idle';
+      emailLoginButton.removeAttribute('disabled');
+      emailLoginButton.textContent = emailLoginDefaultLabel;
     }
   };
 
@@ -559,6 +605,59 @@ const MODULE_SOURCE = `
 
   logoutButton?.addEventListener('click', () => {
     window.location.href = '/auth/logout';
+  });
+
+  emailLoginButton?.addEventListener('click', async () => {
+    if (!emailLoginButton) return;
+    if (emailLoginButton.dataset.state === 'pending') return;
+    const input = window.prompt(
+      'ログインリンクを受け取るメールアドレスを入力してください'
+    );
+    if (input === null) {
+      return;
+    }
+    const normalized = input.trim();
+    if (!normalized) {
+      showEmailLoginFeedback('メールアドレスを入力してください。', 'error');
+      return;
+    }
+    hideEmailLoginFeedback();
+    setEmailLoginButtonState('pending');
+    try {
+      const response = await fetch('/auth/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: normalized }),
+      });
+      if (response.ok) {
+        showEmailLoginFeedback(
+          'ログインリンクを送信しました。メールボックスをご確認ください。',
+          'success'
+        );
+      } else {
+        let message =
+          'メールの送信に失敗しました。時間を置いて再度お試しください。';
+        try {
+          const data = await response.json();
+          if (data && typeof data.error === 'string') {
+            message = data.error;
+          }
+        } catch (error) {
+          console.warn('failed to parse email login error payload', error);
+        }
+        showEmailLoginFeedback(message, 'error');
+      }
+    } catch (error) {
+      console.error('failed to request magic link', error);
+      showEmailLoginFeedback(
+        '通信に失敗しました。接続を確認して再度お試しください。',
+        'error'
+      );
+    } finally {
+      setEmailLoginButtonState('idle');
+    }
   });
 
   guestLoginButton?.addEventListener('click', () => {

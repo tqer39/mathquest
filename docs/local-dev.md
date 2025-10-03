@@ -48,6 +48,15 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
 - データ永続化（開発用）
   - `wrangler dev --persist` を使うと KV/D1 のローカルデータを `.wrangler` ディレクトリに保持できます。
 
+### Better Auth（メールマジックリンク）の設定
+
+- 認証リンクの送信には Resend を利用します。`wrangler dev` で実行する際は、`.dev.vars` などに以下の環境変数を設定してください。
+  - `RESEND_API_KEY`: Resend の API キー
+  - `RESEND_FROM_EMAIL`: 送信元メールアドレス（例: `MathQuest <login@example.com>`）
+  - `APP_BASE_URL`（任意）: マジックリンクのベース URL。未設定の場合はリクエストの Origin を使用します。
+- リンクの有効期限は 10 分です。メール内のボタンまたは URL をブラウザで開くとセッションが発行され、`mq_session` クッキーが付与されます。
+- ログインリンクのリクエストはトップページ右側の「メールでログインリンクを送信」ボタンから実行できます。成功すると Resend API からメールが配信されます。
+
 ## よくある質問（FAQ）
 
 - ポートを変えたい

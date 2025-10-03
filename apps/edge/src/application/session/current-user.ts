@@ -1,4 +1,6 @@
 import type { Env } from '../../env';
+import { SESSION_COOKIE_NAME, GUEST_FLAG_COOKIE, GUEST_PROFILE_COOKIE } from './constants';
+import { getSessionUser } from '../../infrastructure/auth/better-auth';
 
 export type CurrentUser = {
   id: string;
@@ -6,6 +8,7 @@ export type CurrentUser = {
   grade: '小1' | '小2' | '小3' | '小4' | '小5' | '小6';
   avatarColor: string;
   badges: readonly string[];
+  email?: string;
 };
 
 const fallbackUser: CurrentUser = {
@@ -82,7 +85,7 @@ const shouldUseMockUser = (env: Env): boolean => {
   return false;
 };
 
-const parseCookie = (header: string | null): Map<string, string> => {
+export const parseCookie = (header: string | null): Map<string, string> => {
   const map = new Map<string, string>();
   if (!header) return map;
   header.split(';').forEach((part) => {
@@ -98,19 +101,24 @@ const parseCookie = (header: string | null): Map<string, string> => {
 const resolveGuestFromCookie = (
   cookies: Map<string, string>
 ): CurrentUser | null => {
-  if (cookies.get('mq_guest') !== '1') return null;
-  const index = Number(cookies.get('mq_guest_profile'));
+  if (cookies.get(GUEST_FLAG_COOKIE) !== '1') return null;
+  const index = Number(cookies.get(GUEST_PROFILE_COOKIE));
   if (Number.isInteger(index) && index >= 0 && index < guestProfiles.length) {
     return guestProfiles[index];
   }
   return guestProfiles[0] ?? null;
 };
 
-export const resolveCurrentUser = (
+export const resolveCurrentUser = async (
   env: Env,
   req: Request
-): CurrentUser | null => {
+): Promise<CurrentUser | null> => {
   const cookies = parseCookie(req.headers.get('Cookie'));
+  const sessionId = cookies.get(SESSION_COOKIE_NAME);
+  if (sessionId) {
+    const sessionUser = await getSessionUser(env, sessionId);
+    if (sessionUser) return sessionUser;
+  }
   const guest = resolveGuestFromCookie(cookies);
   if (guest) return guest;
   if (shouldUseMockUser(env)) {

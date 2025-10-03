@@ -121,9 +121,22 @@ const renderUserSummary = (user: CurrentUser) => (
     </span>
     <div class="space-y-1 text-[var(--mq-ink)]">
       <p class="text-sm font-semibold">{user.displayName}</p>
-      <p class="text-xs text-[#5e718a]">
-        {user.grade} / {user.badges.join('・')}
-      </p>
+      {user.email ? (
+        <p class="text-xs text-[#5e718a] break-all">{user.email}</p>
+      ) : null}
+      <p class="text-xs text-[#5e718a]">学年: {user.grade}</p>
+      {user.badges.length > 0 ? (
+        <ul class="flex flex-wrap gap-2 text-[11px] text-[#5e718a]">
+          {user.badges.map((badge) => (
+            <li
+              key={badge}
+              class="rounded-full bg-[var(--mq-surface-strong)] px-2 py-0.5"
+            >
+              #{badge}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   </div>
 );
@@ -448,13 +461,30 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
           学習記録をリセット
         </button>
         {currentUser ? null : (
-          <button
-            id="guest-login-button"
-            type="button"
-            class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
-          >
-            ゲストでログイン
-          </button>
+          <div class="space-y-3">
+            <button
+              id="email-login-button"
+              type="button"
+              class="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
+              data-state="idle"
+            >
+              メールでログインリンクを送信
+            </button>
+            <button
+              id="guest-login-button"
+              type="button"
+              class="inline-flex w-full items-center justify-center rounded-2xl bg-[var(--mq-secondary)] px-4 py-3 text-sm font-semibold text-[#7a5544] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary-strong,#f8ead6)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-secondary)]"
+            >
+              ゲストでログイン
+            </button>
+            <p
+              id="email-login-feedback"
+              class="hidden rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-xs text-[#4f6076]"
+              role="status"
+              aria-live="polite"
+              data-variant="info"
+            ></p>
+          </div>
         )}
       </aside>
     </section>

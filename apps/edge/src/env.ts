@@ -8,4 +8,7 @@ export type Env = {
   DB: D1Database;
   DEFAULT_LANG: string;
   USE_MOCK_USER?: string;
+  RESEND_API_KEY: string;
+  RESEND_FROM_EMAIL: string;
+  APP_BASE_URL?: string;
 };

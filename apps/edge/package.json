@@ -14,7 +14,7 @@
   "dependencies": {
     "hono": "^4.4.3",
     "@mathquest/domain": "workspace:*",
-    "drizzle-orm": "^0.36.1"
+    "drizzle-orm": "^0.44.0"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",

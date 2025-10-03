@@ -64,13 +64,17 @@ endif
 
 .PHONY: brew-bundle
 brew-bundle: ## Install dependencies listed in Brewfile
-	@if [ "$(call check_command,brew)" != "exists" ]; then \
+	@if command -v brew >/dev/null 2>&1; then \
+		:; \
+	elif [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then \
+		eval "$$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"; \
+	else \
 		echo "⚠ Homebrew が見つかりません。まず make install-brew を実行してください。"; \
 		exit 1; \
-	fi
-	@echo "Installing packages from Brewfile..."
-	brew bundle install
-	@echo "✓ Brewfile のパッケージをインストールしました"
+	fi; \
+	echo "Installing packages from Brewfile..."; \
+	brew bundle install; \
+	echo "✓ Brewfile のパッケージをインストールしました"
 
 .PHONY: bootstrap
 bootstrap: install-brew brew-bundle ## Install Homebrew and show next steps

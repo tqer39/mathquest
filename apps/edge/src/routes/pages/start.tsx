@@ -4,7 +4,11 @@ import type { CurrentUser } from '../../application/session/current-user';
 import { gradeLevels, practiceThemes, gradePresets } from './grade-presets';
 import { renderStartClientScript } from './start.client';
 
-const questionCountOptions = [10, 20, 30] as const;
+const baseQuestionCountOptions = [10, 20, 30] as const;
+const questionCountOptions =
+  Bun.env.NODE_ENV === 'development'
+    ? ([1, ...baseQuestionCountOptions] as const)
+    : baseQuestionCountOptions;
 
 export const Start: FC<{ currentUser: CurrentUser | null }> = ({
   currentUser,

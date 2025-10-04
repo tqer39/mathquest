@@ -203,7 +203,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                   type="radio"
                   name="question-count"
                   value={count}
-                  defaultChecked={idx === 0}
+                  defaultChecked={count === 10}
                   class="h-4 w-4 accent-[var(--mq-primary-strong)]"
                 />
                 {count}問

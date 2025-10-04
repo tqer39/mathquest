@@ -288,10 +288,11 @@ const MODULE_SOURCE = `
   gradeRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
       if (!radio.checked) return;
-      if (activeThemeId === null) {
-        setSelectedPreset(radio.value);
-        progress.lastLevel = radio.value;
-      }
+
+      // 学年を変更したらテーマ選択をクリア
+      setThemeSelection(null);
+      setSelectedPreset(radio.value);
+      progress.lastLevel = radio.value;
     });
   });
 

@@ -256,10 +256,8 @@ const MODULE_SOURCE = `
 
       if (shouldShow) {
         button.style.display = '';
-        button.parentElement.style.display = '';
       } else {
         button.style.display = 'none';
-        button.parentElement.style.display = 'none';
         // 非表示になったテーマが選択されている場合は選択を解除
         if (activeThemeId === button.dataset.gradeId) {
           setThemeSelection(null);

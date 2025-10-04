@@ -183,7 +183,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             ON / OFF 設定
           </legend>
-          <div class="grid gap-3 sm:grid-cols-3">
+          <div class="grid gap-3 sm:grid-cols-2">
             <button
               id="toggle-sound"
               type="button"
@@ -203,17 +203,6 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             >
               <span>🧮 途中式</span>
               <span class="text-xs text-[#5e718a]">計算の流れを自動で表示</span>
-            </button>
-            <button
-              id="toggle-focus"
-              type="button"
-              data-state="off"
-              class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-            >
-              <span>🎯 集中モード</span>
-              <span class="text-xs text-[#5e718a]">
-                余計な要素を隠して問題に集中
-              </span>
             </button>
           </div>
         </fieldset>

@@ -6,7 +6,6 @@ const MODULE_SOURCE = `
   const STORAGE_KEY = 'mathquest:progress:v1';
   const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
   const WORKING_STORAGE_KEY = 'mathquest:show-working';
-  const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
   const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
   const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -41,7 +40,6 @@ const MODULE_SOURCE = `
   const workingSteps = document.getElementById('working-steps');
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
-  const focusToggle = document.getElementById('toggle-focus');
   const gradeLabelEl = document.getElementById('play-grade-label');
   const countdownOverlay = document.getElementById('countdown-overlay');
   const countdownNumber = document.getElementById('countdown-number');
@@ -144,7 +142,6 @@ const MODULE_SOURCE = `
         questionCount: loadQuestionCount(),
         soundEnabled: loadBoolean(SOUND_STORAGE_KEY, true),
         workingEnabled: loadBoolean(WORKING_STORAGE_KEY, true),
-        focusEnabled: loadBoolean(FOCUS_STORAGE_KEY, false),
         createdAt: Date.now(),
       })
     );
@@ -167,10 +164,6 @@ const MODULE_SOURCE = `
       typeof activeSession.workingEnabled === 'boolean'
         ? activeSession.workingEnabled
         : loadBoolean(WORKING_STORAGE_KEY, true),
-    focusEnabled:
-      typeof activeSession.focusEnabled === 'boolean'
-        ? activeSession.focusEnabled
-        : loadBoolean(FOCUS_STORAGE_KEY, false),
     progress: loadProgress(),
     sessionActive: false,
     sessionAnswered: 0,
@@ -192,17 +185,6 @@ const MODULE_SOURCE = `
 
   toggleButton(soundToggle, state.soundEnabled);
   toggleButton(stepsToggle, state.workingEnabled);
-  toggleButton(focusToggle, state.focusEnabled);
-
-  const applyFocusLayout = () => {
-    const focusOn = state.focusEnabled;
-    root.classList.toggle('focus-mode', focusOn);
-    if (focusOn) {
-      root.dataset.focus = 'on';
-    } else {
-      delete root.dataset.focus;
-    }
-  };
 
   const applyWorkingVisibility = () => {
     if (!workingContainer) return;
@@ -301,7 +283,6 @@ const MODULE_SOURCE = `
       questionCount: state.questionCount,
       soundEnabled: state.soundEnabled,
       workingEnabled: state.workingEnabled,
-      focusEnabled: state.focusEnabled,
       createdAt: Date.now(),
     };
     try {
@@ -315,7 +296,6 @@ const MODULE_SOURCE = `
     try {
       localStorage.setItem(SOUND_STORAGE_KEY, String(state.soundEnabled));
       localStorage.setItem(WORKING_STORAGE_KEY, String(state.workingEnabled));
-      localStorage.setItem(FOCUS_STORAGE_KEY, String(state.focusEnabled));
       localStorage.setItem(QUESTION_COUNT_STORAGE_KEY, String(state.questionCount));
     } catch (e) {
       console.warn('failed to persist preferences', e);
@@ -534,13 +514,6 @@ const MODULE_SOURCE = `
       return;
     }
     if (event.key === 'Escape') {
-      if (state.focusEnabled) {
-        state.focusEnabled = false;
-        toggleButton(focusToggle, false);
-        updatePreferences();
-        updateSessionStorage();
-        applyFocusLayout();
-      }
       return;
     }
     if (event.key >= '0' && event.key <= '9') {
@@ -590,20 +563,9 @@ const MODULE_SOURCE = `
     });
   }
 
-  if (focusToggle) {
-    focusToggle.addEventListener('click', () => {
-      state.focusEnabled = !state.focusEnabled;
-      toggleButton(focusToggle, state.focusEnabled);
-      applyFocusLayout();
-      updatePreferences();
-      updateSessionStorage();
-    });
-  }
-
   if (gradeLabelEl) {
     gradeLabelEl.textContent = activeSession.gradeLabel || state.grade.label;
   }
-  applyFocusLayout();
   applyWorkingVisibility();
   renderProgress();
 })();

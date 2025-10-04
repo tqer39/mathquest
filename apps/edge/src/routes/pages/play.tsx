@@ -12,17 +12,6 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
     class="relative flex min-h-screen flex-col gap-6 bg-[var(--mq-surface-strong)] px-4 py-8 sm:px-8 lg:px-16 xl:px-24 text-[var(--mq-ink)]"
     data-user-state={currentUser ? 'known' : 'anonymous'}
   >
-    {html`
-      <style>
-        #play-root.focus-mode nav,
-        #play-root.focus-mode aside {
-          display: none;
-        }
-        #play-root.focus-mode main {
-          grid-template-columns: 1fr;
-        }
-      </style>
-    `}
     <nav class="flex items-center justify-between rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm">
       <div class="flex flex-col">
         <span class="text-xs font-semibold uppercase tracking-[0.3em] text-[#6c7c90]">
@@ -80,14 +69,6 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
               class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
             >
               🧮 途中式
-            </button>
-            <button
-              id="toggle-focus"
-              type="button"
-              data-state="off"
-              class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
-            >
-              🎯 集中
             </button>
           </div>
         </div>

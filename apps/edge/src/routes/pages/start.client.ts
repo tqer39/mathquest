@@ -13,7 +13,6 @@ const MODULE_SOURCE = `
   const STORAGE_KEY = 'mathquest:progress:v1';
   const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
   const WORKING_STORAGE_KEY = 'mathquest:show-working';
-  const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
   const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
   const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -41,7 +40,6 @@ const MODULE_SOURCE = `
   );
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
-  const focusToggle = document.getElementById('toggle-focus');
   const startButton = document.getElementById('start-session');
 
   if (!startButton || !gradeRadios.length) {
@@ -288,7 +286,6 @@ const MODULE_SOURCE = `
   applyQuestionCount(loadQuestionCount());
   toggleButton(soundToggle, loadBoolean(SOUND_STORAGE_KEY, false));
   toggleButton(stepsToggle, loadBoolean(WORKING_STORAGE_KEY, false));
-  toggleButton(focusToggle, loadBoolean(FOCUS_STORAGE_KEY, false));
 
   gradeRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
@@ -311,7 +308,7 @@ const MODULE_SOURCE = `
     });
   });
 
-  [soundToggle, stepsToggle, focusToggle].forEach((button) => {
+  [soundToggle, stepsToggle].forEach((button) => {
     if (!button) return;
     button.addEventListener('click', () => toggleButton(button));
   });
@@ -338,12 +335,10 @@ const MODULE_SOURCE = `
 
     const soundEnabled = soundToggle?.dataset.state !== 'off';
     const workingEnabled = stepsToggle?.dataset.state !== 'off';
-    const focusEnabled = focusToggle?.dataset.state === 'on';
 
     try {
       localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
       localStorage.setItem(WORKING_STORAGE_KEY, String(workingEnabled));
-      localStorage.setItem(FOCUS_STORAGE_KEY, String(focusEnabled));
       localStorage.setItem(QUESTION_COUNT_STORAGE_KEY, String(questionCount));
     } catch (e) {
       console.warn('failed to persist settings', e);
@@ -362,7 +357,6 @@ const MODULE_SOURCE = `
       questionCount,
       soundEnabled,
       workingEnabled,
-      focusEnabled,
       createdAt: Date.now(),
     };
 

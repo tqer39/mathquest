@@ -300,9 +300,20 @@ const MODULE_SOURCE = `
       const themeId = button.dataset.gradeId;
       if (!themeId) return;
 
-      setThemeSelection(themeId);
-      setSelectedPreset(themeId);
-      progress.lastLevel = ensureGradeSelection();
+      if (activeThemeId === themeId) {
+        // 既に選択されているテーマをクリックした場合は選択解除
+        setThemeSelection(null);
+        const currentGradeId = ensureGradeSelection();
+        if (currentGradeId) {
+          setSelectedPreset(currentGradeId);
+          progress.lastLevel = currentGradeId;
+        }
+      } else {
+        // 新しいテーマを選択
+        setThemeSelection(themeId);
+        setSelectedPreset(themeId);
+        progress.lastLevel = ensureGradeSelection();
+      }
     });
   });
 

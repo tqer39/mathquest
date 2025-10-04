@@ -194,7 +194,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             問題数
           </legend>
           <div class="flex flex-wrap gap-3 text-sm font-semibold">
-            {questionCountOptions.map((count, idx) => (
+            {questionCountOptions.map((count) => (
               <label
                 key={count}
                 class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] cursor-pointer"

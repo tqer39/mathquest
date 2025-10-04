@@ -143,7 +143,7 @@ export const practiceThemes = [
   {
     id: 'practice-mul-table',
     label: 'かけ算九九',
-    description: '1の段から9の段まで基本の九九練習',
+    description: 'かけ算の基礎練習（答えが81以下）',
     mode: 'mul',
     max: 81,
   },

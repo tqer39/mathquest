@@ -4,7 +4,6 @@ import type { CurrentUser } from '../../application/session/current-user';
 import {
   gradeLevels,
   calculationTypes,
-  getAvailableCalculationTypes,
   practiceThemes,
   gradePresets,
 } from './grade-presets';
@@ -80,9 +79,18 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
       <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
         Step 1
       </p>
-      <h1 class="text-3xl font-extrabold text-[var(--mq-ink)]">
-        学年と設定をえらぼう
-      </h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-extrabold text-[var(--mq-ink)]">
+          学年と設定をえらぼう
+        </h1>
+        <button
+          id="clear-selections"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-red-50 hover:border-red-300 hover:text-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+        >
+          🗑️ クリア
+        </button>
+      </div>
       <p class="max-w-2xl text-sm text-[#4f6076]">
         下のカードから学年（または練習テーマ）をえらび、右側で効果音・途中式・集中モードと問題数をまとめて調整します。設定はブラウザに保存されるので、次回はそのまま再開できます。
       </p>

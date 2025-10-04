@@ -54,6 +54,7 @@ const MODULE_SOURCE = `
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
   const startButton = document.getElementById('start-session');
+  const clearButton = document.getElementById('clear-selections');
 
   if (!startButton || !gradeRadios.length) {
     return;
@@ -261,6 +262,38 @@ const MODULE_SOURCE = `
   // 初期表示で小1の計算種類を表示
   renderCalculationTypes('grade-1');
 
+  const resetToInitialState = () => {
+    // 学年選択を小1に戻す
+    if (gradeRadios.length > 0) {
+      gradeRadios.forEach((radio, index) => {
+        radio.checked = index === 0;
+      });
+      selectedGradeId = gradeRadios[0].value;
+      setSelectedPreset(selectedGradeId);
+    }
+
+    // 計算種類を小1用に戻す
+    renderCalculationTypes('grade-1');
+
+    // テーマ選択をクリア
+    setThemeSelection(null);
+
+    // 問題数を初期値（最初の選択肢）に戻す
+    if (questionCountRadios.length > 0) {
+      questionCountRadios.forEach((radio, index) => {
+        radio.checked = index === 0;
+      });
+    }
+
+    // 設定トグルを初期状態に戻す
+    toggleButton(soundToggle, false);
+    toggleButton(stepsToggle, false);
+
+    // プログレスも初期化
+    progress.lastLevel = selectedGradeId;
+    progress.lastGrade = selectedGradeId;
+  };
+
   const toggleButton = (button, force) => {
     if (!button) return;
     const nextState =
@@ -376,6 +409,12 @@ const MODULE_SOURCE = `
     if (!button) return;
     button.addEventListener('click', () => toggleButton(button));
   });
+
+  if (clearButton) {
+    clearButton.addEventListener('click', () => {
+      resetToInitialState();
+    });
+  }
 
   startButton.addEventListener('click', () => {
     if (!selectedGradeId) {

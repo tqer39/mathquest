@@ -223,6 +223,14 @@ const MODULE_SOURCE = `
           </p>
         </div>
       \`;
+
+      const radio = label.querySelector('input[type="radio"]');
+      radio.addEventListener('change', () => {
+        if (radio.checked) {
+          filterThemesByCalculationType(calcType.mode);
+        }
+      });
+
       calculationTypeGrid.appendChild(label);
     });
   };
@@ -238,6 +246,25 @@ const MODULE_SOURCE = `
     themeButtons.forEach((button) => {
       const isActive = button.dataset.gradeId === themeId;
       updateThemeButtonAppearance(button, isActive);
+    });
+  };
+
+  const filterThemesByCalculationType = (calculationMode) => {
+    themeButtons.forEach((button) => {
+      const themeMode = button.dataset.mode;
+      const shouldShow = !calculationMode || themeMode === calculationMode;
+
+      if (shouldShow) {
+        button.style.display = '';
+        button.parentElement.style.display = '';
+      } else {
+        button.style.display = 'none';
+        button.parentElement.style.display = 'none';
+        // 非表示になったテーマが選択されている場合は選択を解除
+        if (activeThemeId === button.dataset.gradeId) {
+          setThemeSelection(null);
+        }
+      }
     });
   };
 
@@ -262,6 +289,9 @@ const MODULE_SOURCE = `
   // 初期表示で小1の計算種類を表示（最初の選択肢を自動選択）
   renderCalculationTypes('grade-1', true);
 
+  // 初期表示時にたし算のテーマに絞る
+  filterThemesByCalculationType('add');
+
   const resetToInitialState = () => {
     // 学年選択を小1に戻す
     if (gradeRadios.length > 0) {
@@ -277,6 +307,9 @@ const MODULE_SOURCE = `
 
     // テーマ選択をクリア
     setThemeSelection(null);
+
+    // たし算のテーマに絞る
+    filterThemesByCalculationType('add');
 
     // 問題数を初期値（最初の選択肢）に戻す
     if (questionCountRadios.length > 0) {
@@ -380,6 +413,8 @@ const MODULE_SOURCE = `
 
       // 計算種類を更新
       renderCalculationTypes(radio.value);
+      // 計算種類が未選択になるのでテーマフィルタリングもリセット
+      filterThemesByCalculationType(null);
     });
   });
 

@@ -118,13 +118,6 @@ pre-commit run --all-files
 - **uv**: Pythonパッケージ・プロジェクト管理
 - **pre-commit**: すべてのリンティングツールを自動処理（個別インストール不要）
 
-### 自動CLIツールインストール
-
-`just setup`の実行時に、AI CLIツールが自動的にインストールされます：
-
-- **Claude Code CLI**: `@anthropic-ai/claude-code` - AI支援開発用
-- **Gemini CLI**: `@google/gemini-cli` - 代替AIアシスタント
-
 ### 依存関係管理
 
 - **Renovate**: 依存関係の自動更新は`renovate.json5`を通じて設定され、`github>tqer39/renovate-config`から拡張されています

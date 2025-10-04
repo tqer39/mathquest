@@ -135,7 +135,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           ))}
         </div>
 
-        <div class="space-y-2">
+        <div id="calculation-type-section" class="space-y-2">
           <p class="text-sm font-semibold text-[var(--mq-ink)]">
             計算の種類をえらぶ
           </p>

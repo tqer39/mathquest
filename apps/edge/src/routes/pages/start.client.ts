@@ -266,6 +266,7 @@ const MODULE_SOURCE = `
     });
   };
 
+
   // テーマは初期状態では何も選択しない
   setThemeSelection(null);
 
@@ -400,22 +401,6 @@ const MODULE_SOURCE = `
   toggleButton(soundToggle, loadBoolean(SOUND_STORAGE_KEY, false));
   toggleButton(stepsToggle, loadBoolean(WORKING_STORAGE_KEY, false));
 
-  gradeRadios.forEach((radio) => {
-    radio.addEventListener('change', () => {
-      if (!radio.checked) return;
-
-      // 学年を変更したらテーマ選択をクリア
-      setThemeSelection(null);
-      setSelectedPreset(radio.value);
-      progress.lastLevel = radio.value;
-
-      // 計算種類を更新
-      renderCalculationTypes(radio.value);
-      // 計算種類が未選択になるのでテーマフィルタリングもリセット
-      filterThemesByCalculationType(null);
-    });
-  });
-
   themeButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const themeId = button.dataset.gradeId;
@@ -512,6 +497,23 @@ const MODULE_SOURCE = `
     }
 
     window.location.href = '/play';
+  });
+
+  // 初期化完了後に学年変更イベントリスナーを登録
+  gradeRadios.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+
+      // 学年を変更したらテーマ選択をクリア
+      setThemeSelection(null);
+      setSelectedPreset(radio.value);
+      progress.lastLevel = radio.value;
+
+      // 計算種類を更新（未選択状態で表示）
+      renderCalculationTypes(radio.value);
+      // 計算種類が未選択になるのでテーマフィルタリングもリセット
+      filterThemesByCalculationType(null);
+    });
   });
   }
 })();

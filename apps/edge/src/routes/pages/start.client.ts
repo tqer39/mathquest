@@ -28,6 +28,18 @@ const MODULE_SOURCE = `
   };
 
   const presets = getJSON('grade-presets');
+  const calculationTypes = getJSON('calculation-types');
+  const gradeLevels = getJSON('grade-levels');
+
+  // 学年ごとの利用可能な計算種類
+  const gradeCalculationTypes = {
+    'grade-1': ['calc-add', 'calc-sub'],
+    'grade-2': ['calc-add', 'calc-sub'],
+    'grade-3': ['calc-add', 'calc-sub', 'calc-mul'],
+    'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
+    'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+    'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+  };
   const gradeRadios = Array.from(
     document.querySelectorAll('input[name="grade-selection"]')
   );
@@ -35,6 +47,7 @@ const MODULE_SOURCE = `
     document.querySelectorAll('#theme-grid button')
   );
   const selectedGradeLabel = document.getElementById('selected-grade-label');
+  const calculationTypeGrid = document.getElementById('calculation-type-grid');
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
   );
@@ -178,6 +191,41 @@ const MODULE_SOURCE = `
     }
   };
 
+  const renderCalculationTypes = (gradeId) => {
+    if (!calculationTypeGrid) return;
+
+    const availableCalcTypes = gradeCalculationTypes[gradeId] || [];
+    const availableTypes = calculationTypes.filter(calcType =>
+      availableCalcTypes.includes(calcType.id)
+    );
+
+    calculationTypeGrid.innerHTML = '';
+
+    availableTypes.forEach((calcType, index) => {
+      const label = document.createElement('label');
+      label.className = 'group cursor-pointer';
+      label.innerHTML = \`
+        <input
+          type="radio"
+          name="calculation-type-selection"
+          value="\${calcType.id}"
+          data-mode="\${calcType.mode}"
+          class="peer sr-only"
+          \${index === 0 ? 'checked' : ''}
+        />
+        <div class="calc-type-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
+          <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
+            \${calcType.label}
+          </p>
+          <p class="text-base font-semibold text-[var(--mq-ink)]">
+            \${calcType.description}
+          </p>
+        </div>
+      \`;
+      calculationTypeGrid.appendChild(label);
+    });
+  };
+
   const setSelectedPreset = (presetId) => {
     if (!presetId) return;
     selectedGradeId = presetId;
@@ -209,6 +257,9 @@ const MODULE_SOURCE = `
   }
 
   setSelectedPreset(selectedGradeId);
+
+  // 初期表示で小1の計算種類を表示
+  renderCalculationTypes('grade-1');
 
   const toggleButton = (button, force) => {
     if (!button) return;
@@ -293,6 +344,9 @@ const MODULE_SOURCE = `
       setThemeSelection(null);
       setSelectedPreset(radio.value);
       progress.lastLevel = radio.value;
+
+      // 計算種類を更新
+      renderCalculationTypes(radio.value);
     });
   });
 
@@ -392,10 +446,18 @@ const MODULE_SOURCE = `
 `;
 
 export const renderStartClientScript = (
-  presets: readonly GradePreset[]
+  presets: readonly GradePreset[],
+  calculationTypes: any,
+  gradeLevels: any
 ) => html`
   <script id="grade-presets" type="application/json">
     ${raw(JSON.stringify(presets))}
+  </script>
+  <script id="calculation-types" type="application/json">
+    ${raw(JSON.stringify(calculationTypes))}
+  </script>
+  <script id="grade-levels" type="application/json">
+    ${raw(JSON.stringify(gradeLevels))}
   </script>
   <script type="module">
     ${raw(MODULE_SOURCE)};

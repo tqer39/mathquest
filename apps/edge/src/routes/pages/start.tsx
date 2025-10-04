@@ -1,7 +1,13 @@
 import type { FC } from 'hono/jsx';
 import { html } from 'hono/html';
 import type { CurrentUser } from '../../application/session/current-user';
-import { gradeLevels, practiceThemes, gradePresets } from './grade-presets';
+import {
+  gradeLevels,
+  calculationTypes,
+  getAvailableCalculationTypes,
+  practiceThemes,
+  gradePresets,
+} from './grade-presets';
 import { renderStartClientScript } from './start.client';
 
 const baseQuestionCountOptions = [10, 20, 30] as const;
@@ -106,8 +112,6 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                 name="grade-selection"
                 value={preset.id}
                 data-group="level"
-                data-mode={preset.mode}
-                data-max={preset.max}
                 class="peer sr-only"
                 defaultChecked={index === 0}
               />
@@ -121,6 +125,18 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               </div>
             </label>
           ))}
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-sm font-semibold text-[var(--mq-ink)]">
+            計算の種類をえらぶ
+          </p>
+          <div
+            id="calculation-type-grid"
+            class="grid gap-3 sm:grid-cols-3 xl:grid-cols-5"
+          >
+            {/* JavaScriptで動的に生成される */}
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -236,6 +252,6 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
       </section>
     </div>
 
-    {renderStartClientScript(gradePresets)}
+    {renderStartClientScript(gradePresets, calculationTypes, gradeLevels)}
   </div>
 );

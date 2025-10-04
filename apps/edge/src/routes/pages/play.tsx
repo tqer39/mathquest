@@ -255,10 +255,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
           >
             こたえを送信すると、計算の流れがここに出るよ。
           </p>
-          <ol
-            id="working-steps"
-            class="mt-4 space-y-2 text-lg font-semibold"
-          ></ol>
+          <div id="working-steps" class="mt-4"></div>
         </div>
       </section>
 

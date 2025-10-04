@@ -458,19 +458,169 @@ const MODULE_SOURCE = `
       return;
     }
     workingEmpty.classList.add('hidden');
-    const steps = [];
+    workingSteps.innerHTML = '';
+
+    // 段階的な計算過程を表示
+    const container = document.createElement('div');
+    container.className = 'space-y-6 py-4';
+
+    let currentSum = question.a;
+
+    // 最初の計算: a + b
+    const step1 = document.createElement('div');
+    step1.className = 'space-y-2';
+
+    const calc1 = document.createElement('div');
+    calc1.className = 'flex flex-col items-end gap-1 font-mono';
+
+    const num1 = document.createElement('div');
+    num1.className = 'text-2xl font-bold';
+    num1.textContent = String(question.a).padStart(6, ' ');
+    calc1.appendChild(num1);
+
+    const num2 = document.createElement('div');
+    num2.className = 'text-2xl font-bold';
+    num2.textContent = question.op + ' ' + String(question.b).padStart(4, ' ');
+    calc1.appendChild(num2);
+
+    const div1 = document.createElement('div');
+    div1.className = 'w-32 border-t-2 border-[var(--mq-primary)] my-1';
+    calc1.appendChild(div1);
+
+    currentSum = question.op === '+' ? currentSum + question.b :
+                 question.op === '-' ? currentSum - question.b :
+                 question.op === '×' ? currentSum * question.b :
+                 question.op === '÷' ? currentSum / question.b : currentSum;
+
+    const ans1 = document.createElement('div');
+    ans1.className = 'text-2xl font-bold text-[var(--mq-primary-strong)]';
+    ans1.textContent = String(currentSum).padStart(6, ' ');
+    calc1.appendChild(ans1);
+
+    step1.appendChild(calc1);
+
+    // 説明文（繰り上がりの説明を含む）
+    const explain1 = document.createElement('div');
+    explain1.className = 'text-sm text-[#5e718a] space-y-1';
+
+    // 繰り上がりの説明を追加（足し算で両方が2桁以上の場合）
+    if (question.op === '+' && question.a >= 10 && question.b >= 10) {
+      const ones1 = question.a % 10;
+      const tens1 = Math.floor(question.a / 10);
+      const ones2 = question.b % 10;
+      const tens2 = Math.floor(question.b / 10);
+      const onesSum = ones1 + ones2;
+      const carry = Math.floor(onesSum / 10);
+
+      if (carry > 0) {
+        const detailDiv = document.createElement('div');
+        detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+        const onesResult = onesSum % 10;
+        const tensSum = tens1 + tens2 + carry;
+
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 くりあがりの説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesSum +
+          (carry > 0 ? ' → ' + onesResult + ' で ' + carry + ' くりあがる' : '') + '</div>' +
+          '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
+          (carry > 0 ? ' + ' + carry + '(くりあがり)' : '') + ' = ' + tensSum + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+
+        explain1.appendChild(detailDiv);
+      }
+    }
+
+    const simpleExplain1 = document.createElement('div');
+    simpleExplain1.className = 'text-center';
+    simpleExplain1.textContent = question.a + ' ' + question.op + ' ' + question.b + ' = ' + currentSum;
+    explain1.appendChild(simpleExplain1);
+
+    step1.appendChild(explain1);
+
+    container.appendChild(step1);
+
+    // extras の各計算を順番に追加
     if (Array.isArray(question.extras)) {
-      question.extras.forEach((line) => {
-        if (typeof line === 'string') steps.push(line);
+      question.extras.forEach((extra, index) => {
+        if (extra && typeof extra === 'object' && extra.op && typeof extra.value !== 'undefined') {
+          const prevSum = currentSum;
+
+          const stepDiv = document.createElement('div');
+          stepDiv.className = 'space-y-2';
+
+          const calcDiv = document.createElement('div');
+          calcDiv.className = 'flex flex-col items-end gap-1 font-mono';
+
+          const prevNum = document.createElement('div');
+          prevNum.className = 'text-2xl font-bold';
+          prevNum.textContent = String(prevSum).padStart(6, ' ');
+          calcDiv.appendChild(prevNum);
+
+          const extraNum = document.createElement('div');
+          extraNum.className = 'text-2xl font-bold';
+          extraNum.textContent = extra.op + ' ' + String(extra.value).padStart(4, ' ');
+          calcDiv.appendChild(extraNum);
+
+          const divider = document.createElement('div');
+          divider.className = 'w-32 border-t-2 border-[var(--mq-primary)] my-1';
+          calcDiv.appendChild(divider);
+
+          currentSum = extra.op === '+' ? currentSum + extra.value :
+                       extra.op === '-' ? currentSum - extra.value :
+                       extra.op === '×' ? currentSum * extra.value :
+                       extra.op === '÷' ? currentSum / extra.value : currentSum;
+
+          const stepAns = document.createElement('div');
+          stepAns.className = 'text-2xl font-bold text-[var(--mq-primary-strong)]';
+          stepAns.textContent = String(currentSum).padStart(6, ' ');
+          calcDiv.appendChild(stepAns);
+
+          stepDiv.appendChild(calcDiv);
+
+          // 説明文（繰り上がりの説明を含む）
+          const explain = document.createElement('div');
+          explain.className = 'text-sm text-[#5e718a] space-y-1';
+
+          // 繰り上がりの説明を追加（足し算で両方が2桁以上の場合）
+          if (extra.op === '+' && prevSum >= 10 && extra.value >= 10) {
+            const ones1 = prevSum % 10;
+            const tens1 = Math.floor(prevSum / 10);
+            const ones2 = extra.value % 10;
+            const tens2 = Math.floor(extra.value / 10);
+            const onesSum = ones1 + ones2;
+            const carry = Math.floor(onesSum / 10);
+
+            if (carry > 0) {
+              const detailDiv = document.createElement('div');
+              detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+              const onesResult = onesSum % 10;
+              const tensSum = tens1 + tens2 + carry;
+
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 くりあがりの説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesSum +
+                (carry > 0 ? ' → ' + onesResult + ' で ' + carry + ' くりあがる' : '') + '</div>' +
+                '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
+                (carry > 0 ? ' + ' + carry + '(くりあがり)' : '') + ' = ' + tensSum + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+
+              explain.appendChild(detailDiv);
+            }
+          }
+
+          const simpleExplain = document.createElement('div');
+          simpleExplain.className = 'text-center';
+          simpleExplain.textContent = prevSum + ' ' + extra.op + ' ' + extra.value + ' = ' + currentSum;
+          explain.appendChild(simpleExplain);
+
+          stepDiv.appendChild(explain);
+
+          container.appendChild(stepDiv);
+        }
       });
     }
-    steps.push('= ' + correctAnswer);
-    workingSteps.innerHTML = '';
-    steps.forEach((line) => {
-      const li = document.createElement('li');
-      li.textContent = line;
-      workingSteps.appendChild(li);
-    });
+
+    workingSteps.appendChild(container);
   };
 
   const updateSessionStorage = () => {

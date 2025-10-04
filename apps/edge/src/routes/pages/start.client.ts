@@ -13,7 +13,6 @@ const MODULE_SOURCE = `
   const STORAGE_KEY = 'mathquest:progress:v1';
   const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
   const WORKING_STORAGE_KEY = 'mathquest:show-working';
-  const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
   const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
   const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -460,13 +459,11 @@ const MODULE_SOURCE = `
 
     const soundEnabled = soundToggle?.dataset.state !== 'off';
     const workingEnabled = stepsToggle?.dataset.state !== 'off';
-    const focusEnabled = focusToggle?.dataset.state === 'on';
 
     try {
       localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
       localStorage.setItem(WORKING_STORAGE_KEY, String(workingEnabled));
       localStorage.setItem(QUESTION_COUNT_STORAGE_KEY, String(questionCount));
-      localStorage.setItem(FOCUS_STORAGE_KEY, String(focusEnabled));
     } catch (e) {
       console.warn('failed to persist settings', e);
     }
@@ -476,7 +473,11 @@ const MODULE_SOURCE = `
     saveProgress(progress);
 
     const currentGradeId = ensureGradeSelection();
-    const baseGradePreset = findPreset(currentGradeId) || findPreset(progress.lastLevel);
+    const baseGradePreset =
+      findPreset(currentGradeId) ||
+      (progress.lastLevel ? findPreset(progress.lastLevel) : null) ||
+      (gradeLevels.find((level) => level.id === currentGradeId) ?? gradeLevels[0]) ||
+      null;
     const isThemeSelected = activeThemeId !== null;
     const themePreset = isThemeSelected ? grade : null;
 
@@ -489,9 +490,7 @@ const MODULE_SOURCE = `
       questionCount,
       soundEnabled,
       workingEnabled,
-      focusEnabled,
       createdAt: Date.now(),
-      focusEnabled: false,
       baseGradeId: baseGradePreset?.id || currentGradeId,
       baseGradeLabel: baseGradePreset?.label || '',
       baseGradeDescription: baseGradePreset?.description || '',

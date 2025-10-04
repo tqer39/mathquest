@@ -228,6 +228,8 @@ const MODULE_SOURCE = `
       radio.addEventListener('change', () => {
         if (radio.checked) {
           filterThemesByCalculationType(calcType.mode);
+          // 計算種類選択後にボタンの状態を更新
+          updateStartButtonState();
         }
       });
 
@@ -247,6 +249,8 @@ const MODULE_SOURCE = `
       const isActive = button.dataset.gradeId === themeId;
       updateThemeButtonAppearance(button, isActive);
     });
+    // テーマ選択状態変更後にボタンの状態を更新
+    updateStartButtonState();
   };
 
   const filterThemesByCalculationType = (calculationMode) => {
@@ -264,6 +268,31 @@ const MODULE_SOURCE = `
         }
       }
     });
+    // 状態変更後にボタンの状態を更新
+    updateStartButtonState();
+  };
+
+  const updateStartButtonState = () => {
+    if (!startButton) return;
+
+    // 計算種類が選択されているかチェック
+    const calculationTypeSelected = document.querySelector('input[name="calculation-type-selection"]:checked');
+
+    // テーマが選択されているかチェック
+    const themeSelected = activeThemeId !== null;
+
+    // 計算種類またはテーマが選択されている場合のみボタンを有効にする
+    const shouldEnable = calculationTypeSelected || themeSelected;
+
+    startButton.disabled = !shouldEnable;
+
+    if (shouldEnable) {
+      startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      startButton.classList.add('hover:-translate-y-0.5', 'hover:bg-[var(--mq-primary-strong)]');
+    } else {
+      startButton.classList.add('opacity-50', 'cursor-not-allowed');
+      startButton.classList.remove('hover:-translate-y-0.5', 'hover:bg-[var(--mq-primary-strong)]');
+    }
   };
 
 
@@ -291,6 +320,9 @@ const MODULE_SOURCE = `
   // 計算種類が未選択なので全テーマを表示
   filterThemesByCalculationType(null);
 
+  // 初期状態でボタンの状態を更新
+  updateStartButtonState();
+
   const resetToInitialState = () => {
     // 学年選択を小1に戻す
     if (gradeRadios.length > 0) {
@@ -309,6 +341,9 @@ const MODULE_SOURCE = `
 
     // 計算種類が未選択なので全テーマを表示
     filterThemesByCalculationType(null);
+
+    // クリア後のボタン状態を更新
+    updateStartButtonState();
 
     // 問題数を初期値（最初の選択肢）に戻す
     if (questionCountRadios.length > 0) {
@@ -549,6 +584,8 @@ const MODULE_SOURCE = `
       renderCalculationTypes(radio.value);
       // 計算種類が未選択になるのでテーマフィルタリングもリセット
       filterThemesByCalculationType(null);
+      // 学年変更後のボタン状態を更新
+      updateStartButtonState();
     });
   });
   }

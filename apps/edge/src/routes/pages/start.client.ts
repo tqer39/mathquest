@@ -232,15 +232,6 @@ const MODULE_SOURCE = `
       });
 
       calculationTypeGrid.appendChild(label);
-
-      // 初期選択時にイベントを手動で発火
-      if (autoSelect && index === 0) {
-        setTimeout(() => {
-          if (radio.checked) {
-            filterThemesByCalculationType(calcType.mode);
-          }
-        }, 0);
-      }
     });
   };
 
@@ -294,8 +285,11 @@ const MODULE_SOURCE = `
 
   setSelectedPreset(selectedGradeId);
 
-  // 初期表示で小1の計算種類を表示（最初の選択肢を自動選択）
-  renderCalculationTypes('grade-1', true);
+  // 初期表示で小1の計算種類を表示（未選択状態）
+  renderCalculationTypes('grade-1', false);
+
+  // 計算種類が未選択なので全テーマを表示
+  filterThemesByCalculationType(null);
 
   const resetToInitialState = () => {
     // 学年選択を小1に戻す
@@ -307,11 +301,14 @@ const MODULE_SOURCE = `
       setSelectedPreset(selectedGradeId);
     }
 
-    // 計算種類を小1用に戻す（最初の選択肢を自動選択）
-    renderCalculationTypes('grade-1', true);
+    // 計算種類を小1用に戻す（未選択状態）
+    renderCalculationTypes('grade-1', false);
 
     // テーマ選択をクリア
     setThemeSelection(null);
+
+    // 計算種類が未選択なので全テーマを表示
+    filterThemesByCalculationType(null);
 
     // 問題数を初期値（最初の選択肢）に戻す
     if (questionCountRadios.length > 0) {

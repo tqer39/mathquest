@@ -1,136 +1,37 @@
 import type { FC } from 'hono/jsx';
-import { html } from 'hono/html';
-import { renderHomeClientScript } from './home.client';
 import type { CurrentUser } from '../../application/session/current-user';
 
-const gradePresets = [
-  {
-    id: 'grade-1',
-    label: '小1',
-    description: '10までのたし算・ひき算',
-    mode: 'add',
-    max: 10,
-  },
-  {
-    id: 'grade-2',
-    label: '小2',
-    description: '100までのひき算',
-    mode: 'sub',
-    max: 100,
-  },
-  {
-    id: 'grade-3',
-    label: '小3',
-    description: 'かけ算（九九）',
-    mode: 'mul',
-    max: 81,
-  },
-  {
-    id: 'grade-4',
-    label: '小4',
-    description: '割り算（あまりあり）',
-    mode: 'mix',
-    max: 144,
-  },
-  {
-    id: 'grade-5',
-    label: '小5',
-    description: '小数のたし算・ひき算',
-    mode: 'mix',
-    max: 200,
-  },
-  {
-    id: 'grade-6',
-    label: '小6',
-    description: '分数のたし算・ひき算',
-    mode: 'mix',
-    max: 300,
-  },
-  {
-    id: 'practice-add-two',
-    label: 'たし算（2項）',
-    description: 'たし算のみでくり返し練習（最大50）',
-    mode: 'add',
-    max: 50,
-  },
-  {
-    id: 'practice-sub-two',
-    label: 'ひき算（2項）',
-    description: 'ひき算のみでくり返し練習（最大50）',
-    mode: 'sub',
-    max: 50,
-  },
-  {
-    id: 'practice-add-three',
-    label: 'たし算（3項）',
-    description: '3つの数をたす練習（最大60）',
-    mode: 'add',
-    max: 60,
-  },
-  {
-    id: 'practice-add-four',
-    label: 'たし算（4項）',
-    description: '4つの数をたす練習（最大80）',
-    mode: 'add',
-    max: 80,
-  },
-  {
-    id: 'practice-add-mixed-digits',
-    label: '一桁＋二桁のたし算',
-    description: '一桁と二桁のたし算を重点練習',
-    mode: 'add',
-    max: 120,
-  },
-  {
-    id: 'practice-sub-double-digit',
-    label: '二桁同士のひき算',
-    description: '二桁と二桁のひき算（答えは0以上）',
-    mode: 'sub',
-    max: 99,
-  },
-  {
-    id: 'practice-mix-three',
-    label: 'たし算・ひき算（3項）',
-    description: 'たし算とひき算を交えた3項の練習',
-    mode: 'mix',
-    max: 70,
-  },
-  {
-    id: 'practice-mix-four',
-    label: 'たし算・ひき算（4項）',
-    description: 'たし算とひき算を交えた4項の練習',
-    mode: 'mix',
-    max: 90,
-  },
-] as const;
-
-export type GradePreset = (typeof gradePresets)[number];
-
-type HomeProps = {
-  currentUser: CurrentUser | null;
-};
-
-const renderUserSummary = (user: CurrentUser) => (
-  <div class="flex items-center gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-3 shadow-sm">
-    <span
-      class="flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white"
-      style={{ backgroundColor: user.avatarColor }}
-      aria-hidden="true"
-    >
-      {user.displayName.split(' ').join('').slice(0, 2)}
-    </span>
-    <div class="space-y-1 text-[var(--mq-ink)]">
-      <p class="text-sm font-semibold">{user.displayName}</p>
-      <p class="text-xs text-[#5e718a]">
-        {user.grade} / {user.badges.join('・')}
-      </p>
+const HomeNav: FC<{ currentUser: CurrentUser | null }> = ({ currentUser }) => (
+  <nav class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-3">
+      <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
+        MQ
+      </span>
+      <span class="text-lg font-semibold tracking-tight text-[var(--mq-ink)]">
+        MathQuest
+      </span>
     </div>
-  </div>
+    <div class="flex items-center gap-3 sm:gap-4">
+      <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
+        小学生の算数を、遊ぶように練習しよう
+      </p>
+      {currentUser ? (
+        <a
+          href="/auth/logout"
+          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+        >
+          ログアウト
+        </a>
+      ) : null}
+    </div>
+  </nav>
 );
 
-export const Home: FC<HomeProps> = ({ currentUser }) => (
+export const Home: FC<{ currentUser: CurrentUser | null }> = ({
+  currentUser,
+}) => (
   <div
-    id="app-root"
+    id="home-root"
     class="flex min-h-screen w-full flex-col gap-10 px-4 py-8 sm:px-8 lg:px-16 xl:px-24"
     data-user-state={
       currentUser
@@ -140,325 +41,52 @@ export const Home: FC<HomeProps> = ({ currentUser }) => (
         : 'none'
     }
   >
-    <nav
-      id="top-nav"
-      class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between"
-    >
-      <div class="flex items-center gap-3">
-        <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
-          MQ
-        </span>
-        <span class="text-lg font-semibold tracking-tight text-[var(--mq-ink)]">
-          MathQuest
-        </span>
-      </div>
-      <div class="flex items-center gap-3 sm:gap-4">
-        <p class="hidden text-sm font-medium text-[#5e718a] sm:block">
-          算数の冒険を、やさしいデザインで
-        </p>
-        <button
-          id="toggle-sound"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-          data-state="on"
-        >
-          🔊 効果音: ON
-        </button>
-        <button
-          id="toggle-steps"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-          data-state="on"
-        >
-          🧮 途中式: ON
-        </button>
-        <button
-          id="toggle-focus"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-          data-state="off"
-        >
-          🎯 集中: OFF
-        </button>
-        {currentUser ? (
-          <button
-            id="logout-button"
-            type="button"
-            class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-          >
-            ログアウト
-          </button>
-        ) : null}
-      </div>
-    </nav>
+    <HomeNav currentUser={currentUser} />
 
-    <header
-      id="hero"
-      class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-r from-[var(--mq-primary-soft)] via-white to-[var(--mq-accent)] p-8 text-[var(--mq-ink)] shadow-xl lg:flex-row lg:items-center lg:justify-between"
-    >
-      <div class="space-y-3">
+    <header class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-r from-[var(--mq-primary-soft)] via-white to-[var(--mq-accent)] p-8 text-[var(--mq-ink)] shadow-xl lg:flex-row lg:items-center lg:justify-between">
+      <div class="space-y-4">
         <p class="text-xs font-semibold uppercase tracking-[0.4em] text-[#6c7c90]">
           じぶんのペースで算数練習
         </p>
         <h1 class="text-3xl font-extrabold sm:text-4xl">MathQuest</h1>
         <p class="max-w-xl text-sm sm:text-base text-[#4f6076]">
-          ボタンを押して、算数ミッションにチャレンジ！学習記録はブラウザに保存。記録を残したくなったら、会員登録でクラウドにバックアップできます。
+          匿名のまま「すぐにはじめる」を押して学年を選ぶだけ。学習記録はブラウザに保存され、会員登録をすればクラウドにも同期できます。
         </p>
+        <ul class="space-y-1 text-sm text-[#4f6076]">
+          <li>・学年別のおすすめ単元からスタート</li>
+          <li>・効果音や途中式の表示などをまとめてカスタマイズ</li>
+          <li>・3,2,1,Go! のカウントダウンで集中モードに突入</li>
+        </ul>
       </div>
-      <button
-        id="start-button"
+      <a
+        href="/start"
         class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-6 py-3 text-lg font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
-        type="button"
       >
-        スタート！
-      </button>
+        すぐにはじめる
+      </a>
     </header>
 
-    <section class="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,1.35fr)]">
-      <article class="relative flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-8">
-        <button
-          id="focus-exit"
-          type="button"
-          class="hidden absolute right-6 top-6 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--mq-outline)] bg-white text-lg font-bold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-          aria-label="集中モードを解除"
-        >
-          ×
-        </button>
-        <div id="grade-panel" class="space-y-4">
-          <span class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
-            学年や単元をえらんでね
-          </span>
-          <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-            {gradePresets.map((preset, index) => (
-              <button
-                key={preset.id}
-                data-grade-id={preset.id}
-                data-mode={preset.mode}
-                data-max={preset.max}
-                aria-pressed={index === 0 ? 'true' : 'false'}
-                class="grade-button rounded-2xl border border-transparent bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-                type="button"
-              >
-                <p class="text-sm font-bold text-[#5e718a]">{preset.label}</p>
-                <p class="text-base font-semibold text-[var(--mq-ink)]">
-                  {preset.description}
-                </p>
-              </button>
-            ))}
-          </div>
-          <p class="rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-3 text-sm text-[var(--mq-ink)]">
-            <span class="font-semibold" id="grade-name">
-              {gradePresets[0].label} のもんだい
-            </span>
-            ：<span id="grade-description">{gradePresets[0].description}</span>
-          </p>
-          <fieldset
-            id="question-count-panel"
-            class="rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-3 text-[var(--mq-ink)]"
-          >
-            <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
-              問題数
-            </legend>
-            <div class="mt-2 flex flex-wrap gap-3 text-sm font-semibold">
-              {[10, 20, 40].map((count) => (
-                <label
-                  key={count}
-                  class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)]"
-                >
-                  <input
-                    type="radio"
-                    name="question-count"
-                    value={count}
-                    defaultChecked={count === 10}
-                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
-                  />
-                  {count}問
-                </label>
-              ))}
-            </div>
-            <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#4f6076]">
-              <span
-                id="question-count-default"
-                class="font-semibold text-[var(--mq-ink)]"
-              >
-                現在の初期値: 10問
-              </span>
-              <button
-                id="question-count-save"
-                type="button"
-                class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-              >
-                現在の選択を初期値にする
-              </button>
-              <span
-                id="question-count-toast"
-                class="hidden text-xs font-semibold text-[var(--mq-primary-strong)]"
-              >
-                初期値を更新しました
-              </span>
-            </div>
-          </fieldset>
-        </div>
-
-        <div class="flex flex-col gap-6 xl:grid xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-stretch">
-          <div class="flex flex-col gap-6">
-            <div class="rounded-3xl border border-[var(--mq-outline)] bg-gradient-to-br from-[var(--mq-accent)] via-white to-[var(--mq-primary-soft)] p-6 text-[var(--mq-ink)] shadow-inner">
-              <p class="text-sm font-medium text-[#5e718a]">もんだい</p>
-              <p
-                id="question"
-                class="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl bg-white/70 p-6 text-5xl font-extrabold leading-tight text-center text-[var(--mq-ink)] shadow-lg backdrop-blur"
-              >
-                0 + 0 = ？
-              </p>
-              <p class="mt-2 text-xs text-[#5e718a]">
-                スタートを押すと新しい問題が届くよ！
-              </p>
-            </div>
-
-            <div
-              id="working-container"
-              class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-inner"
-              data-visible="on"
-            >
-              <div class="flex items-center justify-between gap-3">
-                <p class="text-sm font-semibold text-[#5e718a]">途中式</p>
-                <span class="text-xs text-[#6c7c90]">
-                  こたえの後に表示されるよ
-                </span>
-              </div>
-              <p
-                id="working-empty"
-                class="mt-4 rounded-2xl bg-white/60 px-4 py-3 text-center text-xs font-medium text-[#6c7c90]"
-              >
-                こたえを送信すると、計算の流れがここに出るよ。
-              </p>
-              <ol
-                id="working-steps"
-                class="mt-4 space-y-2 text-lg font-semibold text-[var(--mq-ink)]"
-              ></ol>
-            </div>
-
-            <div class="space-y-4">
-              <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-center">
-                <p class="text-sm font-semibold text-[#5e718a]">こたえ</p>
-                <p
-                  id="answer-display"
-                  class="mt-2 text-4xl font-extrabold tracking-[0.35em] text-[var(--mq-ink)]"
-                >
-                  ？
-                </p>
-              </div>
-              <p
-                id="feedback"
-                class="min-h-[48px] rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-3 text-center text-sm font-semibold text-[var(--mq-primary-strong)] opacity-0 transition-opacity duration-200 ease-out"
-                data-variant="info"
-                aria-live="polite"
-              ></p>
-            </div>
-          </div>
-
-          <div
-            data-keypad-card
-            class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 text-[var(--mq-ink)] shadow-lg xl:h-full xl:min-h-[32rem]"
-          >
-            <p class="text-sm font-semibold text-[#5e718a]">テンキー</p>
-            <div class="mt-4 grid grid-cols-3 gap-3">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
-                <button
-                  key={digit}
-                  type="button"
-                  class="rounded-2xl bg-white px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-                  data-keypad="digit"
-                  data-value={digit}
-                >
-                  {digit}
-                </button>
-              ))}
-              <button
-                type="button"
-                class="rounded-2xl bg-white px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-secondary)]"
-                data-keypad="delete"
-              >
-                ⌫
-              </button>
-              <button
-                type="button"
-                class="rounded-2xl bg-white px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-                data-keypad="digit"
-                data-value="0"
-              >
-                0
-              </button>
-              <button
-                type="button"
-                class="rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
-                data-keypad="submit"
-              >
-                =
-              </button>
-            </div>
-          </div>
-        </div>
-      </article>
-
-      <aside
-        id="stats-panel"
-        class="flex flex-col gap-5 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface-strong)] p-6 shadow-lg sm:p-7"
-      >
-        <h2 class="text-lg font-semibold text-[var(--mq-ink)]">きろく</h2>
-        {currentUser ? (
-          <div class="sm:max-w-none">{renderUserSummary(currentUser)}</div>
-        ) : null}
-        <ul class="space-y-3 text-sm text-[#4f6076]">
-          <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
-            <span>こたえた問題</span>
-            <span id="stats-total" class="font-semibold text-[var(--mq-ink)]">
-              0問
-            </span>
-          </li>
-          <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
-            <span>せいかい</span>
-            <span id="stats-correct" class="font-semibold text-[#2e7c79]">
-              0問
-            </span>
-          </li>
-          <li class="flex items-center justify-between rounded-2xl bg-[var(--mq-surface)] px-4 py-3">
-            <span>連続正解</span>
-            <span id="stats-streak" class="font-semibold text-[#4a7bb7]">
-              0問
-            </span>
-          </li>
-          <li class="rounded-2xl bg-[var(--mq-surface)] px-4 py-3 text-xs text-[#5e718a]">
-            <span class="font-semibold text-[var(--mq-ink)]">
-              さいごに学習した日
-            </span>
-            <span id="stats-last-played" class="mt-1 block text-[#4f6076]">
-              まだ記録はありません
-            </span>
-          </li>
-        </ul>
-        <p class="rounded-2xl bg-[var(--mq-secondary)] px-4 py-3 text-xs text-[#7a5544]">
-          学習記録はブラウザに保存されています。会員登録すると、サーバーに同期してどこからでも続きができます。
+    <section class="grid gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-8 text-[var(--mq-ink)] shadow-lg md:grid-cols-3">
+      <div class="space-y-2">
+        <h2 class="text-xl font-semibold">学年プリセット</h2>
+        <p class="text-sm text-[#5e718a]">
+          1年生から6年生まで、学習指導要領をベースにした単元プリセットを用意しています。学年にあわせた難易度からスタートしましょう。
         </p>
-        <button
-          id="reset-progress"
-          type="button"
-          class="rounded-2xl border border-[var(--mq-outline)] px-4 py-2 text-sm font-semibold text-[#4f6076] transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-        >
-          学習記録をリセット
-        </button>
-        {currentUser ? null : (
-          <button
-            id="guest-login-button"
-            type="button"
-            class="inline-flex items-center justify-center rounded-2xl bg-[var(--mq-primary)] px-4 py-3 text-sm font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
-          >
-            ゲストでログイン
-          </button>
-        )}
-      </aside>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-xl font-semibold">カスタム設定</h2>
+        <p class="text-sm text-[#5e718a]">
+          効果音・途中式・集中モードの ON/OFF と初期問題数を 1
+          画面でまとめて調整できます。設定はブラウザに保存され、次回も引き継がれます。
+        </p>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-xl font-semibold">集中して解く</h2>
+        <p class="text-sm text-[#5e718a]">
+          設定が完了したら 3,2,1,Go!
+          のカウントダウンで集中タイムへ。テンキーと途中式表示で、紙を使わなくても手軽に練習できます。
+        </p>
+      </div>
     </section>
-
-    {renderHomeClientScript(gradePresets)}
   </div>
 );

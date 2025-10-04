@@ -1,9 +1,20 @@
-output "r2_bucket_name" {
-  value       = module.r2_state.bucket_name
-  description = "tfstate 用 R2 バケット名"
+output "cf_d1_database" {
+  value       = module.cf_app_resources.d1_database
+  description = "Cloudflare D1 データベース情報"
 }
 
-output "r2_s3_endpoint" {
-  value       = module.r2_state.s3_endpoint
-  description = "S3 互換エンドポイント（backend 設定に使用）"
+output "cf_kv_namespaces" {
+  value       = module.cf_app_resources.kv_namespaces
+  description = "Workers KV Namespace 情報（バインディング単位）"
+}
+
+output "cf_turnstile_widget" {
+  value       = module.cf_app_resources.turnstile_widget
+  description = "Turnstile ウィジェット情報"
+}
+
+output "cf_turnstile_widget_secret" {
+  value       = module.cf_app_resources.turnstile_widget_secret
+  description = "Turnstile ウィジェットのシークレット"
+  sensitive   = true
 }

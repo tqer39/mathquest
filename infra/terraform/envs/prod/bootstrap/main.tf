@@ -1,6 +1,23 @@
-module "r2_state" {
-  source = "../../../modules/r2-tfstate"
+module "deploy_role" {
+  source = "../../../modules/deploy-role"
+
+  aws_account_id = local.aws_account_id
+  aws_env_name   = local.aws_env_name
+  app_env_name   = local.app_env_name
+  organization   = local.organization
+  repository     = local.repository_name
+}
+
+module "cf_app_resources" {
+  source = "../../../modules/cf-app-resources"
 
   cloudflare_account_id = var.cloudflare_account_id
-  r2_bucket_name        = var.r2_bucket_name
+  project_slug          = var.project_slug
+  environment           = local.app_env_name
+
+  d1_database_name          = var.d1_database_name
+  turnstile_allowed_domains = var.turnstile_allowed_domains
+  turnstile_widget_mode     = var.turnstile_widget_mode
+  turnstile_bot_fight_mode  = var.turnstile_bot_fight_mode
+  turnstile_region          = var.turnstile_region
 }

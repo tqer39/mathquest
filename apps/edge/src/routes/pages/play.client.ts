@@ -726,24 +726,6 @@ const MODULE_SOURCE = `
     });
   }
 
-  if (gradeLabelEl) {
-    console.log('Setting grade label:', activeSession.gradeLabel, state.grade.label);
-    console.log('Session data:', activeSession);
-
-    if (activeSession.isThemeSelected) {
-      // テーマが選択されている場合：学年 + テーマ表示
-      gradeLabelEl.textContent = activeSession.baseGradeLabel || '学年';
-      if (themeLabelEl) {
-        themeLabelEl.textContent = 'テーマ：' + (activeSession.themeLabel || activeSession.gradeLabel);
-      }
-    } else {
-      // 学年のみ選択されている場合
-      gradeLabelEl.textContent = activeSession.gradeLabel || state.grade.label;
-      if (themeLabelEl) {
-        themeLabelEl.textContent = '';
-      }
-    }
-  }
   applyWorkingVisibility();
   renderProgress();
 })();

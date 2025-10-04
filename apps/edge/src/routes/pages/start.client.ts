@@ -496,6 +496,9 @@ const MODULE_SOURCE = `
       questionCountRadios.find((radio) => radio.checked)?.value || 10
     );
 
+    console.log('Starting session with questionCount:', questionCount);
+    console.log('Checked radio value:', questionCountRadios.find((radio) => radio.checked)?.value);
+
     const selectedCalculationRadio = document.querySelector(
       'input[name="calculation-type-selection"]:checked'
     );
@@ -569,7 +572,10 @@ const MODULE_SOURCE = `
     };
 
     try {
+      // 既存のセッションをクリアして新しいセッションを確実に保存
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      console.log('Session saved:', session);
     } catch (e) {
       console.warn('failed to write session storage', e);
     }

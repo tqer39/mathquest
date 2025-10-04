@@ -48,7 +48,8 @@ const MODULE_SOURCE = `
   const resultTotalEl = document.getElementById('result-total');
   const keypadButtons = Array.from(
     document.querySelectorAll('[data-key]')
-  );
+  ).filter((btn) => btn.dataset.key !== 'submit');
+  const keypadSubmitButton = document.querySelector('[data-key="submit"]');
 
   if (!submitBtn || !questionEl || !answerInput || !answerDisplay) {
     return;
@@ -219,6 +220,7 @@ const MODULE_SOURCE = `
 
   const activeSession = loadSession();
   console.log('Active session:', activeSession);
+  console.log('Session questionCount:', activeSession?.questionCount);
   if (!activeSession) {
     window.location.href = '/start';
     return;
@@ -232,7 +234,18 @@ const MODULE_SOURCE = `
         ? activeTheme
         : null,
     calculationType,
-    questionCount: Number(activeSession.questionCount) || loadQuestionCount(),
+    questionCount: (() => {
+      const sessionCount = Number(activeSession.questionCount);
+      const fallbackCount = loadQuestionCount();
+      const finalCount = sessionCount || fallbackCount;
+      console.log('questionCount calculation:', {
+        'activeSession.questionCount': activeSession.questionCount,
+        'sessionCount': sessionCount,
+        'fallbackCount': fallbackCount,
+        'finalCount': finalCount
+      });
+      return finalCount;
+    })(),
     soundEnabled:
       typeof activeSession.soundEnabled === 'boolean'
         ? activeSession.soundEnabled
@@ -251,8 +264,10 @@ const MODULE_SOURCE = `
   };
 
   console.log('State grade:', state.grade);
+  console.log('Final state.questionCount:', state.questionCount);
 
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
+  console.log('After validation state.questionCount:', state.questionCount);
 
   const determineModeLabel = (mode) => {
     switch (mode) {
@@ -342,8 +357,36 @@ const MODULE_SOURCE = `
     });
   };
 
+  const setSubmitButtonEnabled = (enabled) => {
+    [submitBtn, keypadSubmitButton].forEach((btn) => {
+      if (!btn) return;
+      btn.classList.toggle('keypad-button--disabled', !enabled);
+      btn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      btn.tabIndex = enabled ? 0 : -1;
+    });
+  };
+
   const refreshKeypadState = () => {
-    setKeypadEnabled(state.sessionActive && !state.awaitingAdvance);
+    const shouldEnable = state.sessionActive && !state.awaitingAdvance;
+    console.log('Keypad state refresh:', {
+      'sessionActive': state.sessionActive,
+      'awaitingAdvance': state.awaitingAdvance,
+      'shouldEnable': shouldEnable
+    });
+    setKeypadEnabled(shouldEnable);
+  };
+
+  const refreshSubmitButtonState = () => {
+    const hasInput = state.answerBuffer.length > 0;
+    const isWaiting = state.awaitingAdvance;
+    const shouldEnable = state.sessionActive && (hasInput || isWaiting);
+    console.log('Submit button state refresh:', {
+      'sessionActive': state.sessionActive,
+      'hasInput': hasInput,
+      'awaitingAdvance': state.awaitingAdvance,
+      'shouldEnable': shouldEnable
+    });
+    setSubmitButtonEnabled(shouldEnable);
   };
 
   const playSound = (variant) => {
@@ -367,6 +410,7 @@ const MODULE_SOURCE = `
     state.answerBuffer = value;
     if (answerInput) answerInput.value = value;
     if (answerDisplay) answerDisplay.textContent = value || '？';
+    refreshSubmitButtonState();
   };
 
   const renderProgress = () => {
@@ -505,8 +549,10 @@ const MODULE_SOURCE = `
   };
 
   const nextQuestion = async () => {
+    console.log('nextQuestion called, resetting awaitingAdvance');
     state.awaitingAdvance = false;
     refreshKeypadState();
+    refreshSubmitButtonState();
     renderWorkingSteps(null);
     renderProgress();
     try {
@@ -578,19 +624,29 @@ const MODULE_SOURCE = `
       saveProgress(state.progress);
       renderWorkingSteps(state.currentQuestion, correctAnswer);
 
+      console.log('Session termination check:', {
+        'sessionAnswered': state.sessionAnswered,
+        'questionCount': state.questionCount,
+        'shouldTerminate': state.sessionAnswered >= state.questionCount
+      });
+
       if (state.sessionAnswered >= state.questionCount) {
+        console.log('Session finished - ending session');
         renderProgress();
         finishSession();
         return;
       }
 
       if (state.workingEnabled) {
+        console.log('Working enabled, setting awaitingAdvance = true');
         state.awaitingAdvance = true;
         refreshKeypadState();
+        refreshSubmitButtonState();
         renderProgress();
         return;
       }
 
+      console.log('Working disabled, proceeding to next question immediately');
       renderProgress();
       await nextQuestion();
     } catch (e) {
@@ -600,8 +656,13 @@ const MODULE_SOURCE = `
   };
 
   const handleSubmit = async () => {
+    console.log('handleSubmit called:', {
+      'sessionActive': state.sessionActive,
+      'awaitingAdvance': state.awaitingAdvance
+    });
     if (!state.sessionActive) return;
     if (state.awaitingAdvance) {
+      console.log('Advancing to next question from waiting state');
       state.awaitingAdvance = false;
       renderProgress();
       await nextQuestion();
@@ -642,6 +703,7 @@ const MODULE_SOURCE = `
     state.sessionCorrect = 0;
     state.awaitingAdvance = false;
     refreshKeypadState();
+    refreshSubmitButtonState();
     renderProgress();
     renderWorkingSteps(null);
     hideFeedback();
@@ -661,6 +723,7 @@ const MODULE_SOURCE = `
   runCountdown().then(() => startSession());
 
   submitBtn.addEventListener('click', () => {
+    console.log('=== 「こたえる」ボタンがクリックされました ===');
     handleSubmit();
   });
 
@@ -683,16 +746,42 @@ const MODULE_SOURCE = `
   }
 
   if (answerInput) {
+    answerInput.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      // 半角数字と小数点のみを許可（全角数字などを除去）
+      const filtered = target.value.replace(/[^0-9.]/g, '');
+      if (target.value !== filtered) {
+        target.value = filtered;
+      }
+      // state.answerBufferと入力欄を同期
+      state.answerBuffer = filtered;
+      if (answerDisplay) answerDisplay.textContent = filtered || '？';
+      refreshSubmitButtonState();
+    });
+
     answerInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
         handleSubmit();
+        return;
+      }
+      // 半角数字、小数点、制御キー以外は入力を拒否
+      const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+      const isNumberKey = event.key >= '0' && event.key <= '9';
+      const isDecimalPoint = event.key === '.';
+      const isAllowedControlKey = allowedKeys.includes(event.key);
+
+      if (!isNumberKey && !isDecimalPoint && !isAllowedControlKey) {
+        event.preventDefault();
       }
     });
   }
 
   document.addEventListener('keydown', (event) => {
     if (!state.sessionActive || state.awaitingAdvance) return;
+    // answerInputにフォーカスがある場合は、そちらのイベントハンドラに任せる
+    if (document.activeElement === answerInput) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       handleSubmit();
@@ -713,13 +802,15 @@ const MODULE_SOURCE = `
 
   document.querySelectorAll('[data-key]').forEach((button) => {
     button.addEventListener('click', () => {
-      if (!state.sessionActive || state.awaitingAdvance) return;
+      if (!state.sessionActive) return;
       const key = button.dataset.key;
       if (key === 'submit') {
         playSound('success');
         handleSubmit();
         return;
       }
+      // 待機状態の場合は数字入力とバックスペースは無効
+      if (state.awaitingAdvance) return;
       if (key === 'back') {
         setAnswerBuffer(state.answerBuffer.slice(0, -1));
         playSound('keypad');

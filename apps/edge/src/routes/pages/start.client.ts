@@ -192,7 +192,7 @@ const MODULE_SOURCE = `
     }
   };
 
-  const renderCalculationTypes = (gradeId) => {
+  const renderCalculationTypes = (gradeId, autoSelect = false) => {
     if (!calculationTypeGrid) return;
 
     const availableCalcTypes = gradeCalculationTypes[gradeId] || [];
@@ -212,7 +212,7 @@ const MODULE_SOURCE = `
           value="\${calcType.id}"
           data-mode="\${calcType.mode}"
           class="peer sr-only"
-          \${index === 0 ? 'checked' : ''}
+          \${autoSelect && index === 0 ? 'checked' : ''}
         />
         <div class="calc-type-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
           <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
@@ -259,8 +259,8 @@ const MODULE_SOURCE = `
 
   setSelectedPreset(selectedGradeId);
 
-  // 初期表示で小1の計算種類を表示
-  renderCalculationTypes('grade-1');
+  // 初期表示で小1の計算種類を表示（最初の選択肢を自動選択）
+  renderCalculationTypes('grade-1', true);
 
   const resetToInitialState = () => {
     // 学年選択を小1に戻す
@@ -272,8 +272,8 @@ const MODULE_SOURCE = `
       setSelectedPreset(selectedGradeId);
     }
 
-    // 計算種類を小1用に戻す
-    renderCalculationTypes('grade-1');
+    // 計算種類を小1用に戻す（最初の選択肢を自動選択）
+    renderCalculationTypes('grade-1', true);
 
     // テーマ選択をクリア
     setThemeSelection(null);

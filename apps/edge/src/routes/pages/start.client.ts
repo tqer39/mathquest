@@ -107,6 +107,7 @@ const MODULE_SOURCE = `
 
   const updateThemeButtonAppearance = (button, isActive) => {
     if (!button) return;
+    button.dataset.selected = isActive ? 'true' : 'false';
     button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     button.classList.toggle('border-[var(--mq-primary)]', isActive);
     button.classList.toggle('border-[var(--mq-outline)]', !isActive);

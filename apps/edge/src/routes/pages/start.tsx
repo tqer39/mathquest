@@ -14,6 +14,31 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
     class="flex min-h-screen w-full flex-col gap-8 px-4 py-8 sm:px-8 lg:px-16 xl:px-24"
     data-user-state={currentUser ? 'known' : 'anonymous'}
   >
+    {html`
+      <style>
+        #theme-grid .theme-card[data-selected='true'] {
+          background: var(--mq-primary-soft);
+          border-color: var(--mq-primary);
+          box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+          transform: translateY(-2px);
+        }
+        #theme-grid .theme-card[data-selected='true'] [data-role='theme-title'],
+        #theme-grid
+          .theme-card[data-selected='true']
+          [data-role='theme-description'] {
+          color: var(--mq-primary-strong);
+        }
+        .setting-toggle[data-state='on'] {
+          background: var(--mq-primary-soft);
+          border-color: var(--mq-primary);
+          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+          transform: translateY(-1px);
+        }
+        .setting-toggle[data-state='on'] span:first-child {
+          color: var(--mq-primary-strong);
+        }
+      </style>
+    `}
     <nav class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-center gap-3">
         <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
@@ -99,6 +124,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                 data-grade-id={preset.id}
                 data-mode={preset.mode}
                 data-max={preset.max}
+                data-selected="false"
                 class="theme-card group rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                 aria-pressed="false"
               >

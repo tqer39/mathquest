@@ -345,10 +345,10 @@ const MODULE_SOURCE = `
     // クリア後のボタン状態を更新
     updateStartButtonState();
 
-    // 問題数を初期値（最初の選択肢）に戻す
+    // 問題数を10問に戻す
     if (questionCountRadios.length > 0) {
-      questionCountRadios.forEach((radio, index) => {
-        radio.checked = index === 0;
+      questionCountRadios.forEach((radio) => {
+        radio.checked = Number(radio.value) === 10;
       });
     }
 
@@ -416,7 +416,8 @@ const MODULE_SOURCE = `
     } catch (e) {
       console.warn('failed to read question count', e);
     }
-    return Number(questionCountRadios[0]?.value || 10);
+    // デフォルトは10問
+    return 10;
   };
 
   const applyQuestionCount = (value) => {
@@ -427,8 +428,14 @@ const MODULE_SOURCE = `
         matched = true;
       }
     });
-    if (!matched && questionCountRadios[0]) {
-      questionCountRadios[0].checked = true;
+    if (!matched) {
+      // 10問オプションを探して選択、見つからなければ最初の選択肢
+      const tenQuestionRadio = questionCountRadios.find(radio => Number(radio.value) === 10);
+      if (tenQuestionRadio) {
+        tenQuestionRadio.checked = true;
+      } else if (questionCountRadios[0]) {
+        questionCountRadios[0].checked = true;
+      }
     }
   };
 

@@ -109,6 +109,41 @@ const MODULE_SOURCE = `
     if (!button) return;
     button.dataset.selected = isActive ? 'true' : 'false';
     button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    if (isActive) {
+      button.classList.add('theme-card--selected');
+      button.style.setProperty('background', 'var(--mq-primary-soft)', 'important');
+      button.style.setProperty('border-color', 'var(--mq-primary)', 'important');
+      button.style.setProperty(
+        'box-shadow',
+        '0 12px 28px rgba(15, 23, 42, 0.16)',
+        'important'
+      );
+      button.style.setProperty('transform', 'translateY(-2px)', 'important');
+    } else {
+      button.classList.remove('theme-card--selected');
+      button.style.removeProperty('background');
+      button.style.removeProperty('border-color');
+      button.style.removeProperty('box-shadow');
+      button.style.removeProperty('transform');
+    }
+
+    const title = button.querySelector('[data-role="theme-title"]');
+    if (title) {
+      if (isActive) {
+        title.style.setProperty('color', 'var(--mq-primary-strong)', 'important');
+      } else {
+        title.style.removeProperty('color');
+      }
+    }
+
+    const description = button.querySelector('[data-role="theme-description"]');
+    if (description) {
+      if (isActive) {
+        description.style.setProperty('color', 'var(--mq-primary-strong)', 'important');
+      } else {
+        description.style.removeProperty('color');
+      }
+    }
   };
 
   const progress = loadProgress();
@@ -179,6 +214,28 @@ const MODULE_SOURCE = `
         ? force
         : button.dataset.state !== 'on';
     button.dataset.state = nextState ? 'on' : 'off';
+    if (nextState) {
+      button.classList.add('setting-toggle--on');
+      button.style.setProperty('background', 'var(--mq-primary-soft)', 'important');
+      button.style.setProperty('border-color', 'var(--mq-primary)', 'important');
+      button.style.setProperty('box-shadow', '0 10px 24px rgba(15, 23, 42, 0.14)', 'important');
+      button.style.setProperty('transform', 'translateY(-1px)', 'important');
+    } else {
+      button.classList.remove('setting-toggle--on');
+      button.style.removeProperty('background');
+      button.style.removeProperty('border-color');
+      button.style.removeProperty('box-shadow');
+      button.style.removeProperty('transform');
+    }
+
+    const title = button.querySelector('span:first-child');
+    if (title) {
+      if (nextState) {
+        title.style.setProperty('color', 'var(--mq-primary-strong)', 'important');
+      } else {
+        title.style.removeProperty('color');
+      }
+    }
   };
 
   const loadBoolean = (key, fallback) => {
@@ -222,8 +279,8 @@ const MODULE_SOURCE = `
   };
 
   applyQuestionCount(loadQuestionCount());
-  toggleButton(soundToggle, loadBoolean(SOUND_STORAGE_KEY, true));
-  toggleButton(stepsToggle, loadBoolean(WORKING_STORAGE_KEY, true));
+  toggleButton(soundToggle, loadBoolean(SOUND_STORAGE_KEY, false));
+  toggleButton(stepsToggle, loadBoolean(WORKING_STORAGE_KEY, false));
   toggleButton(focusToggle, loadBoolean(FOCUS_STORAGE_KEY, false));
 
   gradeRadios.forEach((radio) => {

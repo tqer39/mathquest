@@ -16,26 +16,31 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
   >
     {html`
       <style>
+        #theme-grid .theme-card--selected,
         #theme-grid .theme-card[data-selected='true'] {
-          background: var(--mq-primary-soft);
-          border-color: var(--mq-primary);
+          background: var(--mq-primary-soft) !important;
+          border-color: var(--mq-primary) !important;
           box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
           transform: translateY(-2px);
         }
+        #theme-grid .theme-card--selected [data-role='theme-title'],
         #theme-grid .theme-card[data-selected='true'] [data-role='theme-title'],
+        #theme-grid .theme-card--selected [data-role='theme-description'],
         #theme-grid
           .theme-card[data-selected='true']
           [data-role='theme-description'] {
-          color: var(--mq-primary-strong);
+          color: var(--mq-primary-strong) !important;
         }
+        .setting-toggle--on,
         .setting-toggle[data-state='on'] {
-          background: var(--mq-primary-soft);
-          border-color: var(--mq-primary);
+          background: var(--mq-primary-soft) !important;
+          border-color: var(--mq-primary) !important;
           box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
           transform: translateY(-1px);
         }
+        .setting-toggle--on span:first-child,
         .setting-toggle[data-state='on'] span:first-child {
-          color: var(--mq-primary-strong);
+          color: var(--mq-primary-strong) !important;
         }
       </style>
     `}
@@ -182,7 +187,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             <button
               id="toggle-sound"
               type="button"
-              data-state="on"
+              data-state="off"
               class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
             >
               <span>🔊 効果音</span>
@@ -193,7 +198,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             <button
               id="toggle-steps"
               type="button"
-              data-state="on"
+              data-state="off"
               class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
             >
               <span>🧮 途中式</span>

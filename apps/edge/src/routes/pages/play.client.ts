@@ -46,6 +46,9 @@ const MODULE_SOURCE = `
   const countdownNumber = document.getElementById('countdown-number');
   const resultCorrectEl = document.getElementById('result-correct');
   const resultTotalEl = document.getElementById('result-total');
+  const keypadButtons = Array.from(
+    document.querySelectorAll('[data-key]')
+  );
 
   if (!submitBtn || !questionEl || !answerInput || !answerDisplay) {
     return;
@@ -330,6 +333,19 @@ const MODULE_SOURCE = `
     workingContainer.classList.toggle('hidden', !state.workingEnabled);
   };
 
+  const setKeypadEnabled = (enabled) => {
+    keypadButtons.forEach((button) => {
+      if (!(button instanceof HTMLElement)) return;
+      button.classList.toggle('keypad-button--disabled', !enabled);
+      button.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      button.tabIndex = enabled ? 0 : -1;
+    });
+  };
+
+  const refreshKeypadState = () => {
+    setKeypadEnabled(state.sessionActive && !state.awaitingAdvance);
+  };
+
   const playSound = (variant) => {
     if (!state.soundEnabled) return;
     const sources = {
@@ -490,6 +506,7 @@ const MODULE_SOURCE = `
 
   const nextQuestion = async () => {
     state.awaitingAdvance = false;
+    refreshKeypadState();
     renderWorkingSteps(null);
     renderProgress();
     try {
@@ -513,6 +530,7 @@ const MODULE_SOURCE = `
   const finishSession = () => {
     state.sessionActive = false;
     state.awaitingAdvance = false;
+    refreshKeypadState();
     if (resultCorrectEl) resultCorrectEl.textContent = String(state.sessionCorrect);
     if (resultTotalEl) resultTotalEl.textContent = String(state.sessionAnswered);
     if (againBtn) {
@@ -568,6 +586,7 @@ const MODULE_SOURCE = `
 
       if (state.workingEnabled) {
         state.awaitingAdvance = true;
+        refreshKeypadState();
         renderProgress();
         return;
       }
@@ -622,6 +641,7 @@ const MODULE_SOURCE = `
     state.sessionAnswered = 0;
     state.sessionCorrect = 0;
     state.awaitingAdvance = false;
+    refreshKeypadState();
     renderProgress();
     renderWorkingSteps(null);
     hideFeedback();
@@ -632,10 +652,12 @@ const MODULE_SOURCE = `
   };
 
   const restartWithCountdown = async () => {
+    refreshKeypadState();
     await runCountdown();
     await startSession();
   };
 
+  refreshKeypadState();
   runCountdown().then(() => startSession());
 
   submitBtn.addEventListener('click', () => {
@@ -670,7 +692,7 @@ const MODULE_SOURCE = `
   }
 
   document.addEventListener('keydown', (event) => {
-    if (!state.sessionActive) return;
+    if (!state.sessionActive || state.awaitingAdvance) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       handleSubmit();
@@ -691,6 +713,7 @@ const MODULE_SOURCE = `
 
   document.querySelectorAll('[data-key]').forEach((button) => {
     button.addEventListener('click', () => {
+      if (!state.sessionActive || state.awaitingAdvance) return;
       const key = button.dataset.key;
       if (key === 'submit') {
         playSound('success');

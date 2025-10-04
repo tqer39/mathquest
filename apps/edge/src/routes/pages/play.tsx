@@ -27,6 +27,26 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
           color: var(--mq-primary-strong) !important;
         }
 
+        .keypad-button {
+          transition:
+            transform 0.18s ease,
+            background-color 0.18s ease,
+            color 0.18s ease,
+            opacity 0.18s ease;
+        }
+
+        .keypad-button--disabled,
+        .keypad-button[aria-disabled='true'] {
+          background: rgba(148, 163, 184, 0.25) !important;
+          color: rgba(100, 116, 139, 0.7) !important;
+          border-color: rgba(148, 163, 184, 0.35) !important;
+          box-shadow: none !important;
+          transform: none !important;
+          pointer-events: none;
+          cursor: default;
+          opacity: 0.65;
+        }
+
         #countdown-overlay {
           background: radial-gradient(
               circle at 20% 20%,
@@ -259,7 +279,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
               <button
                 key={digit}
                 type="button"
-                class="rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+                class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
                 data-key={digit}
               >
                 {digit}
@@ -267,21 +287,21 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             ))}
             <button
               type="button"
-              class="rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)]"
+              class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)]"
               data-key="back"
             >
               ⌫
             </button>
             <button
               type="button"
-              class="rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+              class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
               data-key="0"
             >
               0
             </button>
             <button
               type="button"
-              class="rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
+              class="keypad-button rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
               data-key="submit"
             >
               =

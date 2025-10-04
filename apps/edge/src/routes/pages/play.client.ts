@@ -1,15 +1,15 @@
 import { html, raw } from 'hono/html';
 import { gradePresets } from './grade-presets';
 
-const STORAGE_KEY = 'mathquest:progress:v1';
-const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
-const WORKING_STORAGE_KEY = 'mathquest:show-working';
-const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
-const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
-const SESSION_STORAGE_KEY = 'mathquest:pending-session';
-
 const MODULE_SOURCE = `
 (() => {
+  const STORAGE_KEY = 'mathquest:progress:v1';
+  const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
+  const WORKING_STORAGE_KEY = 'mathquest:show-working';
+  const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
+  const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
+  const SESSION_STORAGE_KEY = 'mathquest:pending-session';
+
   const getJSON = (id) => {
     const el = document.getElementById(id);
     if (!el) return [];

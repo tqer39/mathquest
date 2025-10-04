@@ -1,15 +1,22 @@
 import { html, raw } from 'hono/html';
 import type { GradePreset } from './grade-presets';
 
-const STORAGE_KEY = 'mathquest:progress:v1';
-const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
-const WORKING_STORAGE_KEY = 'mathquest:show-working';
-const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
-const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
-const SESSION_STORAGE_KEY = 'mathquest:pending-session';
-
 const MODULE_SOURCE = `
 (() => {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeStartPage);
+  } else {
+    initializeStartPage();
+  }
+
+  function initializeStartPage() {
+  const STORAGE_KEY = 'mathquest:progress:v1';
+  const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
+  const WORKING_STORAGE_KEY = 'mathquest:show-working';
+  const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
+  const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
+  const SESSION_STORAGE_KEY = 'mathquest:pending-session';
+
   const getJSON = (id) => {
     const el = document.getElementById(id);
     if (!el) return [];
@@ -286,9 +293,10 @@ const MODULE_SOURCE = `
   gradeRadios.forEach((radio) => {
     radio.addEventListener('change', () => {
       if (!radio.checked) return;
-      setThemeSelection(null);
-      setSelectedPreset(radio.value);
-      progress.lastLevel = radio.value;
+      if (activeThemeId === null) {
+        setSelectedPreset(radio.value);
+        progress.lastLevel = radio.value;
+      }
     });
   });
 
@@ -296,16 +304,6 @@ const MODULE_SOURCE = `
     button.addEventListener('click', () => {
       const themeId = button.dataset.gradeId;
       if (!themeId) return;
-
-      if (activeThemeId === themeId) {
-        setThemeSelection(null);
-        const currentGradeId = ensureGradeSelection();
-        if (currentGradeId) {
-          setSelectedPreset(currentGradeId);
-          progress.lastLevel = currentGradeId;
-        }
-        return;
-      }
 
       setThemeSelection(themeId);
       setSelectedPreset(themeId);
@@ -376,6 +374,7 @@ const MODULE_SOURCE = `
 
     window.location.href = '/play';
   });
+  }
 })();
 `;
 

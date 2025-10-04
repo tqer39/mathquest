@@ -449,10 +449,11 @@ const MODULE_SOURCE = `
     feedbackEl.textContent = message;
     feedbackEl.dataset.variant = variant;
     feedbackEl.classList.remove('opacity-0');
+    feedbackEl.style.transition = 'opacity 1s ease-out';
     if (feedbackTimer) clearTimeout(feedbackTimer);
     feedbackTimer = window.setTimeout(() => {
       feedbackEl.classList.add('opacity-0');
-    }, 2000);
+    }, 5000);
   };
 
   const renderQuestionExpression = (question) => {

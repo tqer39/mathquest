@@ -366,6 +366,23 @@ const MODULE_SOURCE = `
     });
   };
 
+  const hasWorkingSteps = (question) => {
+    return question && Array.isArray(question.extras) && question.extras.length > 0;
+  };
+
+  const setStepsToggleEnabled = (enabled) => {
+    if (!stepsToggle) return;
+    if (enabled) {
+      stepsToggle.removeAttribute('disabled');
+      stepsToggle.style.removeProperty('opacity');
+      stepsToggle.style.removeProperty('cursor');
+    } else {
+      stepsToggle.setAttribute('disabled', 'true');
+      stepsToggle.style.setProperty('opacity', '0.5', 'important');
+      stepsToggle.style.setProperty('cursor', 'not-allowed', 'important');
+    }
+  };
+
   const refreshKeypadState = () => {
     const shouldEnable = state.sessionActive && !state.awaitingAdvance;
     console.log('Keypad state refresh:', {
@@ -567,6 +584,16 @@ const MODULE_SOURCE = `
       setAnswerBuffer('');
       hideFeedback();
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
+
+      // 途中式の有無に応じてトグルを有効化/無効化
+      const hasSteps = hasWorkingSteps(question);
+      setStepsToggleEnabled(hasSteps);
+      if (!hasSteps && state.workingEnabled) {
+        // 途中式がない場合は強制的にOFFにする
+        state.workingEnabled = false;
+        toggleButton(stepsToggle, false);
+        applyWorkingVisibility();
+      }
     } catch (e) {
       console.error(e);
       showFeedback('error', '問題の取得に失敗しました。しばらくしてから再度お試しください。');
@@ -832,6 +859,11 @@ const MODULE_SOURCE = `
 
   if (stepsToggle) {
     stepsToggle.addEventListener('click', () => {
+      // 無効化されている場合はクリックを無視
+      if (stepsToggle.hasAttribute('disabled')) return;
+      // 途中式がない問題の場合はクリックを無視
+      if (!hasWorkingSteps(state.currentQuestion)) return;
+
       state.workingEnabled = !state.workingEnabled;
       toggleButton(stepsToggle, state.workingEnabled);
       applyWorkingVisibility();

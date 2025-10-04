@@ -41,7 +41,7 @@ const MODULE_SOURCE = `
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
   const gradeLabelEl = document.getElementById('play-grade-label');
-  const themeLabelEl = document.getElementById('play-theme-label');
+  const contextLabelEl = document.getElementById('play-context-label');
   const countdownOverlay = document.getElementById('countdown-overlay');
   const countdownNumber = document.getElementById('countdown-number');
   const resultCorrectEl = document.getElementById('result-correct');
@@ -131,6 +131,45 @@ const MODULE_SOURCE = `
     ? findPreset(session.gradeId)
     : fallbackPreset;
 
+  const themeFromSession = session?.theme?.id
+    ? findPreset(session.theme.id) || {
+        id: session.theme.id,
+        label: session.theme.label,
+        description: session.theme.description,
+      }
+    : null;
+
+  const baseGradeFromSession = session?.baseGrade?.id
+    ? findPreset(session.baseGrade.id) || {
+        id: session.baseGrade.id,
+        label: session.baseGrade.label,
+        description: session.baseGrade.description,
+        mode: session.baseGrade.mode,
+        max: session.baseGrade.max,
+      }
+    : null;
+
+  const legacyBaseGrade = session?.baseGradeId
+    ? findPreset(session.baseGradeId) || {
+        id: session.baseGradeId,
+        label: session.baseGradeLabel || preset.label,
+        description: session.baseGradeDescription || preset.description,
+        mode: session.baseGradeMode || preset.mode,
+        max: session.baseGradeMax || preset.max,
+      }
+    : null;
+
+  const progressSnapshot = loadProgress();
+
+  const baseGradePreset =
+    baseGradeFromSession ||
+    legacyBaseGrade ||
+    (progressSnapshot?.lastLevel ? findPreset(progressSnapshot.lastLevel) : null) ||
+    (preset.id.startsWith('grade-') ? preset : fallbackPreset);
+
+  const activeTheme =
+    themeFromSession || (!preset.id.startsWith('grade-') ? preset : null);
+
   if (!session) {
     sessionStorage.setItem(
       SESSION_STORAGE_KEY,
@@ -143,6 +182,23 @@ const MODULE_SOURCE = `
         questionCount: loadQuestionCount(),
         soundEnabled: loadBoolean(SOUND_STORAGE_KEY, true),
         workingEnabled: loadBoolean(WORKING_STORAGE_KEY, true),
+        baseGrade: baseGradePreset
+          ? {
+              id: baseGradePreset.id,
+              label: baseGradePreset.label,
+              description: baseGradePreset.description,
+              mode: baseGradePreset.mode,
+              max: baseGradePreset.max,
+            }
+          : null,
+        theme:
+          activeTheme && activeTheme.id !== baseGradePreset?.id
+            ? {
+                id: activeTheme.id,
+                label: activeTheme.label,
+                description: activeTheme.description,
+              }
+            : null,
         createdAt: Date.now(),
       })
     );
@@ -157,6 +213,11 @@ const MODULE_SOURCE = `
 
   const state = {
     grade: preset,
+    baseGrade: baseGradePreset,
+    theme:
+      activeTheme && (!baseGradePreset || activeTheme.id !== baseGradePreset.id)
+        ? activeTheme
+        : null,
     questionCount: Number(activeSession.questionCount) || loadQuestionCount(),
     soundEnabled:
       typeof activeSession.soundEnabled === 'boolean'
@@ -166,7 +227,7 @@ const MODULE_SOURCE = `
       typeof activeSession.workingEnabled === 'boolean'
         ? activeSession.workingEnabled
         : loadBoolean(WORKING_STORAGE_KEY, true),
-    progress: loadProgress(),
+    progress: progressSnapshot,
     sessionActive: false,
     sessionAnswered: 0,
     sessionCorrect: 0,
@@ -178,6 +239,43 @@ const MODULE_SOURCE = `
   console.log('State grade:', state.grade);
 
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
+
+  const determineModeLabel = (mode) => {
+    switch (mode) {
+      case 'add':
+        return 'たし算';
+      case 'sub':
+        return 'ひき算';
+      case 'mul':
+        return 'かけ算';
+      case 'div':
+        return 'わり算';
+      case 'mix':
+        return 'ミックス';
+      default:
+        return '算数ミッション';
+    }
+  };
+
+  const updateContextLabel = () => {
+    if (!gradeLabelEl || !contextLabelEl) return;
+
+    const baseLabel = state.baseGrade?.label ?? state.grade.label;
+    const baseDescription = state.baseGrade?.description ?? state.grade.description ?? '';
+    const baseMode = state.baseGrade?.mode ?? state.grade.mode;
+
+    if (state.theme) {
+      gradeLabelEl.textContent = baseLabel + ' / ' + state.theme.label;
+      contextLabelEl.textContent = state.theme.description ?? baseDescription;
+      return;
+    }
+
+    const modeLabel = determineModeLabel(baseMode);
+    gradeLabelEl.textContent = baseLabel + ' / ' + modeLabel;
+    contextLabelEl.textContent = baseDescription;
+  };
+
+  updateContextLabel();
 
   const toggleButton = (button, force) => {
     if (!button) return;
@@ -310,6 +408,22 @@ const MODULE_SOURCE = `
       questionCount: state.questionCount,
       soundEnabled: state.soundEnabled,
       workingEnabled: state.workingEnabled,
+      baseGrade: state.baseGrade
+        ? {
+            id: state.baseGrade.id,
+            label: state.baseGrade.label,
+            description: state.baseGrade.description,
+            mode: state.baseGrade.mode,
+            max: state.baseGrade.max,
+          }
+        : null,
+      theme: state.theme
+        ? {
+            id: state.theme.id,
+            label: state.theme.label,
+            description: state.theme.description,
+          }
+        : null,
       createdAt: Date.now(),
     };
     try {

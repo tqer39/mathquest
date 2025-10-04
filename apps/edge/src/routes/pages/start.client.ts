@@ -13,6 +13,7 @@ const MODULE_SOURCE = `
   const STORAGE_KEY = 'mathquest:progress:v1';
   const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
   const WORKING_STORAGE_KEY = 'mathquest:show-working';
+  const FOCUS_STORAGE_KEY = 'mathquest:focus-mode';
   const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
   const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -232,6 +233,15 @@ const MODULE_SOURCE = `
       });
 
       calculationTypeGrid.appendChild(label);
+
+      // 初期選択時にイベントを手動で発火
+      if (autoSelect && index === 0) {
+        setTimeout(() => {
+          if (radio.checked) {
+            filterThemesByCalculationType(calcType.mode);
+          }
+        }, 0);
+      }
     });
   };
 
@@ -288,9 +298,6 @@ const MODULE_SOURCE = `
   // 初期表示で小1の計算種類を表示（最初の選択肢を自動選択）
   renderCalculationTypes('grade-1', true);
 
-  // 初期表示時にたし算のテーマに絞る
-  filterThemesByCalculationType('add');
-
   const resetToInitialState = () => {
     // 学年選択を小1に戻す
     if (gradeRadios.length > 0) {
@@ -306,9 +313,6 @@ const MODULE_SOURCE = `
 
     // テーマ選択をクリア
     setThemeSelection(null);
-
-    // たし算のテーマに絞る
-    filterThemesByCalculationType('add');
 
     // 問題数を初期値（最初の選択肢）に戻す
     if (questionCountRadios.length > 0) {
@@ -456,11 +460,13 @@ const MODULE_SOURCE = `
 
     const soundEnabled = soundToggle?.dataset.state !== 'off';
     const workingEnabled = stepsToggle?.dataset.state !== 'off';
+    const focusEnabled = focusToggle?.dataset.state === 'on';
 
     try {
       localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
       localStorage.setItem(WORKING_STORAGE_KEY, String(workingEnabled));
       localStorage.setItem(QUESTION_COUNT_STORAGE_KEY, String(questionCount));
+      localStorage.setItem(FOCUS_STORAGE_KEY, String(focusEnabled));
     } catch (e) {
       console.warn('failed to persist settings', e);
     }
@@ -470,8 +476,9 @@ const MODULE_SOURCE = `
     saveProgress(progress);
 
     const currentGradeId = ensureGradeSelection();
-    const currentGrade = findPreset(currentGradeId);
+    const baseGradePreset = findPreset(currentGradeId) || findPreset(progress.lastLevel);
     const isThemeSelected = activeThemeId !== null;
+    const themePreset = isThemeSelected ? grade : null;
 
     const session = {
       gradeId: grade.id,
@@ -482,12 +489,30 @@ const MODULE_SOURCE = `
       questionCount,
       soundEnabled,
       workingEnabled,
+      focusEnabled,
       createdAt: Date.now(),
-      // 学年とテーマの区別情報を追加
-      baseGradeId: currentGrade?.id || currentGradeId,
-      baseGradeLabel: currentGrade?.label || '',
-      isThemeSelected: isThemeSelected,
-      themeLabel: isThemeSelected ? grade.label : null,
+      focusEnabled: false,
+      baseGradeId: baseGradePreset?.id || currentGradeId,
+      baseGradeLabel: baseGradePreset?.label || '',
+      baseGradeDescription: baseGradePreset?.description || '',
+      baseGradeMode: baseGradePreset?.mode || '',
+      baseGradeMax: baseGradePreset?.max ?? null,
+      baseGrade: baseGradePreset
+        ? {
+            id: baseGradePreset.id,
+            label: baseGradePreset.label,
+            description: baseGradePreset.description,
+            mode: baseGradePreset.mode,
+            max: baseGradePreset.max,
+          }
+        : null,
+      theme: themePreset
+        ? {
+            id: themePreset.id,
+            label: themePreset.label,
+            description: themePreset.description,
+          }
+        : null,
     };
 
     try {

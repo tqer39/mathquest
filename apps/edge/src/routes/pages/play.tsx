@@ -127,7 +127,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
         <span id="play-grade-label" class="text-lg font-semibold">
           {gradePresets[0].label}
         </span>
-        <span id="play-theme-label" class="text-sm text-[#5e718a]"></span>
+        <span id="play-context-label" class="text-sm text-[#5e718a]"></span>
       </div>
       <button
         id="endBtn"

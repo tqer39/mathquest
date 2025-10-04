@@ -79,7 +79,7 @@ export const getAvailableCalculationTypes = (gradeId: string) => {
   const availableIds =
     gradeCalculationTypes[gradeId as keyof typeof gradeCalculationTypes] || [];
   return calculationTypes.filter((calcType) =>
-    availableIds.includes(calcType.id)
+    (availableIds as readonly string[]).includes(calcType.id)
   );
 };
 
@@ -140,6 +140,34 @@ export const practiceThemes = [
     mode: 'mix',
     max: 90,
   },
+  {
+    id: 'practice-mul-table',
+    label: 'かけ算九九',
+    description: '1の段から9の段まで基本の九九練習',
+    mode: 'mul',
+    max: 81,
+  },
+  {
+    id: 'practice-mul-easy',
+    label: 'かんたんかけ算',
+    description: '1×1から5×5までの基礎練習',
+    mode: 'mul',
+    max: 25,
+  },
+  {
+    id: 'practice-mul-hard',
+    label: 'むずかしいかけ算',
+    description: '2桁×1桁の応用練習',
+    mode: 'mul',
+    max: 180,
+  },
+  {
+    id: 'practice-mul-double',
+    label: '2桁×2桁のかけ算',
+    description: '2桁同士のかけ算練習',
+    mode: 'mul',
+    max: 400,
+  },
 ] as const;
 
 // 学年と計算種類の組み合わせから実際の練習設定を生成する関数
@@ -180,7 +208,8 @@ export const createPracticeSession = (
     'grade-6': { add: 2000, sub: 2000, mul: 300, div: 300, mix: 2000 },
   };
 
-  const max = maxValues[gradeId]?.[calcType.mode] || 100;
+  const max =
+    maxValues[gradeId as keyof typeof maxValues]?.[calcType.mode] || 100;
 
   return {
     gradeId: grade.id,

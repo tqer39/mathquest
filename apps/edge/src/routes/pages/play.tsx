@@ -9,7 +9,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
 }) => (
   <div
     id="play-root"
-    class="relative flex min-h-screen flex-col gap-6 bg-[var(--mq-surface-strong)] px-4 py-8 sm:px-8 lg:px-16 xl:px-24 text-[var(--mq-ink)]"
+    class="relative flex min-h-screen flex-col bg-[var(--mq-surface-strong)] text-[var(--mq-ink)]"
     data-user-state={currentUser ? 'known' : 'anonymous'}
   >
     {html`
@@ -139,7 +139,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
         }
       </style>
     `}
-    <nav class="flex items-center justify-between rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm">
+    <nav class="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-4 shadow-sm sm:px-8 lg:px-16 xl:px-24">
       <div class="flex flex-col">
         <span class="text-xs font-semibold uppercase tracking-[0.3em] text-[#6c7c90]">
           PLAY MODE
@@ -172,7 +172,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
       </div>
     </div>
 
-    <main class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <main class="grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:px-16 xl:px-24">
       <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
         <div class="flex flex-col gap-2 rounded-2xl bg-[var(--mq-primary-soft)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div class="flex items-center gap-4 text-sm font-semibold text-[var(--mq-primary-strong)]">
@@ -231,7 +231,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
           <div
             id="feedback"
-            class="min-h-[32px] text-center text-sm font-semibold text-[var(--mq-primary-strong)]"
+            class="flex min-h-[48px] items-center justify-center rounded-2xl text-center text-sm font-semibold text-[var(--mq-primary-strong)]"
           ></div>
           <div class="flex justify-center">
             <button

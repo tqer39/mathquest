@@ -219,8 +219,6 @@ const MODULE_SOURCE = `
   }
 
   const activeSession = loadSession();
-  console.log('Active session:', activeSession);
-  console.log('Session questionCount:', activeSession?.questionCount);
   if (!activeSession) {
     window.location.href = '/start';
     return;
@@ -237,14 +235,7 @@ const MODULE_SOURCE = `
     questionCount: (() => {
       const sessionCount = Number(activeSession.questionCount);
       const fallbackCount = loadQuestionCount();
-      const finalCount = sessionCount || fallbackCount;
-      console.log('questionCount calculation:', {
-        'activeSession.questionCount': activeSession.questionCount,
-        'sessionCount': sessionCount,
-        'fallbackCount': fallbackCount,
-        'finalCount': finalCount
-      });
-      return finalCount;
+      return sessionCount || fallbackCount;
     })(),
     soundEnabled:
       typeof activeSession.soundEnabled === 'boolean'
@@ -263,11 +254,7 @@ const MODULE_SOURCE = `
     awaitingAdvance: false,
   };
 
-  console.log('State grade:', state.grade);
-  console.log('Final state.questionCount:', state.questionCount);
-
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
-  console.log('After validation state.questionCount:', state.questionCount);
 
   const determineModeLabel = (mode) => {
     switch (mode) {
@@ -385,11 +372,6 @@ const MODULE_SOURCE = `
 
   const refreshKeypadState = () => {
     const shouldEnable = state.sessionActive && !state.awaitingAdvance;
-    console.log('Keypad state refresh:', {
-      'sessionActive': state.sessionActive,
-      'awaitingAdvance': state.awaitingAdvance,
-      'shouldEnable': shouldEnable
-    });
     setKeypadEnabled(shouldEnable);
   };
 
@@ -397,12 +379,6 @@ const MODULE_SOURCE = `
     const hasInput = state.answerBuffer.length > 0;
     const isWaiting = state.awaitingAdvance;
     const shouldEnable = state.sessionActive && (hasInput || isWaiting);
-    console.log('Submit button state refresh:', {
-      'sessionActive': state.sessionActive,
-      'hasInput': hasInput,
-      'awaitingAdvance': state.awaitingAdvance,
-      'shouldEnable': shouldEnable
-    });
     setSubmitButtonEnabled(shouldEnable);
   };
 
@@ -423,11 +399,14 @@ const MODULE_SOURCE = `
     }
   };
 
+  let isUpdatingAnswerBuffer = false;
   const setAnswerBuffer = (value) => {
+    isUpdatingAnswerBuffer = true;
     state.answerBuffer = value;
     if (answerInput) answerInput.value = value;
     if (answerDisplay) answerDisplay.textContent = value || '？';
     refreshSubmitButtonState();
+    isUpdatingAnswerBuffer = false;
   };
 
   const renderProgress = () => {
@@ -440,6 +419,7 @@ const MODULE_SOURCE = `
     if (feedbackEl) {
       feedbackEl.textContent = '';
       feedbackEl.dataset.variant = '';
+      feedbackEl.style.opacity = '0';
     }
   };
 
@@ -448,18 +428,21 @@ const MODULE_SOURCE = `
     if (!feedbackEl) return;
     feedbackEl.textContent = message;
     feedbackEl.dataset.variant = variant;
-    feedbackEl.classList.remove('opacity-0');
     feedbackEl.style.transition = 'opacity 1s ease-out';
+    feedbackEl.style.opacity = '1';
     if (feedbackTimer) clearTimeout(feedbackTimer);
     feedbackTimer = window.setTimeout(() => {
-      feedbackEl.classList.add('opacity-0');
+      feedbackEl.style.opacity = '0';
     }, 5000);
   };
 
   const renderQuestionExpression = (question) => {
     if (!questionEl) return;
-    questionEl.textContent =
-      String(question.a) + ' ' + question.op + ' ' + String(question.b) + ' = ?';
+    // expressionがある場合はそれを使用、なければa op bを構築
+    const expression = question.expression
+      ? question.expression
+      : String(question.a) + ' ' + question.op + ' ' + String(question.b);
+    questionEl.textContent = expression + ' = ?';
   };
 
   const renderWorkingSteps = (question, correctAnswer) => {
@@ -567,7 +550,6 @@ const MODULE_SOURCE = `
   };
 
   const nextQuestion = async () => {
-    console.log('nextQuestion called, resetting awaitingAdvance');
     state.awaitingAdvance = false;
     refreshKeypadState();
     refreshSubmitButtonState();
@@ -583,7 +565,6 @@ const MODULE_SOURCE = `
       state.answerBuffer = '';
       renderQuestionExpression(question);
       setAnswerBuffer('');
-      hideFeedback();
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
 
       // 途中式の有無に応じてトグルを有効化/無効化
@@ -652,21 +633,13 @@ const MODULE_SOURCE = `
       saveProgress(state.progress);
       renderWorkingSteps(state.currentQuestion, correctAnswer);
 
-      console.log('Session termination check:', {
-        'sessionAnswered': state.sessionAnswered,
-        'questionCount': state.questionCount,
-        'shouldTerminate': state.sessionAnswered >= state.questionCount
-      });
-
       if (state.sessionAnswered >= state.questionCount) {
-        console.log('Session finished - ending session');
         renderProgress();
         finishSession();
         return;
       }
 
       if (state.workingEnabled) {
-        console.log('Working enabled, setting awaitingAdvance = true');
         state.awaitingAdvance = true;
         refreshKeypadState();
         refreshSubmitButtonState();
@@ -674,7 +647,6 @@ const MODULE_SOURCE = `
         return;
       }
 
-      console.log('Working disabled, proceeding to next question immediately');
       renderProgress();
       await nextQuestion();
     } catch (e) {
@@ -684,19 +656,14 @@ const MODULE_SOURCE = `
   };
 
   const handleSubmit = async () => {
-    console.log('handleSubmit called:', {
-      'sessionActive': state.sessionActive,
-      'awaitingAdvance': state.awaitingAdvance
-    });
     if (!state.sessionActive) return;
     if (state.awaitingAdvance) {
-      console.log('Advancing to next question from waiting state');
       state.awaitingAdvance = false;
       renderProgress();
       await nextQuestion();
       return;
     }
-    const value = Number(state.answerBuffer || answerInput.value);
+    const value = Number(state.answerBuffer);
     if (!Number.isFinite(value)) {
       showFeedback('info', '数字だけを入力してね');
       return;
@@ -751,7 +718,6 @@ const MODULE_SOURCE = `
   runCountdown().then(() => startSession());
 
   submitBtn.addEventListener('click', () => {
-    console.log('=== 「こたえる」ボタンがクリックされました ===');
     handleSubmit();
   });
 
@@ -777,6 +743,8 @@ const MODULE_SOURCE = `
     answerInput.addEventListener('input', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement)) return;
+      // setAnswerBuffer()からの更新の場合はスキップ
+      if (isUpdatingAnswerBuffer) return;
       // 半角数字と小数点のみを許可（全角数字などを除去）
       const filtered = target.value.replace(/[^0-9.]/g, '');
       if (target.value !== filtered) {
@@ -828,15 +796,10 @@ const MODULE_SOURCE = `
     }
   });
 
-  document.querySelectorAll('[data-key]').forEach((button) => {
+  keypadButtons.forEach((button) => {
     button.addEventListener('click', () => {
       if (!state.sessionActive) return;
       const key = button.dataset.key;
-      if (key === 'submit') {
-        playSound('success');
-        handleSubmit();
-        return;
-      }
       // 待機状態の場合は数字入力とバックスペースは無効
       if (state.awaitingAdvance) return;
       if (key === 'back') {
@@ -848,6 +811,14 @@ const MODULE_SOURCE = `
       playSound('keypad');
     });
   });
+
+  if (keypadSubmitButton) {
+    keypadSubmitButton.addEventListener('click', () => {
+      if (!state.sessionActive) return;
+      playSound('success');
+      handleSubmit();
+    });
+  }
 
   if (soundToggle) {
     soundToggle.addEventListener('click', () => {

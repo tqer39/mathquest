@@ -41,10 +41,15 @@ const MODULE_SOURCE = `
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
   const gradeLabelEl = document.getElementById('play-grade-label');
+  const contextLabelEl = document.getElementById('play-context-label');
   const countdownOverlay = document.getElementById('countdown-overlay');
   const countdownNumber = document.getElementById('countdown-number');
   const resultCorrectEl = document.getElementById('result-correct');
   const resultTotalEl = document.getElementById('result-total');
+  const keypadButtons = Array.from(
+    document.querySelectorAll('[data-key]')
+  ).filter((btn) => btn.dataset.key !== 'submit');
+  const keypadSubmitButton = document.querySelector('[data-key="submit"]');
 
   if (!submitBtn || !questionEl || !answerInput || !answerDisplay) {
     return;
@@ -130,6 +135,54 @@ const MODULE_SOURCE = `
     ? findPreset(session.gradeId)
     : fallbackPreset;
 
+  const themeFromSession = session?.theme?.id
+    ? findPreset(session.theme.id) || {
+        id: session.theme.id,
+        label: session.theme.label,
+        description: session.theme.description,
+      }
+    : null;
+
+  const baseGradeFromSession = session?.baseGrade?.id
+    ? findPreset(session.baseGrade.id) || {
+        id: session.baseGrade.id,
+        label: session.baseGrade.label,
+        description: session.baseGrade.description,
+        mode: session.baseGrade.mode,
+        max: session.baseGrade.max,
+      }
+    : null;
+
+  const legacyBaseGrade = session?.baseGradeId
+    ? findPreset(session.baseGradeId) || {
+        id: session.baseGradeId,
+        label: session.baseGradeLabel || preset.label,
+        description: session.baseGradeDescription || preset.description,
+        mode: session.baseGradeMode || preset.mode,
+        max: session.baseGradeMax || preset.max,
+      }
+    : null;
+
+  const progressSnapshot = loadProgress();
+
+  const baseGradePreset =
+    baseGradeFromSession ||
+    legacyBaseGrade ||
+    (progressSnapshot?.lastLevel ? findPreset(progressSnapshot.lastLevel) : null) ||
+    (preset.id.startsWith('grade-') ? preset : fallbackPreset);
+
+  const activeTheme =
+    themeFromSession || (!preset.id.startsWith('grade-') ? preset : null);
+
+  const calculationType = session?.calculationType?.id
+    ? {
+        id: session.calculationType.id,
+        label: session.calculationType.label,
+        description: session.calculationType.description,
+        mode: session.calculationType.mode,
+      }
+    : null;
+
   if (!session) {
     sessionStorage.setItem(
       SESSION_STORAGE_KEY,
@@ -142,6 +195,24 @@ const MODULE_SOURCE = `
         questionCount: loadQuestionCount(),
         soundEnabled: loadBoolean(SOUND_STORAGE_KEY, true),
         workingEnabled: loadBoolean(WORKING_STORAGE_KEY, true),
+        baseGrade: baseGradePreset
+          ? {
+              id: baseGradePreset.id,
+              label: baseGradePreset.label,
+              description: baseGradePreset.description,
+              mode: baseGradePreset.mode,
+              max: baseGradePreset.max,
+            }
+          : null,
+        theme:
+          activeTheme && activeTheme.id !== baseGradePreset?.id
+            ? {
+                id: activeTheme.id,
+                label: activeTheme.label,
+                description: activeTheme.description,
+              }
+            : null,
+        calculationType,
         createdAt: Date.now(),
       })
     );
@@ -155,7 +226,17 @@ const MODULE_SOURCE = `
 
   const state = {
     grade: preset,
-    questionCount: Number(activeSession.questionCount) || loadQuestionCount(),
+    baseGrade: baseGradePreset,
+    theme:
+      activeTheme && (!baseGradePreset || activeTheme.id !== baseGradePreset.id)
+        ? activeTheme
+        : null,
+    calculationType,
+    questionCount: (() => {
+      const sessionCount = Number(activeSession.questionCount);
+      const fallbackCount = loadQuestionCount();
+      return sessionCount || fallbackCount;
+    })(),
     soundEnabled:
       typeof activeSession.soundEnabled === 'boolean'
         ? activeSession.soundEnabled
@@ -164,7 +245,7 @@ const MODULE_SOURCE = `
       typeof activeSession.workingEnabled === 'boolean'
         ? activeSession.workingEnabled
         : loadBoolean(WORKING_STORAGE_KEY, true),
-    progress: loadProgress(),
+    progress: progressSnapshot,
     sessionActive: false,
     sessionAnswered: 0,
     sessionCorrect: 0,
@@ -175,12 +256,75 @@ const MODULE_SOURCE = `
 
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
 
+  const determineModeLabel = (mode) => {
+    switch (mode) {
+      case 'add':
+        return 'たし算';
+      case 'sub':
+        return 'ひき算';
+      case 'mul':
+        return 'かけ算';
+      case 'div':
+        return 'わり算';
+      case 'mix':
+        return 'ミックス';
+      default:
+        return '算数ミッション';
+    }
+  };
+
+  const updateContextLabel = () => {
+    if (!gradeLabelEl || !contextLabelEl) return;
+
+    const baseLabel = state.baseGrade?.label ?? state.grade.label;
+    const baseDescription = state.baseGrade?.description ?? state.grade.description ?? '';
+    const baseMode = state.baseGrade?.mode ?? state.grade.mode;
+
+    if (state.theme) {
+      gradeLabelEl.textContent = baseLabel + ' / ' + state.theme.label;
+      contextLabelEl.textContent = state.theme.description ?? baseDescription;
+      return;
+    }
+
+    const modeLabel = state.calculationType?.label
+      ? state.calculationType.label
+      : determineModeLabel(state.calculationType?.mode || baseMode);
+
+    gradeLabelEl.textContent = baseLabel + ' / ' + modeLabel;
+    contextLabelEl.textContent = state.calculationType?.description ?? baseDescription;
+  };
+
+  updateContextLabel();
+
   const toggleButton = (button, force) => {
     if (!button) return;
-    const nextState = typeof force === 'boolean' ? force : button.dataset.state !== 'on';
+    const nextState =
+      typeof force === 'boolean'
+        ? force
+        : button.dataset.state !== 'on';
     button.dataset.state = nextState ? 'on' : 'off';
-    button.classList.toggle('bg-[var(--mq-primary-soft)]', nextState);
-    button.classList.toggle('border-[var(--mq-primary)]', nextState);
+    if (nextState) {
+      button.classList.add('setting-toggle--on');
+      button.style.setProperty('background', 'var(--mq-primary-soft)', 'important');
+      button.style.setProperty('border-color', 'var(--mq-primary)', 'important');
+      button.style.setProperty('box-shadow', '0 10px 24px rgba(15, 23, 42, 0.14)', 'important');
+      button.style.setProperty('transform', 'translateY(-1px)', 'important');
+    } else {
+      button.classList.remove('setting-toggle--on');
+      button.style.removeProperty('background');
+      button.style.removeProperty('border-color');
+      button.style.removeProperty('box-shadow');
+      button.style.removeProperty('transform');
+    }
+
+    const title = button.querySelector('span:first-child');
+    if (title) {
+      if (nextState) {
+        title.style.setProperty('color', 'var(--mq-primary-strong)', 'important');
+      } else {
+        title.style.removeProperty('color');
+      }
+    }
   };
 
   toggleButton(soundToggle, state.soundEnabled);
@@ -189,6 +333,53 @@ const MODULE_SOURCE = `
   const applyWorkingVisibility = () => {
     if (!workingContainer) return;
     workingContainer.classList.toggle('hidden', !state.workingEnabled);
+  };
+
+  const setKeypadEnabled = (enabled) => {
+    keypadButtons.forEach((button) => {
+      if (!(button instanceof HTMLElement)) return;
+      button.classList.toggle('keypad-button--disabled', !enabled);
+      button.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      button.tabIndex = enabled ? 0 : -1;
+    });
+  };
+
+  const setSubmitButtonEnabled = (enabled) => {
+    [submitBtn, keypadSubmitButton].forEach((btn) => {
+      if (!btn) return;
+      btn.classList.toggle('keypad-button--disabled', !enabled);
+      btn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      btn.tabIndex = enabled ? 0 : -1;
+    });
+  };
+
+  const hasWorkingSteps = (question) => {
+    return question && Array.isArray(question.extras) && question.extras.length > 0;
+  };
+
+  const setStepsToggleEnabled = (enabled) => {
+    if (!stepsToggle) return;
+    if (enabled) {
+      stepsToggle.removeAttribute('disabled');
+      stepsToggle.style.removeProperty('opacity');
+      stepsToggle.style.removeProperty('cursor');
+    } else {
+      stepsToggle.setAttribute('disabled', 'true');
+      stepsToggle.style.setProperty('opacity', '0.5', 'important');
+      stepsToggle.style.setProperty('cursor', 'not-allowed', 'important');
+    }
+  };
+
+  const refreshKeypadState = () => {
+    const shouldEnable = state.sessionActive && !state.awaitingAdvance;
+    setKeypadEnabled(shouldEnable);
+  };
+
+  const refreshSubmitButtonState = () => {
+    const hasInput = state.answerBuffer.length > 0;
+    const isWaiting = state.awaitingAdvance;
+    const shouldEnable = state.sessionActive && (hasInput || isWaiting);
+    setSubmitButtonEnabled(shouldEnable);
   };
 
   const playSound = (variant) => {
@@ -208,10 +399,14 @@ const MODULE_SOURCE = `
     }
   };
 
+  let isUpdatingAnswerBuffer = false;
   const setAnswerBuffer = (value) => {
+    isUpdatingAnswerBuffer = true;
     state.answerBuffer = value;
     if (answerInput) answerInput.value = value;
     if (answerDisplay) answerDisplay.textContent = value || '？';
+    refreshSubmitButtonState();
+    isUpdatingAnswerBuffer = false;
   };
 
   const renderProgress = () => {
@@ -224,6 +419,7 @@ const MODULE_SOURCE = `
     if (feedbackEl) {
       feedbackEl.textContent = '';
       feedbackEl.dataset.variant = '';
+      feedbackEl.style.opacity = '0';
     }
   };
 
@@ -232,17 +428,21 @@ const MODULE_SOURCE = `
     if (!feedbackEl) return;
     feedbackEl.textContent = message;
     feedbackEl.dataset.variant = variant;
-    feedbackEl.classList.remove('opacity-0');
+    feedbackEl.style.transition = 'opacity 1s ease-out';
+    feedbackEl.style.opacity = '1';
     if (feedbackTimer) clearTimeout(feedbackTimer);
     feedbackTimer = window.setTimeout(() => {
-      feedbackEl.classList.add('opacity-0');
-    }, 2000);
+      feedbackEl.style.opacity = '0';
+    }, 5000);
   };
 
   const renderQuestionExpression = (question) => {
     if (!questionEl) return;
-    questionEl.textContent =
-      String(question.a) + ' ' + question.op + ' ' + String(question.b) + ' = ?';
+    // expressionがある場合はそれを使用、なければa op bを構築
+    const expression = question.expression
+      ? question.expression
+      : String(question.a) + ' ' + question.op + ' ' + String(question.b);
+    questionEl.textContent = expression + ' = ?';
   };
 
   const renderWorkingSteps = (question, correctAnswer) => {
@@ -283,6 +483,30 @@ const MODULE_SOURCE = `
       questionCount: state.questionCount,
       soundEnabled: state.soundEnabled,
       workingEnabled: state.workingEnabled,
+      baseGrade: state.baseGrade
+        ? {
+            id: state.baseGrade.id,
+            label: state.baseGrade.label,
+            description: state.baseGrade.description,
+            mode: state.baseGrade.mode,
+            max: state.baseGrade.max,
+          }
+        : null,
+      theme: state.theme
+        ? {
+            id: state.theme.id,
+            label: state.theme.label,
+            description: state.theme.description,
+          }
+        : null,
+      calculationType: state.calculationType
+        ? {
+            id: state.calculationType.id,
+            label: state.calculationType.label,
+            description: state.calculationType.description,
+            mode: state.calculationType.mode,
+          }
+        : null,
       createdAt: Date.now(),
     };
     try {
@@ -327,6 +551,8 @@ const MODULE_SOURCE = `
 
   const nextQuestion = async () => {
     state.awaitingAdvance = false;
+    refreshKeypadState();
+    refreshSubmitButtonState();
     renderWorkingSteps(null);
     renderProgress();
     try {
@@ -339,8 +565,17 @@ const MODULE_SOURCE = `
       state.answerBuffer = '';
       renderQuestionExpression(question);
       setAnswerBuffer('');
-      hideFeedback();
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
+
+      // 途中式の有無に応じてトグルを有効化/無効化
+      const hasSteps = hasWorkingSteps(question);
+      setStepsToggleEnabled(hasSteps);
+      if (!hasSteps && state.workingEnabled) {
+        // 途中式がない場合は強制的にOFFにする
+        state.workingEnabled = false;
+        toggleButton(stepsToggle, false);
+        applyWorkingVisibility();
+      }
     } catch (e) {
       console.error(e);
       showFeedback('error', '問題の取得に失敗しました。しばらくしてから再度お試しください。');
@@ -350,6 +585,7 @@ const MODULE_SOURCE = `
   const finishSession = () => {
     state.sessionActive = false;
     state.awaitingAdvance = false;
+    refreshKeypadState();
     if (resultCorrectEl) resultCorrectEl.textContent = String(state.sessionCorrect);
     if (resultTotalEl) resultTotalEl.textContent = String(state.sessionAnswered);
     if (againBtn) {
@@ -405,6 +641,8 @@ const MODULE_SOURCE = `
 
       if (state.workingEnabled) {
         state.awaitingAdvance = true;
+        refreshKeypadState();
+        refreshSubmitButtonState();
         renderProgress();
         return;
       }
@@ -425,7 +663,7 @@ const MODULE_SOURCE = `
       await nextQuestion();
       return;
     }
-    const value = Number(state.answerBuffer || answerInput.value);
+    const value = Number(state.answerBuffer);
     if (!Number.isFinite(value)) {
       showFeedback('info', '数字だけを入力してね');
       return;
@@ -459,6 +697,8 @@ const MODULE_SOURCE = `
     state.sessionAnswered = 0;
     state.sessionCorrect = 0;
     state.awaitingAdvance = false;
+    refreshKeypadState();
+    refreshSubmitButtonState();
     renderProgress();
     renderWorkingSteps(null);
     hideFeedback();
@@ -469,10 +709,12 @@ const MODULE_SOURCE = `
   };
 
   const restartWithCountdown = async () => {
+    refreshKeypadState();
     await runCountdown();
     await startSession();
   };
 
+  refreshKeypadState();
   runCountdown().then(() => startSession());
 
   submitBtn.addEventListener('click', () => {
@@ -498,16 +740,44 @@ const MODULE_SOURCE = `
   }
 
   if (answerInput) {
+    answerInput.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      // setAnswerBuffer()からの更新の場合はスキップ
+      if (isUpdatingAnswerBuffer) return;
+      // 半角数字と小数点のみを許可（全角数字などを除去）
+      const filtered = target.value.replace(/[^0-9.]/g, '');
+      if (target.value !== filtered) {
+        target.value = filtered;
+      }
+      // state.answerBufferと入力欄を同期
+      state.answerBuffer = filtered;
+      if (answerDisplay) answerDisplay.textContent = filtered || '？';
+      refreshSubmitButtonState();
+    });
+
     answerInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
         handleSubmit();
+        return;
+      }
+      // 半角数字、小数点、制御キー以外は入力を拒否
+      const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+      const isNumberKey = event.key >= '0' && event.key <= '9';
+      const isDecimalPoint = event.key === '.';
+      const isAllowedControlKey = allowedKeys.includes(event.key);
+
+      if (!isNumberKey && !isDecimalPoint && !isAllowedControlKey) {
+        event.preventDefault();
       }
     });
   }
 
   document.addEventListener('keydown', (event) => {
-    if (!state.sessionActive) return;
+    if (!state.sessionActive || state.awaitingAdvance) return;
+    // answerInputにフォーカスがある場合は、そちらのイベントハンドラに任せる
+    if (document.activeElement === answerInput) return;
     if (event.key === 'Enter') {
       event.preventDefault();
       handleSubmit();
@@ -526,14 +796,12 @@ const MODULE_SOURCE = `
     }
   });
 
-  document.querySelectorAll('[data-key]').forEach((button) => {
+  keypadButtons.forEach((button) => {
     button.addEventListener('click', () => {
+      if (!state.sessionActive) return;
       const key = button.dataset.key;
-      if (key === 'submit') {
-        playSound('success');
-        handleSubmit();
-        return;
-      }
+      // 待機状態の場合は数字入力とバックスペースは無効
+      if (state.awaitingAdvance) return;
       if (key === 'back') {
         setAnswerBuffer(state.answerBuffer.slice(0, -1));
         playSound('keypad');
@@ -543,6 +811,14 @@ const MODULE_SOURCE = `
       playSound('keypad');
     });
   });
+
+  if (keypadSubmitButton) {
+    keypadSubmitButton.addEventListener('click', () => {
+      if (!state.sessionActive) return;
+      playSound('success');
+      handleSubmit();
+    });
+  }
 
   if (soundToggle) {
     soundToggle.addEventListener('click', () => {
@@ -555,6 +831,11 @@ const MODULE_SOURCE = `
 
   if (stepsToggle) {
     stepsToggle.addEventListener('click', () => {
+      // 無効化されている場合はクリックを無視
+      if (stepsToggle.hasAttribute('disabled')) return;
+      // 途中式がない問題の場合はクリックを無視
+      if (!hasWorkingSteps(state.currentQuestion)) return;
+
       state.workingEnabled = !state.workingEnabled;
       toggleButton(stepsToggle, state.workingEnabled);
       applyWorkingVisibility();
@@ -563,9 +844,6 @@ const MODULE_SOURCE = `
     });
   }
 
-  if (gradeLabelEl) {
-    gradeLabelEl.textContent = activeSession.gradeLabel || state.grade.label;
-  }
   applyWorkingVisibility();
   renderProgress();
 })();

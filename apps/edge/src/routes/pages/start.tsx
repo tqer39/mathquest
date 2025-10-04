@@ -1,14 +1,24 @@
 import type { FC } from 'hono/jsx';
 import { html } from 'hono/html';
 import type { CurrentUser } from '../../application/session/current-user';
-import { gradeLevels, practiceThemes, gradePresets } from './grade-presets';
+import {
+  gradeLevels,
+  calculationTypes,
+  practiceThemes,
+  gradePresets,
+} from './grade-presets';
 import { renderStartClientScript } from './start.client';
 
 const baseQuestionCountOptions = [10, 20, 30] as const;
-const questionCountOptions =
-  Bun.env.NODE_ENV === 'development'
-    ? ([1, ...baseQuestionCountOptions] as const)
-    : baseQuestionCountOptions;
+
+// ローカル開発環境の判定を簡素化
+const isDevelopment = true; // デバッグ用に常に true に設定
+
+console.log('Development mode enabled for 1-question option');
+
+const questionCountOptions = (
+  isDevelopment ? [1, ...baseQuestionCountOptions] : baseQuestionCountOptions
+) as readonly number[];
 
 export const Start: FC<{ currentUser: CurrentUser | null }> = ({
   currentUser,
@@ -54,7 +64,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           MQ
         </span>
         <span class="text-lg font-semibold tracking-tight text-[var(--mq-ink)]">
-          設定ウィザード
+          れんしゅうの じゅんび
         </span>
       </div>
       <a
@@ -69,9 +79,18 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
       <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
         Step 1
       </p>
-      <h1 class="text-3xl font-extrabold text-[var(--mq-ink)]">
-        学年と設定をえらぼう
-      </h1>
+      <div class="flex items-center justify-between">
+        <h1 class="text-3xl font-extrabold text-[var(--mq-ink)]">
+          学年と設定をえらぼう
+        </h1>
+        <button
+          id="clear-selections"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-red-50 hover:border-red-300 hover:text-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+        >
+          🗑️ クリア
+        </button>
+      </div>
       <p class="max-w-2xl text-sm text-[#4f6076]">
         下のカードから学年（または練習テーマ）をえらび、右側で効果音・途中式・集中モードと問題数をまとめて調整します。設定はブラウザに保存されるので、次回はそのまま再開できます。
       </p>
@@ -101,8 +120,6 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                 name="grade-selection"
                 value={preset.id}
                 data-group="level"
-                data-mode={preset.mode}
-                data-max={preset.max}
                 class="peer sr-only"
                 defaultChecked={index === 0}
               />
@@ -116,6 +133,18 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               </div>
             </label>
           ))}
+        </div>
+
+        <div id="calculation-type-section" class="space-y-2">
+          <p class="text-sm font-semibold text-[var(--mq-ink)]">
+            計算の種類をえらぶ
+          </p>
+          <div
+            id="calculation-type-grid"
+            class="grid gap-3 sm:grid-cols-3 xl:grid-cols-5"
+          >
+            {/* JavaScriptで動的に生成される */}
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -165,16 +194,16 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             問題数
           </legend>
           <div class="flex flex-wrap gap-3 text-sm font-semibold">
-            {questionCountOptions.map((count, idx) => (
+            {questionCountOptions.map((count) => (
               <label
                 key={count}
-                class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)]"
+                class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] cursor-pointer"
               >
                 <input
                   type="radio"
                   name="question-count"
                   value={count}
-                  defaultChecked={idx === 0}
+                  defaultChecked={count === 10}
                   class="h-4 w-4 accent-[var(--mq-primary-strong)]"
                 />
                 {count}問
@@ -219,11 +248,18 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           つぎへ（カウントダウン）
         </button>
         <p class="text-xs text-[#5e718a]">
-          設定はブラウザに保存されます。会員登録すると学習記録をクラウドにも同期できます。
+          設定はブラウザに保存されます。
+          <a
+            href="/auth/login"
+            class="text-[var(--mq-primary)] hover:text-[var(--mq-primary-strong)] transition-colors cursor-pointer underline"
+          >
+            会員登録
+          </a>
+          すると学習記録をクラウドにも同期できます。
         </p>
       </section>
     </div>
 
-    {renderStartClientScript(gradePresets)}
+    {renderStartClientScript(gradePresets, calculationTypes, gradeLevels)}
   </div>
 );

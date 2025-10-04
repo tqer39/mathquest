@@ -11,6 +11,9 @@ jobs:
     name: Apply migrations to prod
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
       - name: Apply migrations
         uses: ./.github/actions/d1-migrations
         with:

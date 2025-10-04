@@ -28,6 +28,18 @@ const MODULE_SOURCE = `
   };
 
   const presets = getJSON('grade-presets');
+  const calculationTypes = getJSON('calculation-types');
+  const gradeLevels = getJSON('grade-levels');
+
+  // 学年ごとの利用可能な計算種類
+  const gradeCalculationTypes = {
+    'grade-1': ['calc-add', 'calc-sub'],
+    'grade-2': ['calc-add', 'calc-sub'],
+    'grade-3': ['calc-add', 'calc-sub', 'calc-mul'],
+    'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
+    'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+    'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+  };
   const gradeRadios = Array.from(
     document.querySelectorAll('input[name="grade-selection"]')
   );
@@ -35,12 +47,14 @@ const MODULE_SOURCE = `
     document.querySelectorAll('#theme-grid button')
   );
   const selectedGradeLabel = document.getElementById('selected-grade-label');
+  const calculationTypeGrid = document.getElementById('calculation-type-grid');
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
   );
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
   const startButton = document.getElementById('start-session');
+  const clearButton = document.getElementById('clear-selections');
 
   if (!startButton || !gradeRadios.length) {
     return;
@@ -178,6 +192,51 @@ const MODULE_SOURCE = `
     }
   };
 
+  const renderCalculationTypes = (gradeId, autoSelect = false) => {
+    if (!calculationTypeGrid) return;
+
+    const availableCalcTypes = gradeCalculationTypes[gradeId] || [];
+    const availableTypes = calculationTypes.filter(calcType =>
+      availableCalcTypes.includes(calcType.id)
+    );
+
+    calculationTypeGrid.innerHTML = '';
+
+    availableTypes.forEach((calcType, index) => {
+      const label = document.createElement('label');
+      label.className = 'group cursor-pointer';
+      label.innerHTML = \`
+        <input
+          type="radio"
+          name="calculation-type-selection"
+          value="\${calcType.id}"
+          data-mode="\${calcType.mode}"
+          class="peer sr-only"
+          \${autoSelect && index === 0 ? 'checked' : ''}
+        />
+        <div class="calc-type-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
+          <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
+            \${calcType.label}
+          </p>
+          <p class="text-base font-semibold text-[var(--mq-ink)]">
+            \${calcType.description}
+          </p>
+        </div>
+      \`;
+
+      const radio = label.querySelector('input[type="radio"]');
+      radio.addEventListener('change', () => {
+        if (radio.checked) {
+          filterThemesByCalculationType(calcType.mode);
+          // 計算種類選択後にボタンの状態を更新
+          updateStartButtonState();
+        }
+      });
+
+      calculationTypeGrid.appendChild(label);
+    });
+  };
+
   const setSelectedPreset = (presetId) => {
     if (!presetId) return;
     selectedGradeId = presetId;
@@ -190,19 +249,62 @@ const MODULE_SOURCE = `
       const isActive = button.dataset.gradeId === themeId;
       updateThemeButtonAppearance(button, isActive);
     });
+    // テーマ選択状態変更後にボタンの状態を更新
+    updateStartButtonState();
   };
 
-  if (selectedGradeId && themeIdExists(selectedGradeId)) {
-    setThemeSelection(selectedGradeId);
-  } else {
-    setThemeSelection(null);
-    const gradeToUse = selectedGradeId && gradeIdExists(selectedGradeId)
-      ? selectedGradeId
-      : fallbackGradeId;
-    if (gradeToUse) {
-      selectedGradeId = gradeToUse;
-      applyGradeRadio(gradeToUse);
+  const filterThemesByCalculationType = (calculationMode) => {
+    themeButtons.forEach((button) => {
+      const themeMode = button.dataset.mode;
+      const shouldShow = !calculationMode || themeMode === calculationMode;
+
+      if (shouldShow) {
+        button.style.display = '';
+      } else {
+        button.style.display = 'none';
+        // 非表示になったテーマが選択されている場合は選択を解除
+        if (activeThemeId === button.dataset.gradeId) {
+          setThemeSelection(null);
+        }
+      }
+    });
+    // 状態変更後にボタンの状態を更新
+    updateStartButtonState();
+  };
+
+  const updateStartButtonState = () => {
+    if (!startButton) return;
+
+    // 計算種類が選択されているかチェック
+    const calculationTypeSelected = document.querySelector('input[name="calculation-type-selection"]:checked');
+
+    // テーマが選択されているかチェック
+    const themeSelected = activeThemeId !== null;
+
+    // 計算種類またはテーマが選択されている場合のみボタンを有効にする
+    const shouldEnable = calculationTypeSelected || themeSelected;
+
+    startButton.disabled = !shouldEnable;
+
+    if (shouldEnable) {
+      startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      startButton.classList.add('hover:-translate-y-0.5', 'hover:bg-[var(--mq-primary-strong)]');
+    } else {
+      startButton.classList.add('opacity-50', 'cursor-not-allowed');
+      startButton.classList.remove('hover:-translate-y-0.5', 'hover:bg-[var(--mq-primary-strong)]');
     }
+  };
+
+
+  // テーマは初期状態では何も選択しない
+  setThemeSelection(null);
+
+  const gradeToUse = selectedGradeId && gradeIdExists(selectedGradeId)
+    ? selectedGradeId
+    : fallbackGradeId;
+  if (gradeToUse) {
+    selectedGradeId = gradeToUse;
+    applyGradeRadio(gradeToUse);
   }
 
   if (!selectedGradeId && presets[0]) {
@@ -211,6 +313,53 @@ const MODULE_SOURCE = `
   }
 
   setSelectedPreset(selectedGradeId);
+
+  // 初期表示で小1の計算種類を表示（未選択状態）
+  renderCalculationTypes('grade-1', false);
+
+  // 計算種類が未選択なので全テーマを表示
+  filterThemesByCalculationType(null);
+
+  // 初期状態でボタンの状態を更新
+  updateStartButtonState();
+
+  const resetToInitialState = () => {
+    // 学年選択を小1に戻す
+    if (gradeRadios.length > 0) {
+      gradeRadios.forEach((radio, index) => {
+        radio.checked = index === 0;
+      });
+      selectedGradeId = gradeRadios[0].value;
+      setSelectedPreset(selectedGradeId);
+    }
+
+    // 計算種類を小1用に戻す（未選択状態）
+    renderCalculationTypes('grade-1', false);
+
+    // テーマ選択をクリア
+    setThemeSelection(null);
+
+    // 計算種類が未選択なので全テーマを表示
+    filterThemesByCalculationType(null);
+
+    // クリア後のボタン状態を更新
+    updateStartButtonState();
+
+    // 問題数を10問に戻す
+    if (questionCountRadios.length > 0) {
+      questionCountRadios.forEach((radio) => {
+        radio.checked = Number(radio.value) === 10;
+      });
+    }
+
+    // 設定トグルを初期状態に戻す
+    toggleButton(soundToggle, false);
+    toggleButton(stepsToggle, false);
+
+    // プログレスも初期化
+    progress.lastLevel = selectedGradeId;
+    progress.lastGrade = selectedGradeId;
+  };
 
   const toggleButton = (button, force) => {
     if (!button) return;
@@ -267,7 +416,8 @@ const MODULE_SOURCE = `
     } catch (e) {
       console.warn('failed to read question count', e);
     }
-    return Number(questionCountRadios[0]?.value || 10);
+    // デフォルトは10問
+    return 10;
   };
 
   const applyQuestionCount = (value) => {
@@ -278,8 +428,14 @@ const MODULE_SOURCE = `
         matched = true;
       }
     });
-    if (!matched && questionCountRadios[0]) {
-      questionCountRadios[0].checked = true;
+    if (!matched) {
+      // 10問オプションを探して選択、見つからなければ最初の選択肢
+      const tenQuestionRadio = questionCountRadios.find(radio => Number(radio.value) === 10);
+      if (tenQuestionRadio) {
+        tenQuestionRadio.checked = true;
+      } else if (questionCountRadios[0]) {
+        questionCountRadios[0].checked = true;
+      }
     }
   };
 
@@ -287,24 +443,25 @@ const MODULE_SOURCE = `
   toggleButton(soundToggle, loadBoolean(SOUND_STORAGE_KEY, false));
   toggleButton(stepsToggle, loadBoolean(WORKING_STORAGE_KEY, false));
 
-  gradeRadios.forEach((radio) => {
-    radio.addEventListener('change', () => {
-      if (!radio.checked) return;
-      if (activeThemeId === null) {
-        setSelectedPreset(radio.value);
-        progress.lastLevel = radio.value;
-      }
-    });
-  });
-
   themeButtons.forEach((button) => {
     button.addEventListener('click', () => {
       const themeId = button.dataset.gradeId;
       if (!themeId) return;
 
-      setThemeSelection(themeId);
-      setSelectedPreset(themeId);
-      progress.lastLevel = ensureGradeSelection();
+      if (activeThemeId === themeId) {
+        // 既に選択されているテーマをクリックした場合は選択解除
+        setThemeSelection(null);
+        const currentGradeId = ensureGradeSelection();
+        if (currentGradeId) {
+          setSelectedPreset(currentGradeId);
+          progress.lastLevel = currentGradeId;
+        }
+      } else {
+        // 新しいテーマを選択
+        setThemeSelection(themeId);
+        setSelectedPreset(themeId);
+        progress.lastLevel = ensureGradeSelection();
+      }
     });
   });
 
@@ -312,6 +469,12 @@ const MODULE_SOURCE = `
     if (!button) return;
     button.addEventListener('click', () => toggleButton(button));
   });
+
+  if (clearButton) {
+    clearButton.addEventListener('click', () => {
+      resetToInitialState();
+    });
+  }
 
   startButton.addEventListener('click', () => {
     if (!selectedGradeId) {
@@ -333,6 +496,16 @@ const MODULE_SOURCE = `
       questionCountRadios.find((radio) => radio.checked)?.value || 10
     );
 
+    console.log('Starting session with questionCount:', questionCount);
+    console.log('Checked radio value:', questionCountRadios.find((radio) => radio.checked)?.value);
+
+    const selectedCalculationRadio = document.querySelector(
+      'input[name="calculation-type-selection"]:checked'
+    );
+    const selectedCalculationType = selectedCalculationRadio
+      ? calculationTypes.find((calc) => calc.id === selectedCalculationRadio.value)
+      : null;
+
     const soundEnabled = soundToggle?.dataset.state !== 'off';
     const workingEnabled = stepsToggle?.dataset.state !== 'off';
 
@@ -348,6 +521,15 @@ const MODULE_SOURCE = `
     progress.lastGrade = grade.id;
     saveProgress(progress);
 
+    const currentGradeId = ensureGradeSelection();
+    const baseGradePreset =
+      findPreset(currentGradeId) ||
+      (progress.lastLevel ? findPreset(progress.lastLevel) : null) ||
+      (gradeLevels.find((level) => level.id === currentGradeId) ?? gradeLevels[0]) ||
+      null;
+    const isThemeSelected = activeThemeId !== null;
+    const themePreset = isThemeSelected ? grade : null;
+
     const session = {
       gradeId: grade.id,
       gradeLabel: grade.label,
@@ -358,25 +540,84 @@ const MODULE_SOURCE = `
       soundEnabled,
       workingEnabled,
       createdAt: Date.now(),
+      baseGradeId: baseGradePreset?.id || currentGradeId,
+      baseGradeLabel: baseGradePreset?.label || '',
+      baseGradeDescription: baseGradePreset?.description || '',
+      baseGradeMode: baseGradePreset?.mode || '',
+      baseGradeMax: baseGradePreset?.max ?? null,
+      baseGrade: baseGradePreset
+        ? {
+            id: baseGradePreset.id,
+            label: baseGradePreset.label,
+            description: baseGradePreset.description,
+            mode: baseGradePreset.mode,
+            max: baseGradePreset.max,
+          }
+        : null,
+      theme: themePreset
+        ? {
+            id: themePreset.id,
+            label: themePreset.label,
+            description: themePreset.description,
+          }
+        : null,
+      calculationType: selectedCalculationType
+        ? {
+            id: selectedCalculationType.id,
+            label: selectedCalculationType.label,
+            description: selectedCalculationType.description,
+            mode: selectedCalculationType.mode,
+          }
+        : null,
     };
 
     try {
+      // 既存のセッションをクリアして新しいセッションを確実に保存
+      sessionStorage.removeItem(SESSION_STORAGE_KEY);
       sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+      console.log('Session saved:', session);
     } catch (e) {
       console.warn('failed to write session storage', e);
     }
 
     window.location.href = '/play';
   });
+
+  // 初期化完了後に学年変更イベントリスナーを登録
+  gradeRadios.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+
+      // 学年を変更したらテーマ選択をクリア
+      setThemeSelection(null);
+      setSelectedPreset(radio.value);
+      progress.lastLevel = radio.value;
+
+      // 計算種類を更新（未選択状態で表示）
+      renderCalculationTypes(radio.value);
+      // 計算種類が未選択になるのでテーマフィルタリングもリセット
+      filterThemesByCalculationType(null);
+      // 学年変更後のボタン状態を更新
+      updateStartButtonState();
+    });
+  });
   }
 })();
 `;
 
 export const renderStartClientScript = (
-  presets: readonly GradePreset[]
+  presets: readonly GradePreset[],
+  calculationTypes: any,
+  gradeLevels: any
 ) => html`
   <script id="grade-presets" type="application/json">
     ${raw(JSON.stringify(presets))}
+  </script>
+  <script id="calculation-types" type="application/json">
+    ${raw(JSON.stringify(calculationTypes))}
+  </script>
+  <script id="grade-levels" type="application/json">
+    ${raw(JSON.stringify(gradeLevels))}
   </script>
   <script type="module">
     ${raw(MODULE_SOURCE)};

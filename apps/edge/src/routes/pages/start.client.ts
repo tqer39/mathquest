@@ -22,13 +22,12 @@ const MODULE_SOURCE = `
   };
 
   const presets = getJSON('grade-presets');
-  const gradeLevelButtons = Array.from(
-    document.querySelectorAll('#grade-level-grid button')
+  const gradeRadios = Array.from(
+    document.querySelectorAll('input[name="grade-selection"]')
   );
   const themeButtons = Array.from(
     document.querySelectorAll('#theme-grid button')
   );
-  const gradeButtons = gradeLevelButtons.concat(themeButtons);
   const selectedGradeLabel = document.getElementById('selected-grade-label');
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
@@ -38,16 +37,19 @@ const MODULE_SOURCE = `
   const focusToggle = document.getElementById('toggle-focus');
   const startButton = document.getElementById('start-session');
 
-  if (!startButton || !gradeButtons.length) {
+  if (!startButton || !gradeRadios.length) {
     return;
   }
+
+  const defaultGradeValue = gradeRadios[0]?.value || null;
 
   const defaultProgress = () => ({
     totalAnswered: 0,
     totalCorrect: 0,
     streak: 0,
     lastAnsweredAt: null,
-    lastGrade: presets[0] ? presets[0].id : null,
+    lastGrade: defaultGradeValue,
+    lastLevel: defaultGradeValue,
   });
 
   const loadProgress = () => {
@@ -70,34 +72,130 @@ const MODULE_SOURCE = `
     }
   };
 
+  const findPreset = (id) => presets.find((p) => p.id === id);
+  const gradeIdExists = (id) =>
+    gradeRadios.some((radio) => radio.value === id);
+  const themeIdExists = (id) =>
+    themeButtons.some((button) => button.dataset.gradeId === id);
+
+  const ensureGradeSelection = () => {
+    const checked = gradeRadios.find((radio) => radio.checked);
+    if (checked) {
+      return checked.value;
+    }
+    if (gradeRadios[0]) {
+      gradeRadios[0].checked = true;
+      return gradeRadios[0].value;
+    }
+    return null;
+  };
+
+  const applyGradeRadio = (gradeId) => {
+    let matched = false;
+    gradeRadios.forEach((radio) => {
+      const isMatch = radio.value === gradeId;
+      radio.checked = isMatch;
+      if (isMatch) {
+        matched = true;
+      }
+    });
+    if (!matched) {
+      return ensureGradeSelection();
+    }
+    return gradeId;
+  };
+
+  const updateThemeButtonAppearance = (button, isActive) => {
+    if (!button) return;
+    button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    button.classList.toggle('border-[var(--mq-primary)]', isActive);
+    button.classList.toggle('border-[var(--mq-outline)]', !isActive);
+    button.classList.toggle('bg-[var(--mq-primary-soft)]', isActive);
+    button.classList.toggle('bg-[var(--mq-surface)]', !isActive);
+    button.classList.toggle('shadow-md', isActive);
+    button.classList.toggle('shadow-sm', !isActive);
+
+    const title = button.querySelector('[data-role="theme-title"]');
+    if (title) {
+      title.classList.toggle('text-[var(--mq-primary-strong)]', isActive);
+      title.classList.toggle('text-[#5e718a]', !isActive);
+    }
+
+    const description = button.querySelector('[data-role="theme-description"]');
+    if (description) {
+      description.classList.toggle('text-[var(--mq-primary-strong)]', isActive);
+      description.classList.toggle('text-[var(--mq-ink)]', !isActive);
+    }
+  };
+
   const progress = loadProgress();
 
   let selectedGradeId =
-    progress.lastGrade && presets.some((p) => p.id === progress.lastGrade)
+    progress.lastGrade && findPreset(progress.lastGrade)
       ? progress.lastGrade
-      : gradeLevelButtons[0]?.dataset.gradeId || presets[0]?.id;
+      : defaultGradeValue;
 
-  const setActiveGrade = (gradeId) => {
-    selectedGradeId = gradeId;
-    gradeButtons.forEach((button) => {
-      const active = button.dataset.gradeId === gradeId;
-      button.setAttribute('aria-pressed', active ? 'true' : 'false');
-      const group = button.dataset.group || 'level';
-      if (group === 'level') {
-        button.classList.toggle('border-[var(--mq-primary)]', active);
-        button.classList.toggle('bg-[var(--mq-primary-soft)]', active);
-        button.classList.toggle('shadow-xl', active);
-      } else {
-        button.classList.toggle('border-[var(--mq-primary)]', active);
-        button.classList.toggle('bg-white', active);
-        button.classList.toggle('bg-[var(--mq-surface)]', !active);
-      }
-    });
-    const preset = presets.find((p) => p.id === gradeId);
+  const fallbackGradeId =
+    progress.lastLevel && gradeIdExists(progress.lastLevel)
+      ? progress.lastLevel
+      : ensureGradeSelection();
+
+  if (fallbackGradeId) {
+    applyGradeRadio(fallbackGradeId);
+    progress.lastLevel = fallbackGradeId;
+  }
+
+  let activeThemeId = null;
+
+  const updateSelectedLabel = (presetId) => {
+    const preset = findPreset(presetId);
     if (preset && selectedGradeLabel) {
-      selectedGradeLabel.textContent = \
+      selectedGradeLabel.textContent =
         preset.label + '：' + preset.description;
     }
+  };
+
+  const setSelectedPreset = (presetId) => {
+    if (!presetId) return;
+    selectedGradeId = presetId;
+    updateSelectedLabel(presetId);
+  };
+
+  const setThemeSelection = (themeId) => {
+    activeThemeId = themeId;
+    themeButtons.forEach((button) => {
+      const isActive = button.dataset.gradeId === themeId;
+      updateThemeButtonAppearance(button, isActive);
+    });
+  };
+
+  if (selectedGradeId && themeIdExists(selectedGradeId)) {
+    setThemeSelection(selectedGradeId);
+  } else {
+    setThemeSelection(null);
+    const gradeToUse = selectedGradeId && gradeIdExists(selectedGradeId)
+      ? selectedGradeId
+      : fallbackGradeId;
+    if (gradeToUse) {
+      selectedGradeId = gradeToUse;
+      applyGradeRadio(gradeToUse);
+    }
+  }
+
+  if (!selectedGradeId && presets[0]) {
+    selectedGradeId = presets[0].id;
+    applyGradeRadio(selectedGradeId);
+  }
+
+  setSelectedPreset(selectedGradeId);
+
+  const applyToggleVisualState = (button, isOn) => {
+    button.classList.toggle('bg-[var(--mq-primary-soft)]', isOn);
+    button.classList.toggle('border-[var(--mq-primary)]', isOn);
+    button.classList.toggle('shadow-md', isOn);
+    button.classList.toggle('bg-white', !isOn);
+    button.classList.toggle('border-[var(--mq-outline)]', !isOn);
+    button.classList.toggle('shadow-sm', !isOn);
   };
 
   const toggleButton = (button, force) => {
@@ -107,8 +205,7 @@ const MODULE_SOURCE = `
         ? force
         : button.dataset.state !== 'on';
     button.dataset.state = nextState ? 'on' : 'off';
-    button.classList.toggle('bg-[var(--mq-primary-soft)]', nextState);
-    button.classList.toggle('border-[var(--mq-primary)]', nextState);
+    applyToggleVisualState(button, nextState);
   };
 
   const loadBoolean = (key, fallback) => {
@@ -126,7 +223,10 @@ const MODULE_SOURCE = `
     try {
       const raw = localStorage.getItem(QUESTION_COUNT_STORAGE_KEY);
       const value = Number(raw);
-      if (Number.isFinite(value) && questionCountRadios.some((r) => Number(r.value) === value)) {
+      if (
+        Number.isFinite(value) &&
+        questionCountRadios.some((r) => Number(r.value) === value)
+      ) {
         return value;
       }
     } catch (e) {
@@ -148,28 +248,40 @@ const MODULE_SOURCE = `
     }
   };
 
-  // 初期化
-  if (selectedGradeId) {
-    setActiveGrade(selectedGradeId);
-  }
   applyQuestionCount(loadQuestionCount());
   toggleButton(soundToggle, loadBoolean(SOUND_STORAGE_KEY, true));
   toggleButton(stepsToggle, loadBoolean(WORKING_STORAGE_KEY, true));
   toggleButton(focusToggle, loadBoolean(FOCUS_STORAGE_KEY, false));
 
-  const attachSelectionHandler = (buttonList) => {
-    buttonList.forEach((button) => {
-      button.addEventListener('click', () => {
-        const gid = button.dataset.gradeId;
-        if (gid) {
-          setActiveGrade(gid);
-        }
-      });
+  gradeRadios.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      if (!radio.checked) return;
+      setThemeSelection(null);
+      setSelectedPreset(radio.value);
+      progress.lastLevel = radio.value;
     });
-  };
+  });
 
-  attachSelectionHandler(gradeLevelButtons);
-  attachSelectionHandler(themeButtons);
+  themeButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const themeId = button.dataset.gradeId;
+      if (!themeId) return;
+
+      if (activeThemeId === themeId) {
+        setThemeSelection(null);
+        const currentGradeId = ensureGradeSelection();
+        if (currentGradeId) {
+          setSelectedPreset(currentGradeId);
+          progress.lastLevel = currentGradeId;
+        }
+        return;
+      }
+
+      setThemeSelection(themeId);
+      setSelectedPreset(themeId);
+      progress.lastLevel = ensureGradeSelection();
+    });
+  });
 
   [soundToggle, stepsToggle, focusToggle].forEach((button) => {
     if (!button) return;
@@ -177,7 +289,16 @@ const MODULE_SOURCE = `
   });
 
   startButton.addEventListener('click', () => {
-    const grade = presets.find((p) => p.id === selectedGradeId) || presets[0];
+    if (!selectedGradeId) {
+      const ensured = ensureGradeSelection();
+      if (ensured && findPreset(ensured)) {
+        selectedGradeId = ensured;
+      } else if (presets[0]) {
+        selectedGradeId = presets[0].id;
+      }
+    }
+
+    const grade = findPreset(selectedGradeId) || presets[0];
     if (!grade) {
       alert('学年の読み込みに失敗しました。ページを再読み込みしてください。');
       return;
@@ -200,6 +321,7 @@ const MODULE_SOURCE = `
       console.warn('failed to persist settings', e);
     }
 
+    progress.lastLevel = ensureGradeSelection();
     progress.lastGrade = grade.id;
     saveProgress(progress);
 

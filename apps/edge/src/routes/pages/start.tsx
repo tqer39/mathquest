@@ -61,25 +61,26 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           class="grid gap-3 sm:grid-cols-3 xl:grid-cols-6"
         >
           {gradeLevels.map((preset, index) => (
-            <button
-              key={preset.id}
-              data-grade-id={preset.id}
-              data-mode={preset.mode}
-              data-max={preset.max}
-              data-label={preset.label}
-              data-description={preset.description}
-              data-group="level"
-              aria-pressed={index === 0 ? 'true' : 'false'}
-              class="grade-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-              type="button"
-            >
-              <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
-                {preset.label}
-              </p>
-              <p class="text-base font-semibold text-[var(--mq-ink)]">
-                {preset.description}
-              </p>
-            </button>
+            <label key={preset.id} class="group cursor-pointer">
+              <input
+                type="radio"
+                name="grade-selection"
+                value={preset.id}
+                data-group="level"
+                data-mode={preset.mode}
+                data-max={preset.max}
+                class="peer sr-only"
+                defaultChecked={index === 0}
+              />
+              <div class="grade-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
+                <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
+                  {preset.label}
+                </p>
+                <p class="text-base font-semibold text-[var(--mq-ink)]">
+                  {preset.description}
+                </p>
+              </div>
+            </label>
           ))}
         </div>
 
@@ -94,18 +95,23 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             {practiceThemes.map((preset) => (
               <button
                 key={preset.id}
+                type="button"
                 data-grade-id={preset.id}
                 data-mode={preset.mode}
                 data-max={preset.max}
-                data-label={preset.label}
-                data-description={preset.description}
-                data-group="theme"
+                class="theme-card group rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                 aria-pressed="false"
-                class="theme-card rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
-                type="button"
               >
-                <p class="text-sm font-bold text-[#5e718a]">{preset.label}</p>
-                <p class="text-sm font-semibold text-[var(--mq-ink)]">
+                <p
+                  data-role="theme-title"
+                  class="text-sm font-bold text-[#5e718a] transition-colors"
+                >
+                  {preset.label}
+                </p>
+                <p
+                  data-role="theme-description"
+                  class="text-sm font-semibold text-[var(--mq-ink)] transition-colors"
+                >
                   {preset.description}
                 </p>
               </button>

@@ -457,6 +457,13 @@ const MODULE_SOURCE = `
       questionCountRadios.find((radio) => radio.checked)?.value || 10
     );
 
+    const selectedCalculationRadio = document.querySelector(
+      'input[name="calculation-type-selection"]:checked'
+    );
+    const selectedCalculationType = selectedCalculationRadio
+      ? calculationTypes.find((calc) => calc.id === selectedCalculationRadio.value)
+      : null;
+
     const soundEnabled = soundToggle?.dataset.state !== 'off';
     const workingEnabled = stepsToggle?.dataset.state !== 'off';
 
@@ -510,6 +517,14 @@ const MODULE_SOURCE = `
             id: themePreset.id,
             label: themePreset.label,
             description: themePreset.description,
+          }
+        : null,
+      calculationType: selectedCalculationType
+        ? {
+            id: selectedCalculationType.id,
+            label: selectedCalculationType.label,
+            description: selectedCalculationType.description,
+            mode: selectedCalculationType.mode,
           }
         : null,
     };

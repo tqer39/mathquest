@@ -199,6 +199,7 @@ const MODULE_SOURCE = `
                 description: activeTheme.description,
               }
             : null,
+        calculationType,
         createdAt: Date.now(),
       })
     );
@@ -218,6 +219,7 @@ const MODULE_SOURCE = `
       activeTheme && (!baseGradePreset || activeTheme.id !== baseGradePreset.id)
         ? activeTheme
         : null,
+    calculationType,
     questionCount: Number(activeSession.questionCount) || loadQuestionCount(),
     soundEnabled:
       typeof activeSession.soundEnabled === 'boolean'
@@ -270,9 +272,12 @@ const MODULE_SOURCE = `
       return;
     }
 
-    const modeLabel = determineModeLabel(baseMode);
+    const modeLabel = state.calculationType?.label
+      ? state.calculationType.label
+      : determineModeLabel(state.calculationType?.mode || baseMode);
+
     gradeLabelEl.textContent = baseLabel + ' / ' + modeLabel;
-    contextLabelEl.textContent = baseDescription;
+    contextLabelEl.textContent = state.calculationType?.description ?? baseDescription;
   };
 
   updateContextLabel();
@@ -422,6 +427,14 @@ const MODULE_SOURCE = `
             id: state.theme.id,
             label: state.theme.label,
             description: state.theme.description,
+          }
+        : null,
+      calculationType: state.calculationType
+        ? {
+            id: state.calculationType.id,
+            label: state.calculationType.label,
+            description: state.calculationType.description,
+            mode: state.calculationType.mode,
           }
         : null,
       createdAt: Date.now(),

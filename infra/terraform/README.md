@@ -6,7 +6,7 @@ DDD の考え方で「ユースケース単位のモジュール」を `modules/
 
 - `modules/domain-register-delegate`: Google Cloud Domains でドメインを新規登録し、DNS を Cloudflare へ委任（Zone 作成含む）
 - `modules/cf-app-resources`: Cloudflare Workers アプリ向けの D1 / KV / Turnstile をまとめて作成
-- `envs/prod`: 本番用。`sansu.dev` を登録・委任するエントリポイント
+- `envs/prod`: 本番用。`mathquest.app` を登録・委任するエントリポイント
 - `envs/dev`: モジュール利用例（通常は apply しない）
 
 前提

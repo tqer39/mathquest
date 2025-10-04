@@ -1,13 +1,13 @@
 # prod 環境: ドメイン登録 + Cloudflare 委任
 
-この環境は `sansu.dev` を Google Cloud Domains で新規登録し、DNS を Cloudflare に委任します。
+この環境は `mathquest.app` を Google Cloud Domains で新規登録し、DNS を Cloudflare に委任します。
 
 注意: 実行には料金が発生します。`plan` で内容・価格を確認し、連絡先情報は必ず実情報に置換してください。
 
 ## 変数例 (`terraform.tfvars`)
 
 ```hcl
-root_domain            = "sansu.dev"
+root_domain            = "mathquest.app"
 gcp_project_id         = "your-gcp-project-id"
 cloudflare_account_id  = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 cloudflare_api_token   = "cf-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -31,7 +31,7 @@ yearly_price_units    = 12
 project_slug                 = "mathquest"
 environment_name             = "prod"
 d1_database_name             = "mathquest"
-turnstile_additional_domains = ["app.sansu.dev"]
+turnstile_additional_domains = ["app.mathquest.app"]
 turnstile_widget_mode        = "managed"
 turnstile_region             = "world"
 ```

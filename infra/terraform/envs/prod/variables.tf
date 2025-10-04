@@ -1,7 +1,7 @@
 variable "root_domain" {
-  description = "取得するルートドメイン (例: sansu.dev)"
+  description = "取得するルートドメイン (例: mathquest.app)"
   type        = string
-  default     = "sansu.dev"
+  default     = "mathquest.app"
 }
 
 variable "gcp_project_id" {

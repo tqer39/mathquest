@@ -170,6 +170,15 @@ const MODULE_SOURCE = `
   const activeTheme =
     themeFromSession || (!preset.id.startsWith('grade-') ? preset : null);
 
+  const calculationType = session?.calculationType?.id
+    ? {
+        id: session.calculationType.id,
+        label: session.calculationType.label,
+        description: session.calculationType.description,
+        mode: session.calculationType.mode,
+      }
+    : null;
+
   if (!session) {
     sessionStorage.setItem(
       SESSION_STORAGE_KEY,

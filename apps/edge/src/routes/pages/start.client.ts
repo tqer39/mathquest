@@ -109,24 +109,6 @@ const MODULE_SOURCE = `
     if (!button) return;
     button.dataset.selected = isActive ? 'true' : 'false';
     button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    button.classList.toggle('border-[var(--mq-primary)]', isActive);
-    button.classList.toggle('border-[var(--mq-outline)]', !isActive);
-    button.classList.toggle('bg-[var(--mq-primary-soft)]', isActive);
-    button.classList.toggle('bg-[var(--mq-surface)]', !isActive);
-    button.classList.toggle('shadow-md', isActive);
-    button.classList.toggle('shadow-sm', !isActive);
-
-    const title = button.querySelector('[data-role="theme-title"]');
-    if (title) {
-      title.classList.toggle('text-[var(--mq-primary-strong)]', isActive);
-      title.classList.toggle('text-[#5e718a]', !isActive);
-    }
-
-    const description = button.querySelector('[data-role="theme-description"]');
-    if (description) {
-      description.classList.toggle('text-[var(--mq-primary-strong)]', isActive);
-      description.classList.toggle('text-[var(--mq-ink)]', !isActive);
-    }
   };
 
   const progress = loadProgress();
@@ -190,15 +172,6 @@ const MODULE_SOURCE = `
 
   setSelectedPreset(selectedGradeId);
 
-  const applyToggleVisualState = (button, isOn) => {
-    button.classList.toggle('bg-[var(--mq-primary-soft)]', isOn);
-    button.classList.toggle('border-[var(--mq-primary)]', isOn);
-    button.classList.toggle('shadow-md', isOn);
-    button.classList.toggle('bg-white', !isOn);
-    button.classList.toggle('border-[var(--mq-outline)]', !isOn);
-    button.classList.toggle('shadow-sm', !isOn);
-  };
-
   const toggleButton = (button, force) => {
     if (!button) return;
     const nextState =
@@ -206,7 +179,6 @@ const MODULE_SOURCE = `
         ? force
         : button.dataset.state !== 'on';
     button.dataset.state = nextState ? 'on' : 'off';
-    applyToggleVisualState(button, nextState);
   };
 
   const loadBoolean = (key, fallback) => {

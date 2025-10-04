@@ -1,33 +1,34 @@
-# boilerplate-base
+# MathQuest
 
-A base boilerplate template for projects with pre-configured development tools and workflows.
+MathQuest is an elementary-school math learning platform built on a Hono-based SSR application that targets Cloudflare Workers.
+The repository bundles the edge runtime, supporting API/frontend packages, and Terraform-managed infrastructure so the team can
+iterate on product, platform, and operations from a single mono-repo.
 
 ## Quick Start
 
 ### Prerequisites
 
-This project uses different tools for different purposes:
+This project relies on a small toolchain:
 
-- **Homebrew**: System-level development tools
-- **mise**: Programming language version management
-- **just**: Task automation and command runner
+- **Homebrew** (macOS/Linux): System-level development tools (mise, just, git, pre-commit, uv, etc.)
+- **mise**: Installs the runtime tool versions declared in `.tool-versions` (Node.js 22, pnpm 10, Terraform, Wrangler)
+- **just**: Task runner that wires the setup/lint/dev workflows
+- **pnpm**: JavaScript package manager used across the workspace (installed via mise during `just setup`)
 
 ### Setup
 
 ```bash
-# 1. Install Homebrew (if not already installed)
+# 1. (macOS/Linux) Install Homebrew and Brewfile packages
 make bootstrap
 
-# 2. Install all development tools
-brew bundle install
-
-# 3. Setup development environment
+# 2. Install language/toolchain versions and JS dependencies via mise + pnpm
 just setup
 ```
 
-**Alternative one-command setup** (if Homebrew is already installed):
+If Homebrew is already installed you can skip `make bootstrap` and instead run:
 
 ```bash
+brew bundle install
 just setup
 ```
 
@@ -59,10 +60,11 @@ just status
 
 This setup clearly separates tool responsibilities:
 
-- **brew**: System-level development tools (git, pre-commit, mise, just, uv)
-- **mise**: Node.js version management only
-- **uv**: Python package and project management
-- **pre-commit**: Handles all linting tools automatically (no need to install separately)
+- **brew**: System-level development tools (git, pre-commit, mise, just, uv, rulesync, cf-vault, aws-vault)
+- **mise**: Installs runtime tools defined in `.tool-versions` (Node.js, pnpm, Terraform, Wrangler)
+- **pnpm**: Manages JavaScript/TypeScript workspaces under `apps/` and `packages/`
+- **uv**: Python package and project management (used for supporting scripts)
+- **pre-commit**: Runs all linting/formatting hooks automatically (no need to install each hook manually)
 
 ### Optional AI CLI Tools
 

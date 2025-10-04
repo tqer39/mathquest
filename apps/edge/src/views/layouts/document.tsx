@@ -108,7 +108,7 @@ export const Document: FC<DocumentProps> = ({
             class="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-[#5e718a] sm:flex-row sm:items-center sm:justify-between"
           >
             <a
-              href="https://github.com/takeruooyama/mathquest"
+              href="https://github.com/tqer39/mathquest"
               class="inline-flex items-center gap-2 font-semibold text-[var(--mq-primary-strong)] transition hover:-translate-y-0.5 hover:text-[var(--mq-ink)]"
               target="_blank"
               rel="noreferrer"

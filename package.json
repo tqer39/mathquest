@@ -12,11 +12,16 @@
     "dev:web": "pnpm --filter @mathquest/web run dev",
     "dev:edge": "pnpm --filter @mathquest/domain run build && pnpm --filter @mathquest/edge run dev",
     "clean": "pnpm --filter @mathquest/domain run clean && pnpm --filter @mathquest/app run clean && pnpm --filter @mathquest/api run clean && pnpm --filter @mathquest/web run clean",
-    "format": "pre-commit run prettier --all-files",
+    "format": "pnpm run format:biome && pnpm run format:prettier",
+    "format:biome": "pnpm exec biome format --write .",
+    "format:prettier": "pre-commit run prettier --all-files",
     "format:staged": "pre-commit run prettier",
+    "lint:biome": "pnpm exec biome lint .",
+    "lint:biome:fix": "pnpm exec biome check --write .",
     "drizzle:generate": "pnpm --filter @mathquest/edge run drizzle:generate"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.7.3",
     "wrangler": "4"
   }
 }

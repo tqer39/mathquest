@@ -64,7 +64,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           MQ
         </span>
         <span class="text-lg font-semibold tracking-tight text-[var(--mq-ink)]">
-          設定ウィザード
+          れんしゅうの じゅんび
         </span>
       </div>
       <a

@@ -7,6 +7,8 @@ import type { Env } from './env';
 import { i18n } from './middlewares/i18n';
 import { quiz } from './routes/apis/quiz';
 import { Home } from './routes/pages/home';
+import { Start } from './routes/pages/start';
+import { Play } from './routes/pages/play';
 import { resolveCurrentUser } from './application/session/current-user';
 import { Document } from './views/layouts/document';
 
@@ -42,6 +44,22 @@ app.get('/', (c) =>
     title: 'MathQuest | じぶんのペースで楽しく算数練習',
     description:
       '学年別の単元から選んで算数を練習。匿名で始めて、記録を残したくなったら会員登録できる学習アプリです。',
+  })
+);
+
+app.get('/start', (c) =>
+  c.render(<Start currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
+    title: 'MathQuest | 設定ウィザード',
+    description:
+      '学年・単元とプレイ設定をまとめて選択し、集中モードで算数ミッションを始めましょう。',
+  })
+);
+
+app.get('/play', (c) =>
+  c.render(<Play currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
+    title: 'MathQuest | 練習セッション',
+    description:
+      '選択した学年の問題に挑戦します。カウントダウン後にテンキーで解答し、途中式を確認できます。',
   })
 );
 

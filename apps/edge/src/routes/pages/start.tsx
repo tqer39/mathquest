@@ -1,0 +1,199 @@
+import type { FC } from 'hono/jsx';
+import { html } from 'hono/html';
+import type { CurrentUser } from '../../application/session/current-user';
+import { gradeLevels, practiceThemes, gradePresets } from './grade-presets';
+import { renderStartClientScript } from './start.client';
+
+const questionCountOptions = [10, 20, 30] as const;
+
+export const Start: FC<{ currentUser: CurrentUser | null }> = ({
+  currentUser,
+}) => (
+  <div
+    id="start-root"
+    class="flex min-h-screen w-full flex-col gap-8 px-4 py-8 sm:px-8 lg:px-16 xl:px-24"
+    data-user-state={currentUser ? 'known' : 'anonymous'}
+  >
+    <nav class="flex flex-col gap-3 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--mq-primary-soft)] text-base font-bold text-[var(--mq-primary-strong)]">
+          MQ
+        </span>
+        <span class="text-lg font-semibold tracking-tight text-[var(--mq-ink)]">
+          設定ウィザード
+        </span>
+      </div>
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+      >
+        ← トップに戻る
+      </a>
+    </nav>
+
+    <header class="space-y-3">
+      <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
+        Step 1
+      </p>
+      <h1 class="text-3xl font-extrabold text-[var(--mq-ink)]">
+        学年と設定をえらぼう
+      </h1>
+      <p class="max-w-2xl text-sm text-[#4f6076]">
+        下のカードから学年（または練習テーマ）をえらび、右側で効果音・途中式・集中モードと問題数をまとめて調整します。設定はブラウザに保存されるので、次回はそのまま再開できます。
+      </p>
+    </header>
+
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <section id="grade-step" class="space-y-5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-[var(--mq-ink)]">
+            学年をえらぶ
+          </h2>
+          <p
+            id="selected-grade-label"
+            class="text-sm font-semibold text-[#5e718a]"
+          >
+            {gradeLevels[0].label}：{gradeLevels[0].description}
+          </p>
+        </div>
+        <div
+          id="grade-level-grid"
+          class="grid gap-3 sm:grid-cols-3 xl:grid-cols-6"
+        >
+          {gradeLevels.map((preset, index) => (
+            <button
+              key={preset.id}
+              data-grade-id={preset.id}
+              data-mode={preset.mode}
+              data-max={preset.max}
+              data-label={preset.label}
+              data-description={preset.description}
+              data-group="level"
+              aria-pressed={index === 0 ? 'true' : 'false'}
+              class="grade-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+              type="button"
+            >
+              <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
+                {preset.label}
+              </p>
+              <p class="text-base font-semibold text-[var(--mq-ink)]">
+                {preset.description}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        <div class="space-y-2">
+          <p class="text-sm font-semibold text-[var(--mq-ink)]">
+            テーマでえらぶ（任意）
+          </p>
+          <p class="text-xs text-[#5e718a]">
+            集中して取り組みたいテーマがあれば、こちらから選択できます。
+          </p>
+          <div id="theme-grid" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {practiceThemes.map((preset) => (
+              <button
+                key={preset.id}
+                data-grade-id={preset.id}
+                data-mode={preset.mode}
+                data-max={preset.max}
+                data-label={preset.label}
+                data-description={preset.description}
+                data-group="theme"
+                aria-pressed="false"
+                class="theme-card rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+                type="button"
+              >
+                <p class="text-sm font-bold text-[#5e718a]">{preset.label}</p>
+                <p class="text-sm font-semibold text-[var(--mq-ink)]">
+                  {preset.description}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="settings-step"
+        class="space-y-5 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg"
+      >
+        <h2 class="text-xl font-semibold text-[var(--mq-ink)]">プレイ設定</h2>
+        <fieldset class="space-y-3">
+          <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
+            問題数
+          </legend>
+          <div class="flex flex-wrap gap-3 text-sm font-semibold">
+            {questionCountOptions.map((count, idx) => (
+              <label
+                key={count}
+                class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)]"
+              >
+                <input
+                  type="radio"
+                  name="question-count"
+                  value={count}
+                  defaultChecked={idx === 0}
+                  class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                />
+                {count}問
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset class="space-y-3">
+          <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
+            ON / OFF 設定
+          </legend>
+          <div class="grid gap-3 sm:grid-cols-3">
+            <button
+              id="toggle-sound"
+              type="button"
+              data-state="on"
+              class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+            >
+              <span>🔊 効果音</span>
+              <span class="text-xs text-[#5e718a]">
+                キー操作や正解時のサウンド
+              </span>
+            </button>
+            <button
+              id="toggle-steps"
+              type="button"
+              data-state="on"
+              class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+            >
+              <span>🧮 途中式</span>
+              <span class="text-xs text-[#5e718a]">計算の流れを自動で表示</span>
+            </button>
+            <button
+              id="toggle-focus"
+              type="button"
+              data-state="off"
+              class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+            >
+              <span>🎯 集中モード</span>
+              <span class="text-xs text-[#5e718a]">
+                余計な要素を隠して問題に集中
+              </span>
+            </button>
+          </div>
+        </fieldset>
+
+        <button
+          id="start-session"
+          type="button"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[var(--mq-primary)] px-6 py-3 text-lg font-semibold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary-strong)]"
+        >
+          つぎへ（カウントダウン）
+        </button>
+        <p class="text-xs text-[#5e718a]">
+          設定はブラウザに保存されます。会員登録すると学習記録をクラウドにも同期できます。
+        </p>
+      </section>
+    </div>
+
+    {renderStartClientScript(gradePresets)}
+  </div>
+);

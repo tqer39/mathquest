@@ -1,64 +1,61 @@
-# prod/bootstrap: R2 に tfstate を保管するための初期化
+# prod/bootstrap: 本番環境向け Cloudflare / IAM 初期化
 
-目的
+このディレクトリは、本番環境 (`prod`) で利用する Cloudflare リソース（D1 / Workers KV / Turnstile など）と GitHub Actions からのデプロイ用 IAM ロールを Terraform でセットアップするためのブートストラップです。
 
-- まず手動で R2 バケットを作成し（または wrangler で作成）、Terraform の `import` ブロックで取り込んで管理下に置きます。
-- その後、`envs/prod` など本体側のバックエンドを R2(S3 互換) に切り替えます。
+開発環境 (`dev/bootstrap`) と同じ構成をベースにしており、以下を行います。
 
-手順
+- GitHub Actions から Assume する IAM ロールの作成
+- Cloudflare アカウント内に D1・Workers KV・Turnstile を環境名付きで作成
 
-1. R2 バケットを手動作成（どちらか）
+状態ファイルは AWS S3 バケットに保存します。初回実行前に `terraform { backend "s3" { ... } }` で指定しているバケットが存在している必要があります。（`dev/bootstrap` と同じバケットを共有し、`key` だけ環境毎に分けています。）
 
-- Cloudflare ダッシュボード → R2 → Create bucket（例: `mathquest-tfstate`）
-- もしくは wrangler
+## 前提条件
 
-  ```sh
-  wrangler r2 bucket create mathquest-tfstate
-  ```
+- AWS アカウント（`ap-northeast-1` リージョンで IAM 操作が可能な権限）
+- AWS CLI が認証済み (`AWS_PROFILE` もしくは `AWS_ACCESS_KEY_ID` などを設定)
+- Cloudflare アカウント（D1 / Workers KV / Turnstile を作成できる API Token）
+- Terraform 1.13.3
 
-1. `terraform.tfvars` を用意
+## 変数の設定
 
-```hcl
-cloudflare_api_token  = "cf-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-cloudflare_account_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-r2_bucket_name        = "mathquest-tfstate"
-```
-
-1. 取り込み実行（import ブロックを使用）
-
-```sh
-terraform init
-terraform plan   # import 予定が表示される
-terraform apply  # state に取り込み
-```
-
-1. 本体側の backend を R2(S3) に設定
-
-`envs/prod` 側に `backend.tf` を作成し、以下のように設定します（例）。
+最低限、以下の変数を `terraform.tfvars` などで指定してください。
 
 ```hcl
-terraform {
-  backend "s3" {
-    bucket                      = "mathquest-tfstate"
-    key                         = "prod/terraform.tfstate"
-    endpoint                    = "https://${var.cloudflare_account_id}.r2.cloudflarestorage.com"
-    region                      = "auto"
-    skip_credentials_validation = true
-    skip_region_validation      = true
-    skip_requesting_account_id  = true
-    force_path_style            = true
-  }
-}
+cloudflare_account_id   = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+turnstile_allowed_domains = [
+  "mathquest.app",
+  "www.mathquest.app",
+]
 ```
 
-認証は環境変数で渡します（CI でも同様）。
+Turnstile を利用しない場合は `turnstile_allowed_domains = []` のまま適用できます。`d1_database_name` を指定しない場合は `${project_slug}-${app_env_name}` 形式で自動生成されます。
 
-```sh
-export AWS_ACCESS_KEY_ID=<R2のAccess Key>
-export AWS_SECRET_ACCESS_KEY=<R2のSecret Key>
-```
+## 実行手順
 
-補足
+1. バックエンド設定を反映しつつ初期化
 
-- R2 の S3 Access Key/Secret は Cloudflare ダッシュボードで発行してください（Terraform からの発行は対象外）。
-- 先に state バケットを import しておくことで、以降の IaC から R2 を backend として安全に利用できます。
+   ```sh
+   just tf -- -chdir=prod/bootstrap init -reconfigure
+   ```
+
+2. 変数を指定して計画確認
+
+   ```sh
+   just tf -- -chdir=prod/bootstrap plan
+   ```
+
+3. 適用
+
+   ```sh
+   just tf -- -chdir=prod/bootstrap apply
+   ```
+
+実行後、`terraform output` で D1 / KV / Turnstile の識別子やシークレットを確認できます。Turnstile シークレットは `sensitive = true` のため、`terraform output cf_turnstile_widget_secret` を明示的に実行してください。
+
+## 補足
+
+- IAM ポリシー `deploy-allow-specifics` / `deploy-deny-specifics` は既存の AWS アカウントに事前定義されている前提です。
+- Cloudflare API Token は環境変数 `CLOUDFLARE_API_TOKEN` などで provider に渡してください。
+- `dev/bootstrap` と同様に、タグや命名は `shared-locals.tf` の値を修正することで調整できます。
+
+このブートストラップを適用した後は、`envs/prod` 配下のメイン Terraform から作成したリソースを参照することで、本番環境の IaC 管理を進められます。

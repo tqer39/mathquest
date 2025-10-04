@@ -224,7 +224,14 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           つぎへ（カウントダウン）
         </button>
         <p class="text-xs text-[#5e718a]">
-          設定はブラウザに保存されます。会員登録すると学習記録をクラウドにも同期できます。
+          設定はブラウザに保存されます。
+          <a
+            href="/auth/login"
+            class="text-[var(--mq-primary)] hover:text-[var(--mq-primary-strong)] transition-colors cursor-pointer underline"
+          >
+            会員登録
+          </a>
+          すると学習記録をクラウドにも同期できます。
         </p>
       </section>
     </div>

@@ -192,17 +192,15 @@ const MODULE_SOURCE = `
     });
   };
 
-  if (selectedGradeId && themeIdExists(selectedGradeId)) {
-    setThemeSelection(selectedGradeId);
-  } else {
-    setThemeSelection(null);
-    const gradeToUse = selectedGradeId && gradeIdExists(selectedGradeId)
-      ? selectedGradeId
-      : fallbackGradeId;
-    if (gradeToUse) {
-      selectedGradeId = gradeToUse;
-      applyGradeRadio(gradeToUse);
-    }
+  // テーマは初期状態では何も選択しない
+  setThemeSelection(null);
+
+  const gradeToUse = selectedGradeId && gradeIdExists(selectedGradeId)
+    ? selectedGradeId
+    : fallbackGradeId;
+  if (gradeToUse) {
+    selectedGradeId = gradeToUse;
+    applyGradeRadio(gradeToUse);
   }
 
   if (!selectedGradeId && presets[0]) {

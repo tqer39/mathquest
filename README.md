@@ -66,16 +66,6 @@ This setup clearly separates tool responsibilities:
 - **uv**: Python package and project management (used for supporting scripts)
 - **pre-commit**: Runs all linting/formatting hooks automatically (no need to install each hook manually)
 
-### Optional AI CLI Tools
-
-`just setup` no longer installs AI development CLIs automatically. Install them manually if you want the tooling support (for example: `mise exec node -- npm install -g @anthropic-ai/claude-code @google/gemini-cli @openai/codex`).
-
-- **Claude Code CLI**: `@anthropic-ai/claude-code` - For AI-assisted development
-- **Gemini CLI**: `@google/gemini-cli` - Alternative AI assistant
-- **OpenAI Codex CLI**: `@openai/codex` - OpenAI CLI for code workflows
-
-Keeping the installation manual lets each developer decide which AI tools to keep in their environment.
-
 ## Optional: rulesync
 
 If you want to synchronize common config files from an external rules repository, see `docs/RULESYNC.ja.md` for setup and usage.

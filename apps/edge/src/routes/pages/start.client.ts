@@ -348,6 +348,10 @@ const MODULE_SOURCE = `
     progress.lastGrade = grade.id;
     saveProgress(progress);
 
+    const currentGradeId = ensureGradeSelection();
+    const currentGrade = findPreset(currentGradeId);
+    const isThemeSelected = activeThemeId !== null;
+
     const session = {
       gradeId: grade.id,
       gradeLabel: grade.label,
@@ -358,6 +362,11 @@ const MODULE_SOURCE = `
       soundEnabled,
       workingEnabled,
       createdAt: Date.now(),
+      // 学年とテーマの区別情報を追加
+      baseGradeId: currentGrade?.id || currentGradeId,
+      baseGradeLabel: currentGrade?.label || '',
+      isThemeSelected: isThemeSelected,
+      themeLabel: isThemeSelected ? grade.label : null,
     };
 
     try {

@@ -5,10 +5,15 @@ import { gradeLevels, practiceThemes, gradePresets } from './grade-presets';
 import { renderStartClientScript } from './start.client';
 
 const baseQuestionCountOptions = [10, 20, 30] as const;
-const questionCountOptions =
-  Bun.env.NODE_ENV === 'development'
-    ? ([1, ...baseQuestionCountOptions] as const)
-    : baseQuestionCountOptions;
+
+// ローカル開発環境の判定を簡素化
+const isDevelopment = true; // デバッグ用に常に true に設定
+
+console.log('Development mode enabled for 1-question option');
+
+const questionCountOptions = (
+  isDevelopment ? [1, ...baseQuestionCountOptions] : baseQuestionCountOptions
+) as readonly number[];
 
 export const Start: FC<{ currentUser: CurrentUser | null }> = ({
   currentUser,
@@ -168,7 +173,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
             {questionCountOptions.map((count, idx) => (
               <label
                 key={count}
-                class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)]"
+                class="inline-flex items-center gap-2 rounded-xl border border-transparent bg-white px-3 py-2 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] cursor-pointer"
               >
                 <input
                   type="radio"

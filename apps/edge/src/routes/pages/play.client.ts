@@ -41,6 +41,7 @@ const MODULE_SOURCE = `
   const soundToggle = document.getElementById('toggle-sound');
   const stepsToggle = document.getElementById('toggle-steps');
   const gradeLabelEl = document.getElementById('play-grade-label');
+  const themeLabelEl = document.getElementById('play-theme-label');
   const countdownOverlay = document.getElementById('countdown-overlay');
   const countdownNumber = document.getElementById('countdown-number');
   const resultCorrectEl = document.getElementById('result-correct');
@@ -148,6 +149,7 @@ const MODULE_SOURCE = `
   }
 
   const activeSession = loadSession();
+  console.log('Active session:', activeSession);
   if (!activeSession) {
     window.location.href = '/start';
     return;
@@ -173,14 +175,39 @@ const MODULE_SOURCE = `
     awaitingAdvance: false,
   };
 
+  console.log('State grade:', state.grade);
+
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
 
   const toggleButton = (button, force) => {
     if (!button) return;
-    const nextState = typeof force === 'boolean' ? force : button.dataset.state !== 'on';
+    const nextState =
+      typeof force === 'boolean'
+        ? force
+        : button.dataset.state !== 'on';
     button.dataset.state = nextState ? 'on' : 'off';
-    button.classList.toggle('bg-[var(--mq-primary-soft)]', nextState);
-    button.classList.toggle('border-[var(--mq-primary)]', nextState);
+    if (nextState) {
+      button.classList.add('setting-toggle--on');
+      button.style.setProperty('background', 'var(--mq-primary-soft)', 'important');
+      button.style.setProperty('border-color', 'var(--mq-primary)', 'important');
+      button.style.setProperty('box-shadow', '0 10px 24px rgba(15, 23, 42, 0.14)', 'important');
+      button.style.setProperty('transform', 'translateY(-1px)', 'important');
+    } else {
+      button.classList.remove('setting-toggle--on');
+      button.style.removeProperty('background');
+      button.style.removeProperty('border-color');
+      button.style.removeProperty('box-shadow');
+      button.style.removeProperty('transform');
+    }
+
+    const title = button.querySelector('span:first-child');
+    if (title) {
+      if (nextState) {
+        title.style.setProperty('color', 'var(--mq-primary-strong)', 'important');
+      } else {
+        title.style.removeProperty('color');
+      }
+    }
   };
 
   toggleButton(soundToggle, state.soundEnabled);
@@ -564,7 +591,22 @@ const MODULE_SOURCE = `
   }
 
   if (gradeLabelEl) {
-    gradeLabelEl.textContent = activeSession.gradeLabel || state.grade.label;
+    console.log('Setting grade label:', activeSession.gradeLabel, state.grade.label);
+    console.log('Session data:', activeSession);
+
+    if (activeSession.isThemeSelected) {
+      // テーマが選択されている場合：学年 + テーマ表示
+      gradeLabelEl.textContent = activeSession.baseGradeLabel || '学年';
+      if (themeLabelEl) {
+        themeLabelEl.textContent = 'テーマ：' + (activeSession.themeLabel || activeSession.gradeLabel);
+      }
+    } else {
+      // 学年のみ選択されている場合
+      gradeLabelEl.textContent = activeSession.gradeLabel || state.grade.label;
+      if (themeLabelEl) {
+        themeLabelEl.textContent = '';
+      }
+    }
   }
   applyWorkingVisibility();
   renderProgress();

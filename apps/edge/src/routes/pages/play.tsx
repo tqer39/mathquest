@@ -12,6 +12,21 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
     class="relative flex min-h-screen flex-col gap-6 bg-[var(--mq-surface-strong)] px-4 py-8 sm:px-8 lg:px-16 xl:px-24 text-[var(--mq-ink)]"
     data-user-state={currentUser ? 'known' : 'anonymous'}
   >
+    {html`
+      <style>
+        .setting-toggle--on,
+        .setting-toggle[data-state='on'] {
+          background: var(--mq-primary-soft) !important;
+          border-color: var(--mq-primary) !important;
+          box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+          transform: translateY(-1px);
+        }
+        .setting-toggle--on span:first-child,
+        .setting-toggle[data-state='on'] span:first-child {
+          color: var(--mq-primary-strong) !important;
+        }
+      </style>
+    `}
     <nav class="flex items-center justify-between rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] px-6 py-4 shadow-sm">
       <div class="flex flex-col">
         <span class="text-xs font-semibold uppercase tracking-[0.3em] text-[#6c7c90]">
@@ -20,6 +35,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
         <span id="play-grade-label" class="text-lg font-semibold">
           {gradePresets[0].label}
         </span>
+        <span id="play-theme-label" class="text-sm text-[#5e718a]"></span>
       </div>
       <button
         id="endBtn"
@@ -58,17 +74,17 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
               id="toggle-sound"
               type="button"
               data-state="on"
-              class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+              class="setting-toggle inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
             >
-              🔊 効果音
+              <span>🔊 効果音</span>
             </button>
             <button
               id="toggle-steps"
               type="button"
               data-state="on"
-              class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+              class="setting-toggle inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
             >
-              🧮 途中式
+              <span>🧮 途中式</span>
             </button>
           </div>
         </div>

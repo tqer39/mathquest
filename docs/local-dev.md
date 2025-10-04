@@ -43,7 +43,9 @@ Wrangler を使って Cloudflare Workers をローカル実行します。KV/D1 
 - D1 のローカル準備（任意）
   - DB 作成: `wrangler d1 create mathquest`
   - 生成された `database_id` を `apps/edge/wrangler.toml` の `d1_databases` に反映
-  - マイグレーションがある場合: `wrangler d1 migrations apply mathquest`
+  - マイグレーション適用: `wrangler d1 migrations apply DB --local --config apps/edge/wrangler.toml`
+    - `DB` は `wrangler.toml` の `binding` 名を指し、`--config` で設定ファイルを指定することで `infra/migrations` 配下の SQL が適用されます。
+    - `--local` フラグにより、ローカル SQLite ファイルに対してマイグレーションが実行されるため、Wrangler のプレビュー環境に影響を与えません。
   - スキーマ変更時は `pnpm drizzle:generate` で SQL を生成し、上記コマンドで適用
 - データ永続化（開発用）
   - `wrangler dev --persist` を使うと KV/D1 のローカルデータを `.wrangler` ディレクトリに保持できます。

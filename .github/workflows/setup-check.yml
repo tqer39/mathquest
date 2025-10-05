@@ -58,7 +58,7 @@ jobs:
         run: just setup
 
   ubuntu-setup:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       HOMEBREW_NO_AUTO_UPDATE: '1'

@@ -354,7 +354,8 @@ const MODULE_SOURCE = `
   };
 
   const hasWorkingSteps = (question) => {
-    return question && Array.isArray(question.extras) && question.extras.length > 0;
+    // すべての問題で途中式を表示可能にする
+    return question && question.a !== undefined && question.b !== undefined;
   };
 
   const setStepsToggleEnabled = (enabled) => {
@@ -457,6 +458,11 @@ const MODULE_SOURCE = `
       workingEmpty.classList.remove('hidden');
       return;
     }
+    if (!hasWorkingSteps(question)) {
+      workingSteps.innerHTML = '';
+      workingEmpty.classList.remove('hidden');
+      return;
+    }
     workingEmpty.classList.add('hidden');
     workingSteps.innerHTML = '';
 
@@ -466,6 +472,12 @@ const MODULE_SOURCE = `
 
     let currentSum = question.a;
 
+    // 数値を右寄せ表示する関数（小数・負の数対応）
+    const formatNumber = (num) => {
+      const str = String(num);
+      return str.padStart(10, ' ');
+    };
+
     // 最初の計算: a + b
     const step1 = document.createElement('div');
     step1.className = 'space-y-2';
@@ -474,17 +486,17 @@ const MODULE_SOURCE = `
     calc1.className = 'flex flex-col items-end gap-1 font-mono';
 
     const num1 = document.createElement('div');
-    num1.className = 'text-2xl font-bold';
-    num1.textContent = String(question.a).padStart(6, ' ');
+    num1.className = 'text-xl font-bold';
+    num1.textContent = formatNumber(question.a);
     calc1.appendChild(num1);
 
     const num2 = document.createElement('div');
-    num2.className = 'text-2xl font-bold';
-    num2.textContent = question.op + ' ' + String(question.b).padStart(4, ' ');
+    num2.className = 'text-xl font-bold';
+    num2.textContent = question.op + ' ' + formatNumber(question.b).trimStart();
     calc1.appendChild(num2);
 
     const div1 = document.createElement('div');
-    div1.className = 'w-32 border-t-2 border-[var(--mq-primary)] my-1';
+    div1.className = 'w-40 border-t-2 border-[var(--mq-primary)] my-1';
     calc1.appendChild(div1);
 
     currentSum = question.op === '+' ? currentSum + question.b :
@@ -493,8 +505,8 @@ const MODULE_SOURCE = `
                  question.op === '÷' ? currentSum / question.b : currentSum;
 
     const ans1 = document.createElement('div');
-    ans1.className = 'text-2xl font-bold text-[var(--mq-primary-strong)]';
-    ans1.textContent = String(currentSum).padStart(6, ' ');
+    ans1.className = 'text-xl font-bold text-[var(--mq-primary-strong)]';
+    ans1.textContent = formatNumber(currentSum);
     calc1.appendChild(ans1);
 
     step1.appendChild(calc1);
@@ -552,17 +564,17 @@ const MODULE_SOURCE = `
           calcDiv.className = 'flex flex-col items-end gap-1 font-mono';
 
           const prevNum = document.createElement('div');
-          prevNum.className = 'text-2xl font-bold';
-          prevNum.textContent = String(prevSum).padStart(6, ' ');
+          prevNum.className = 'text-xl font-bold';
+          prevNum.textContent = formatNumber(prevSum);
           calcDiv.appendChild(prevNum);
 
           const extraNum = document.createElement('div');
-          extraNum.className = 'text-2xl font-bold';
-          extraNum.textContent = extra.op + ' ' + String(extra.value).padStart(4, ' ');
+          extraNum.className = 'text-xl font-bold';
+          extraNum.textContent = extra.op + ' ' + formatNumber(extra.value).trimStart();
           calcDiv.appendChild(extraNum);
 
           const divider = document.createElement('div');
-          divider.className = 'w-32 border-t-2 border-[var(--mq-primary)] my-1';
+          divider.className = 'w-40 border-t-2 border-[var(--mq-primary)] my-1';
           calcDiv.appendChild(divider);
 
           currentSum = extra.op === '+' ? currentSum + extra.value :
@@ -571,8 +583,8 @@ const MODULE_SOURCE = `
                        extra.op === '÷' ? currentSum / extra.value : currentSum;
 
           const stepAns = document.createElement('div');
-          stepAns.className = 'text-2xl font-bold text-[var(--mq-primary-strong)]';
-          stepAns.textContent = String(currentSum).padStart(6, ' ');
+          stepAns.className = 'text-xl font-bold text-[var(--mq-primary-strong)]';
+          stepAns.textContent = formatNumber(currentSum);
           calcDiv.appendChild(stepAns);
 
           stepDiv.appendChild(calcDiv);
@@ -717,15 +729,8 @@ const MODULE_SOURCE = `
       setAnswerBuffer('');
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
 
-      // 途中式の有無に応じてトグルを有効化/無効化
-      const hasSteps = hasWorkingSteps(question);
-      setStepsToggleEnabled(hasSteps);
-      if (!hasSteps && state.workingEnabled) {
-        // 途中式がない場合は強制的にOFFにする
-        state.workingEnabled = false;
-        toggleButton(stepsToggle, false);
-        applyWorkingVisibility();
-      }
+      // すべての問題で途中式トグルを有効化
+      setStepsToggleEnabled(true);
     } catch (e) {
       console.error(e);
       showFeedback('error', '問題の取得に失敗しました。しばらくしてから再度お試しください。');
@@ -741,7 +746,6 @@ const MODULE_SOURCE = `
     if (againBtn) {
       againBtn.classList.remove('hidden');
     }
-    showFeedback('info', 'おつかれさま！もう一度練習する場合はボタンを押してね');
   };
 
   const handleAnswer = async (value) => {
@@ -895,8 +899,12 @@ const MODULE_SOURCE = `
       if (!(target instanceof HTMLInputElement)) return;
       // setAnswerBuffer()からの更新の場合はスキップ
       if (isUpdatingAnswerBuffer) return;
-      // 半角数字と小数点のみを許可（全角数字などを除去）
-      const filtered = target.value.replace(/[^0-9.]/g, '');
+      // 半角数字、小数点、マイナス記号のみを許可
+      let filtered = target.value.replace(/[^0-9.\-]/g, '');
+      // マイナスは先頭のみ許可
+      if (filtered.indexOf('-') > 0) {
+        filtered = filtered.replace(/-/g, '');
+      }
       if (target.value !== filtered) {
         target.value = filtered;
       }
@@ -912,13 +920,14 @@ const MODULE_SOURCE = `
         handleSubmit();
         return;
       }
-      // 半角数字、小数点、制御キー以外は入力を拒否
+      // 半角数字、小数点、マイナス、制御キー以外は入力を拒否
       const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
       const isNumberKey = event.key >= '0' && event.key <= '9';
       const isDecimalPoint = event.key === '.';
+      const isMinus = event.key === '-' && answerInput.selectionStart === 0;
       const isAllowedControlKey = allowedKeys.includes(event.key);
 
-      if (!isNumberKey && !isDecimalPoint && !isAllowedControlKey) {
+      if (!isNumberKey && !isDecimalPoint && !isMinus && !isAllowedControlKey) {
         event.preventDefault();
       }
     });
@@ -950,13 +959,30 @@ const MODULE_SOURCE = `
     button.addEventListener('click', () => {
       if (!state.sessionActive) return;
       const key = button.dataset.key;
-      // 待機状態の場合は数字入力とバックスペースは無効
+      // 待機状態の場合は数字入力等は無効
       if (state.awaitingAdvance) return;
-      if (key === 'back') {
-        setAnswerBuffer(state.answerBuffer.slice(0, -1));
+
+      // cspell:ignore plusminus
+      if (key === 'plusminus') {
+        // +/-ボタン: 符号を反転
+        if (state.answerBuffer.startsWith('-')) {
+          setAnswerBuffer(state.answerBuffer.slice(1));
+        } else if (state.answerBuffer.length > 0) {
+          setAnswerBuffer('-' + state.answerBuffer);
+        }
         playSound('keypad');
         return;
       }
+
+      if (key === '.') {
+        // 小数点ボタン: 既に小数点がある場合は追加しない
+        if (!state.answerBuffer.includes('.')) {
+          setAnswerBuffer(state.answerBuffer + '.');
+        }
+        playSound('keypad');
+        return;
+      }
+
       setAnswerBuffer(state.answerBuffer + key);
       playSound('keypad');
     });
@@ -983,8 +1009,6 @@ const MODULE_SOURCE = `
     stepsToggle.addEventListener('click', () => {
       // 無効化されている場合はクリックを無視
       if (stepsToggle.hasAttribute('disabled')) return;
-      // 途中式がない問題の場合はクリックを無視
-      if (!hasWorkingSteps(state.currentQuestion)) return;
 
       state.workingEnabled = !state.workingEnabled;
       toggleButton(stepsToggle, state.workingEnabled);

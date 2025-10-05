@@ -285,9 +285,9 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             <button
               type="button"
               class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)]"
-              data-key="back"
+              data-key="plusminus"
             >
-              ⌫
+              +/−
             </button>
             <button
               type="button"
@@ -298,7 +298,16 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             </button>
             <button
               type="button"
-              class="keypad-button rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
+              class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+              data-key="."
+            >
+              .
+            </button>
+          </div>
+          <div class="mt-3">
+            <button
+              type="button"
+              class="keypad-button w-full rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
               data-key="submit"
             >
               =

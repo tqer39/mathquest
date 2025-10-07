@@ -347,12 +347,25 @@ const MODULE_SOURCE = `
   };
 
   const setSubmitButtonEnabled = (enabled) => {
-    [submitBtn, keypadSubmitButton].forEach((btn) => {
-      if (!btn) return;
-      btn.classList.toggle('keypad-button--disabled', !enabled);
-      btn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
-      btn.tabIndex = enabled ? 0 : -1;
-    });
+    if (submitBtn) {
+      submitBtn.classList.toggle('keypad-button--disabled', !enabled);
+      submitBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      submitBtn.tabIndex = enabled ? 0 : -1;
+    }
+  };
+
+  const updateSubmitButtonText = (isAdvancing) => {
+    if (submitBtn) {
+      submitBtn.textContent = isAdvancing ? 'つぎの問題' : 'こたえる';
+    }
+  };
+
+  const setKeypadSubmitButtonState = (enabled, isAdvancing) => {
+    if (!keypadSubmitButton) return;
+    keypadSubmitButton.classList.toggle('keypad-button--disabled', !enabled);
+    keypadSubmitButton.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    keypadSubmitButton.tabIndex = enabled ? 0 : -1;
+    keypadSubmitButton.textContent = isAdvancing ? '→' : '=';
   };
 
   const setSkipButtonEnabled = (enabled) => {
@@ -388,8 +401,17 @@ const MODULE_SOURCE = `
   const refreshSubmitButtonState = () => {
     const hasInput = state.answerBuffer.length > 0;
     const isWaiting = state.awaitingAdvance;
-    const shouldEnable = state.sessionActive && (hasInput || isWaiting);
-    setSubmitButtonEnabled(shouldEnable);
+
+    // 待機状態では「つぎの問題」、通常は「こたえる」
+    updateSubmitButtonText(isWaiting);
+
+    // 待機状態ではテキストボタンは常に有効、通常は入力がある場合のみ有効
+    const shouldEnableSubmit = state.sessionActive && (isWaiting || hasInput);
+    setSubmitButtonEnabled(shouldEnableSubmit);
+
+    // キーパッドの = ボタンは待機状態では有効、通常は入力がある場合のみ有効
+    const shouldEnableKeypad = state.sessionActive && (isWaiting || hasInput);
+    setKeypadSubmitButtonState(shouldEnableKeypad, isWaiting);
   };
 
   const playSound = (variant) => {
@@ -1193,7 +1215,10 @@ const MODULE_SOURCE = `
   if (keypadSubmitButton) {
     keypadSubmitButton.addEventListener('click', () => {
       if (!state.sessionActive) return;
-      playSound('success');
+      // 待機状態でない場合のみ音を鳴らす
+      if (!state.awaitingAdvance) {
+        playSound('success');
+      }
       handleSubmit();
     });
   }

@@ -551,6 +551,60 @@ const MODULE_SOURCE = `
       }
     }
 
+    // かけ算の説明を追加
+    if (question.op === '×' && question.a >= 10 && question.b >= 10) {
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+      // 筆算形式の説明を生成
+      const bStr = String(question.b);
+      const steps = [];
+      let stepResults = [];
+
+      // 各桁ごとの掛け算を計算
+      for (let i = bStr.length - 1; i >= 0; i--) {
+        const digit = Number(bStr[i]);
+        const place = bStr.length - 1 - i;
+        const multiplier = digit * Math.pow(10, place);
+        const result = question.a * digit * Math.pow(10, place);
+
+        if (digit !== 0) {
+          steps.push({
+            digit,
+            place,
+            multiplier,
+            result,
+            displayResult: question.a * digit
+          });
+          stepResults.push(result);
+        }
+      }
+
+      let html = '<div class="font-semibold mb-1">💡 かけ算の説明:</div>';
+
+      // 各桁の計算を説明
+      steps.forEach((step, index) => {
+        const placeName = step.place === 0 ? '一のくらい' :
+                         step.place === 1 ? '十のくらい' :
+                         step.place === 2 ? '百のくらい' : step.place + '桁目';
+        html += '<div>① ' + placeName + ': ' + question.a + ' × ' + step.digit;
+        if (step.place > 0) {
+          html += ' (×' + Math.pow(10, step.place) + ')';
+        }
+        html += ' = ' + step.result + '</div>';
+      });
+
+      // 足し算の説明
+      if (steps.length > 1) {
+        html += '<div>② 各結果を足す: ' + stepResults.join(' + ') + ' = ' + currentSum + '</div>';
+      }
+
+      html += '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+      detailDiv.innerHTML = html;
+      explain1.appendChild(detailDiv);
+    }
+
     const simpleExplain1 = document.createElement('div');
     simpleExplain1.className = 'text-center';
     simpleExplain1.textContent = question.a + ' ' + question.op + ' ' + question.b + ' = ' + currentSum;

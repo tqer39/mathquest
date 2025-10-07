@@ -321,13 +321,22 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             正解 <span id="result-correct">0</span> /{' '}
             <span id="result-total">0</span>
           </p>
-          <button
-            id="againBtn"
-            type="button"
-            class="hidden w-full rounded-2xl bg-[var(--mq-primary)] px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-md transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
-          >
-            もういちど練習する
-          </button>
+          <div id="result-actions" class="hidden flex flex-col gap-2">
+            <button
+              id="againBtn"
+              type="button"
+              class="w-full rounded-2xl bg-[var(--mq-primary)] px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-md transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
+            >
+              もういちど練習する
+            </button>
+            <button
+              id="endResultBtn"
+              type="button"
+              class="w-full rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-surface-strong)]"
+            >
+              やめる
+            </button>
+          </div>
         </div>
       </aside>
     </main>

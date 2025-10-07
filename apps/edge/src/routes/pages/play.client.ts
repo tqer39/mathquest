@@ -551,6 +551,32 @@ const MODULE_SOURCE = `
       }
     }
 
+    // 引き算の繰り下がりの説明を追加
+    if (question.op === '-') {
+      const ones1 = question.a % 10;
+      const tens1 = Math.floor(question.a / 10);
+      const ones2 = question.b % 10;
+      const tens2 = Math.floor(question.b / 10);
+      const needsBorrow = ones1 < ones2;
+
+      if (needsBorrow) {
+        const detailDiv = document.createElement('div');
+        detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+        const borrowedOnes = ones1 + 10;
+        const onesResult = borrowedOnes - ones2;
+        const tensResult = tens1 - 1 - tens2;
+
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 くりさがりの説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' では ' + ones2 + ' をひけないので、十のくらいから 10 をかりる</div>' +
+          '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+          '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+
+        explain1.appendChild(detailDiv);
+      }
+    }
+
     // かけ算の説明を追加
     if (question.op === '×' && question.a >= 10 && question.b >= 10) {
       const detailDiv = document.createElement('div');
@@ -678,6 +704,32 @@ const MODULE_SOURCE = `
                 '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
                 (carry > 0 ? ' + ' + carry + '(くりあがり)' : '') + ' = ' + tensSum + '</div>' +
                 '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+
+              explain.appendChild(detailDiv);
+            }
+          }
+
+          // 引き算の繰り下がりの説明を追加
+          if (extra.op === '-') {
+            const ones1 = prevSum % 10;
+            const tens1 = Math.floor(prevSum / 10);
+            const ones2 = extra.value % 10;
+            const tens2 = Math.floor(extra.value / 10);
+            const needsBorrow = ones1 < ones2;
+
+            if (needsBorrow) {
+              const detailDiv = document.createElement('div');
+              detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+              const borrowedOnes = ones1 + 10;
+              const onesResult = borrowedOnes - ones2;
+              const tensResult = tens1 - 1 - tens2;
+
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 くりさがりの説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' では ' + ones2 + ' をひけないので、十のくらいから 10 をかりる</div>' +
+                '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+                '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
 
               explain.appendChild(detailDiv);
             }

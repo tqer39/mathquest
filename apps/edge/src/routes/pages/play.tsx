@@ -164,11 +164,11 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
     >
       <div class="countdown-card">
         <div class="countdown-ring" aria-hidden="true"></div>
-        <span class="countdown-label">集中モード</span>
+        <span class="countdown-label">まもなく開始</span>
         <span id="countdown-number" class="countdown-number">
           3
         </span>
-        <span class="countdown-caption">深呼吸して準備完了</span>
+        <span class="countdown-caption">0になると問題が表示されます</span>
       </div>
     </div>
 

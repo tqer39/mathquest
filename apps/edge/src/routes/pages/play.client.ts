@@ -520,12 +520,12 @@ const MODULE_SOURCE = `
 
     step1.appendChild(calc1);
 
-    // 説明文（繰り上がりの説明を含む）
+    // 説明文（計算過程の説明を含む）
     const explain1 = document.createElement('div');
     explain1.className = 'text-sm text-[#5e718a] space-y-1';
 
-    // 繰り上がりの説明を追加（足し算で繰り上がりが発生する場合）
-    if (question.op === '+') {
+    // 足し算の説明を追加
+    if (question.op === '+' && (question.a >= 10 || question.b >= 10)) {
       const ones1 = question.a % 10;
       const tens1 = Math.floor(question.a / 10);
       const ones2 = question.b % 10;
@@ -533,35 +533,46 @@ const MODULE_SOURCE = `
       const onesSum = ones1 + ones2;
       const carry = Math.floor(onesSum / 10);
 
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
       if (carry > 0) {
-        const detailDiv = document.createElement('div');
-        detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
         const onesResult = onesSum % 10;
         const tensSum = tens1 + tens2 + carry;
 
         detailDiv.innerHTML =
           '<div class="font-semibold mb-1">💡 くりあがりの説明:</div>' +
           '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesSum +
-          (carry > 0 ? ' → ' + onesResult + ' で ' + carry + ' くりあがる' : '') + '</div>' +
+          ' → ' + onesResult + ' で ' + carry + ' くりあがる</div>' +
           '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
-          (carry > 0 ? ' + ' + carry + '(くりあがり)' : '') + ' = ' + tensSum + '</div>' +
+          ' + ' + carry + '(くりあがり) = ' + tensSum + '</div>' +
           '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+      } else {
+        const onesResult = ones1 + ones2;
+        const tensResult = tens1 + tens2;
 
-        explain1.appendChild(detailDiv);
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 たし算の説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesResult + '</div>' +
+          '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 + ' = ' + tensResult + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
       }
+
+      explain1.appendChild(detailDiv);
     }
 
-    // 引き算の繰り下がりの説明を追加
-    if (question.op === '-') {
+    // 引き算の説明を追加
+    if (question.op === '-' && (question.a >= 10 || question.b >= 10)) {
       const ones1 = question.a % 10;
       const tens1 = Math.floor(question.a / 10);
       const ones2 = question.b % 10;
       const tens2 = Math.floor(question.b / 10);
       const needsBorrow = ones1 < ones2;
 
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
       if (needsBorrow) {
-        const detailDiv = document.createElement('div');
-        detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
         const borrowedOnes = ones1 + 10;
         const onesResult = borrowedOnes - ones2;
         const tensResult = tens1 - 1 - tens2;
@@ -572,13 +583,22 @@ const MODULE_SOURCE = `
           '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
           '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
           '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+      } else {
+        const onesResult = ones1 - ones2;
+        const tensResult = tens1 - tens2;
 
-        explain1.appendChild(detailDiv);
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 ひき算の説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+          '<div>② 十のくらい: ' + tens1 + ' - ' + tens2 + ' = ' + tensResult + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
       }
+
+      explain1.appendChild(detailDiv);
     }
 
     // かけ算の説明を追加
-    if (question.op === '×' && question.a >= 10 && question.b >= 10) {
+    if (question.op === '×' && (question.a >= 10 || question.b >= 10)) {
       const detailDiv = document.createElement('div');
       detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
@@ -631,6 +651,19 @@ const MODULE_SOURCE = `
       explain1.appendChild(detailDiv);
     }
 
+    // わり算の説明を追加
+    if (question.op === '÷' && (question.a >= 10 || question.b >= 10)) {
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+      detailDiv.innerHTML =
+        '<div class="font-semibold mb-1">💡 わり算の説明:</div>' +
+        '<div>' + question.a + ' を ' + question.b + ' で割ります</div>' +
+        '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+      explain1.appendChild(detailDiv);
+    }
+
     const simpleExplain1 = document.createElement('div');
     simpleExplain1.className = 'text-center';
     simpleExplain1.textContent = question.a + ' ' + question.op + ' ' + question.b + ' = ' + currentSum;
@@ -678,12 +711,12 @@ const MODULE_SOURCE = `
 
           stepDiv.appendChild(calcDiv);
 
-          // 説明文（繰り上がりの説明を含む）
+          // 説明文（計算過程の説明を含む）
           const explain = document.createElement('div');
           explain.className = 'text-sm text-[#5e718a] space-y-1';
 
-          // 繰り上がりの説明を追加（足し算で繰り上がりが発生する場合）
-          if (extra.op === '+') {
+          // 足し算の説明を追加
+          if (extra.op === '+' && (prevSum >= 10 || extra.value >= 10)) {
             const ones1 = prevSum % 10;
             const tens1 = Math.floor(prevSum / 10);
             const ones2 = extra.value % 10;
@@ -691,35 +724,46 @@ const MODULE_SOURCE = `
             const onesSum = ones1 + ones2;
             const carry = Math.floor(onesSum / 10);
 
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
             if (carry > 0) {
-              const detailDiv = document.createElement('div');
-              detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
               const onesResult = onesSum % 10;
               const tensSum = tens1 + tens2 + carry;
 
               detailDiv.innerHTML =
                 '<div class="font-semibold mb-1">💡 くりあがりの説明:</div>' +
                 '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesSum +
-                (carry > 0 ? ' → ' + onesResult + ' で ' + carry + ' くりあがる' : '') + '</div>' +
+                ' → ' + onesResult + ' で ' + carry + ' くりあがる</div>' +
                 '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
-                (carry > 0 ? ' + ' + carry + '(くりあがり)' : '') + ' = ' + tensSum + '</div>' +
+                ' + ' + carry + '(くりあがり) = ' + tensSum + '</div>' +
                 '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+            } else {
+              const onesResult = ones1 + ones2;
+              const tensResult = tens1 + tens2;
 
-              explain.appendChild(detailDiv);
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 たし算の説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesResult + '</div>' +
+                '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 + ' = ' + tensResult + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
             }
+
+            explain.appendChild(detailDiv);
           }
 
-          // 引き算の繰り下がりの説明を追加
-          if (extra.op === '-') {
+          // 引き算の説明を追加
+          if (extra.op === '-' && (prevSum >= 10 || extra.value >= 10)) {
             const ones1 = prevSum % 10;
             const tens1 = Math.floor(prevSum / 10);
             const ones2 = extra.value % 10;
             const tens2 = Math.floor(extra.value / 10);
             const needsBorrow = ones1 < ones2;
 
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
             if (needsBorrow) {
-              const detailDiv = document.createElement('div');
-              detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
               const borrowedOnes = ones1 + 10;
               const onesResult = borrowedOnes - ones2;
               const tensResult = tens1 - 1 - tens2;
@@ -730,9 +774,44 @@ const MODULE_SOURCE = `
                 '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
                 '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
                 '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+            } else {
+              const onesResult = ones1 - ones2;
+              const tensResult = tens1 - tens2;
 
-              explain.appendChild(detailDiv);
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 ひき算の説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+                '<div>② 十のくらい: ' + tens1 + ' - ' + tens2 + ' = ' + tensResult + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
             }
+
+            explain.appendChild(detailDiv);
+          }
+
+          // かけ算の説明を追加
+          if (extra.op === '×' && (prevSum >= 10 || extra.value >= 10)) {
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+            detailDiv.innerHTML =
+              '<div class="font-semibold mb-1">💡 かけ算の説明:</div>' +
+              '<div>' + prevSum + ' × ' + extra.value + ' = ' + currentSum + '</div>' +
+              '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+            explain.appendChild(detailDiv);
+          }
+
+          // わり算の説明を追加
+          if (extra.op === '÷' && (prevSum >= 10 || extra.value >= 10)) {
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+            detailDiv.innerHTML =
+              '<div class="font-semibold mb-1">💡 わり算の説明:</div>' +
+              '<div>' + prevSum + ' を ' + extra.value + ' で割ります</div>' +
+              '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+            explain.appendChild(detailDiv);
           }
 
           const simpleExplain = document.createElement('div');

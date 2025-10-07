@@ -34,6 +34,8 @@ const MODULE_SOURCE = `
   const skipBtn = document.getElementById('skipBtn');
   const endBtn = document.getElementById('endBtn');
   const againBtn = document.getElementById('againBtn');
+  const endResultBtn = document.getElementById('endResultBtn');
+  const resultActions = document.getElementById('result-actions');
   const feedbackEl = document.getElementById('feedback');
   const workingContainer = document.getElementById('working-container');
   const workingEmpty = document.getElementById('working-empty');
@@ -353,6 +355,13 @@ const MODULE_SOURCE = `
     });
   };
 
+  const setSkipButtonEnabled = (enabled) => {
+    if (!skipBtn) return;
+    skipBtn.classList.toggle('keypad-button--disabled', !enabled);
+    skipBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    skipBtn.tabIndex = enabled ? 0 : -1;
+  };
+
   const hasWorkingSteps = (question) => {
     // すべての問題で途中式を表示可能にする
     return question && question.a !== undefined && question.b !== undefined;
@@ -515,8 +524,8 @@ const MODULE_SOURCE = `
     const explain1 = document.createElement('div');
     explain1.className = 'text-sm text-[#5e718a] space-y-1';
 
-    // 繰り上がりの説明を追加（足し算で両方が2桁以上の場合）
-    if (question.op === '+' && question.a >= 10 && question.b >= 10) {
+    // 繰り上がりの説明を追加（足し算で繰り上がりが発生する場合）
+    if (question.op === '+') {
       const ones1 = question.a % 10;
       const tens1 = Math.floor(question.a / 10);
       const ones2 = question.b % 10;
@@ -593,8 +602,8 @@ const MODULE_SOURCE = `
           const explain = document.createElement('div');
           explain.className = 'text-sm text-[#5e718a] space-y-1';
 
-          // 繰り上がりの説明を追加（足し算で両方が2桁以上の場合）
-          if (extra.op === '+' && prevSum >= 10 && extra.value >= 10) {
+          // 繰り上がりの説明を追加（足し算で繰り上がりが発生する場合）
+          if (extra.op === '+') {
             const ones1 = prevSum % 10;
             const tens1 = Math.floor(prevSum / 10);
             const ones2 = extra.value % 10;
@@ -741,10 +750,11 @@ const MODULE_SOURCE = `
     state.sessionActive = false;
     state.awaitingAdvance = false;
     refreshKeypadState();
+    setSkipButtonEnabled(false);
     if (resultCorrectEl) resultCorrectEl.textContent = String(state.sessionCorrect);
     if (resultTotalEl) resultTotalEl.textContent = String(state.sessionAnswered);
-    if (againBtn) {
-      againBtn.classList.remove('hidden');
+    if (resultActions) {
+      resultActions.classList.remove('hidden');
     }
   };
 
@@ -853,10 +863,11 @@ const MODULE_SOURCE = `
     state.awaitingAdvance = false;
     refreshKeypadState();
     refreshSubmitButtonState();
+    setSkipButtonEnabled(true);
     renderProgress();
     renderWorkingSteps(null);
     hideFeedback();
-    if (againBtn) againBtn.classList.add('hidden');
+    if (resultActions) resultActions.classList.add('hidden');
     updatePreferences();
     updateSessionStorage();
     await nextQuestion();
@@ -889,6 +900,12 @@ const MODULE_SOURCE = `
 
   if (endBtn) {
     endBtn.addEventListener('click', () => {
+      window.location.href = '/start';
+    });
+  }
+
+  if (endResultBtn) {
+    endResultBtn.addEventListener('click', () => {
       window.location.href = '/start';
     });
   }

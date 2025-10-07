@@ -1,4 +1,4 @@
-# Claude Project Instructions
+# Copilot Workspace / Chat Instructions
 
 ## AI アシスタント共通ルール（日本語）
 

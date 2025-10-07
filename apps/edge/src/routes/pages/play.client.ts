@@ -568,7 +568,7 @@ const MODULE_SOURCE = `
           ' → ' + onesResult + ' で ' + carry + ' くりあがる</div>' +
           '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
           ' + ' + carry + '(くりあがり) = ' + tensSum + '</div>' +
-          '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
       } else {
         const onesResult = ones1 + ones2;
         const tensResult = tens1 + tens2;
@@ -577,7 +577,7 @@ const MODULE_SOURCE = `
           '<div class="font-semibold mb-1">💡 たし算の説明:</div>' +
           '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesResult + '</div>' +
           '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 + ' = ' + tensResult + '</div>' +
-          '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
       }
 
       explain1.appendChild(detailDiv);
@@ -604,7 +604,7 @@ const MODULE_SOURCE = `
           '<div>① 一のくらい: ' + ones1 + ' では ' + ones2 + ' をひけないので、十のくらいから 10 をかりる</div>' +
           '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
           '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
-          '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
       } else {
         const onesResult = ones1 - ones2;
         const tensResult = tens1 - tens2;
@@ -613,7 +613,7 @@ const MODULE_SOURCE = `
           '<div class="font-semibold mb-1">💡 ひき算の説明:</div>' +
           '<div>① 一のくらい: ' + ones1 + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
           '<div>② 十のくらい: ' + tens1 + ' - ' + tens2 + ' = ' + tensResult + '</div>' +
-          '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
       }
 
       explain1.appendChild(detailDiv);
@@ -759,7 +759,7 @@ const MODULE_SOURCE = `
                 ' → ' + onesResult + ' で ' + carry + ' くりあがる</div>' +
                 '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
                 ' + ' + carry + '(くりあがり) = ' + tensSum + '</div>' +
-                '<div class="mt-1 font-semibold">答え: ' + tensSum + onesResult + '</div>';
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
             } else {
               const onesResult = ones1 + ones2;
               const tensResult = tens1 + tens2;
@@ -768,7 +768,7 @@ const MODULE_SOURCE = `
                 '<div class="font-semibold mb-1">💡 たし算の説明:</div>' +
                 '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesResult + '</div>' +
                 '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 + ' = ' + tensResult + '</div>' +
-                '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
             }
 
             explain.appendChild(detailDiv);
@@ -795,7 +795,7 @@ const MODULE_SOURCE = `
                 '<div>① 一のくらい: ' + ones1 + ' では ' + ones2 + ' をひけないので、十のくらいから 10 をかりる</div>' +
                 '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
                 '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
-                '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
             } else {
               const onesResult = ones1 - ones2;
               const tensResult = tens1 - tens2;
@@ -804,7 +804,7 @@ const MODULE_SOURCE = `
                 '<div class="font-semibold mb-1">💡 ひき算の説明:</div>' +
                 '<div>① 一のくらい: ' + ones1 + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
                 '<div>② 十のくらい: ' + tens1 + ' - ' + tens2 + ' = ' + tensResult + '</div>' +
-                '<div class="mt-1 font-semibold">答え: ' + tensResult + onesResult + '</div>';
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
             }
 
             explain.appendChild(detailDiv);

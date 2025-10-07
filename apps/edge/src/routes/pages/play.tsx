@@ -261,7 +261,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
 
       <aside class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
         <div class="rounded-3xl border border-[var(--mq-outline)] bg-white p-6 shadow-sm">
-          <p class="text-sm font-semibold text-[#5e718a]">こたえ</p>
+          <p class="text-sm font-semibold text-[#5e718a]">あなたのこたえ</p>
           <p
             id="answer-display"
             class="mt-2 text-center text-5xl font-extrabold tracking-[0.35em] text-[var(--mq-ink)]"

@@ -286,6 +286,7 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
               type="button"
               class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)]"
               data-key="plusminus"
+              title="符号を変更"
             >
               +/−
             </button>
@@ -298,10 +299,11 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             </button>
             <button
               type="button"
-              class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
-              data-key="."
+              class="keypad-button rounded-2xl bg-red-50 px-4 py-5 text-xl font-extrabold text-red-600 shadow transition hover:-translate-y-0.5 hover:bg-red-100 border border-red-200"
+              data-key="backspace"
+              title="1文字削除"
             >
-              .
+              ⌫
             </button>
           </div>
           <div class="mt-3">

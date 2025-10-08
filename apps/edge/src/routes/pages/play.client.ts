@@ -1198,6 +1198,15 @@ const MODULE_SOURCE = `
         return;
       }
 
+      if (key === 'backspace') {
+        // バックスペースボタン: 最後の1文字を削除
+        if (state.answerBuffer.length > 0) {
+          setAnswerBuffer(state.answerBuffer.slice(0, -1));
+        }
+        playSound('keypad');
+        return;
+      }
+
       if (key === '.') {
         // 小数点ボタン: 既に小数点がある場合は追加しない
         if (!state.answerBuffer.includes('.')) {

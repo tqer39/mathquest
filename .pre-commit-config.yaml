@@ -89,6 +89,16 @@ repos:
         name: Prettier format
         files: "\\.(?:[cm]?[jt]sx?|json|css|scss|html?|md|markdown|ya?ml)$"
 
+  - repo: local
+    hooks:
+      - id: biome-lint
+        name: Biome lint
+        language: system
+        entry: bash -lc 'eval "$(mise activate bash)" && pnpm exec biome lint --write --files-ignore-unknown=true --no-errors-on-unmatched'
+        types: [file]
+        files: '\.(jsx?|tsx?|[cm]js|json)$'
+        pass_filenames: true
+
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.7
     hooks:

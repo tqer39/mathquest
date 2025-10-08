@@ -5,7 +5,6 @@
 
   const startBtn = el('startBtn');
   const submitBtn = el('submitBtn');
-  const skipBtn = el('skipBtn');
   const endBtn = el('endBtn');
   const againBtn = el('againBtn');
   const modeSel = el('mode');
@@ -103,12 +102,12 @@
   answerEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') checkAnswer();
   });
-  $$('.numpad button').forEach((b) =>
+  $$('.numpad button').forEach((b) => {
     b.addEventListener('click', () => {
       const k = b.dataset.key;
       if (k === 'back') answerEl.value = answerEl.value.slice(0, -1);
       else answerEl.value += k;
       answerEl.focus();
-    })
-  );
+    });
+  });
 })();

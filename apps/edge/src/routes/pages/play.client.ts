@@ -1124,7 +1124,7 @@ const MODULE_SOURCE = `
       // setAnswerBuffer()からの更新の場合はスキップ
       if (isUpdatingAnswerBuffer) return;
       // 半角数字、小数点、マイナス記号のみを許可
-      let filtered = target.value.replace(/[^0-9.\-]/g, '');
+      let filtered = target.value.replace(/[^0-9.-]/g, '');
       // マイナスは先頭のみ許可
       if (filtered.indexOf('-') > 0) {
         filtered = filtered.replace(/-/g, '');

@@ -26,6 +26,8 @@ setup:
     @if command -v pnpm >/dev/null 2>&1; then \
         echo "→ Installing JS dependencies with pnpm..."; \
         pnpm install; \
+        echo "→ Approving builds..."; \
+        pnpm approve-builds; \
     else \
         echo "⚠ pnpm not found. Install pnpm (npm install -g pnpm) してから再実行してください。"; \
     fi

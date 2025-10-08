@@ -8,11 +8,8 @@ export function i18n() {
     const cookie = getCookie(c, 'lang');
     const hdr = c.req.header('accept-language') || '';
     const fromUA = hdr.toLowerCase().startsWith('ja') ? 'ja' : 'en';
-    const lang = (q ||
-      cookie ||
-      fromUA ||
-      (c.env as any).DEFAULT_LANG ||
-      'ja') as 'ja' | 'en';
+    const defaultLang = (c.env as Record<string, unknown>).DEFAULT_LANG || 'ja';
+    const lang = (q || cookie || fromUA || defaultLang) as 'ja' | 'en';
     c.set('lang', lang);
     if (q && q !== cookie) {
       setCookie(c, 'lang', q, {

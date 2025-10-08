@@ -225,6 +225,25 @@ const MODULE_SOURCE = `
       \`;
 
       const radio = label.querySelector('input[type="radio"]');
+      const card = label.querySelector('.calc-type-card');
+
+      // カードクリックで選択/解除を切り替え
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (radio.checked) {
+          // 既に選択されている場合は選択を解除
+          radio.checked = false;
+          filterThemesByCalculationType(null);
+          updateStartButtonState();
+        } else {
+          // 選択されていない場合は選択
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change'));
+        }
+      });
+
       radio.addEventListener('change', () => {
         if (radio.checked) {
           filterThemesByCalculationType(calcType.mode);
@@ -607,8 +626,8 @@ const MODULE_SOURCE = `
 
 export const renderStartClientScript = (
   presets: readonly GradePreset[],
-  calculationTypes: any,
-  gradeLevels: any
+  calculationTypes: unknown,
+  gradeLevels: unknown
 ) => html`
   <script id="grade-presets" type="application/json">
     ${raw(JSON.stringify(presets))}

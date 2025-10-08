@@ -254,6 +254,7 @@ const MODULE_SOURCE = `
     currentQuestion: null,
     answerBuffer: '',
     awaitingAdvance: false,
+    userAnswer: null,
   };
 
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
@@ -404,6 +405,11 @@ const MODULE_SOURCE = `
 
     // 待機状態では「つぎの問題」、通常は「こたえる」
     updateSubmitButtonText(isWaiting);
+
+    // 待機状態では、ユーザーが入力した答えを表示
+    if (isWaiting && state.userAnswer !== null && answerDisplay) {
+      answerDisplay.textContent = String(state.userAnswer);
+    }
 
     // 待機状態ではテキストボタンは常に有効、通常は入力がある場合のみ有効
     const shouldEnableSubmit = state.sessionActive && (isWaiting || hasInput);
@@ -929,6 +935,7 @@ const MODULE_SOURCE = `
 
   const nextQuestion = async () => {
     state.awaitingAdvance = false;
+    state.userAnswer = null;
     refreshKeypadState();
     refreshSubmitButtonState();
     renderWorkingSteps(null);
@@ -990,6 +997,7 @@ const MODULE_SOURCE = `
       state.progress.lastAnsweredAt = new Date().toISOString();
       state.progress.lastGrade = state.grade.id;
       state.sessionAnswered += 1;
+      state.userAnswer = value;
       if (ok) {
         state.progress.totalCorrect += 1;
         state.progress.streak += 1;

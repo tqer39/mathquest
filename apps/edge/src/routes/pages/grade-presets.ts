@@ -68,7 +68,7 @@ export const calculationTypes = [
 export const gradeCalculationTypes = {
   'grade-1': ['calc-add', 'calc-sub'],
   'grade-2': ['calc-add', 'calc-sub'],
-  'grade-3': ['calc-mul'],
+  'grade-3': ['calc-add', 'calc-sub', 'calc-mul'],
   'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
   'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
   'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
@@ -83,6 +83,31 @@ export const getAvailableCalculationTypes = (gradeId: string) => {
   );
 };
 
+// 学年の順序を取得する関数（比較用）
+const getGradeOrder = (gradeId: string): number => {
+  const index = gradeLevels.findIndex((g) => g.id === gradeId);
+  return index === -1 ? 0 : index;
+};
+
+// 学年と計算種類に応じて利用可能なテーマを取得する関数
+export const getAvailableThemes = (
+  gradeId: string,
+  calculationMode?: string
+) => {
+  const currentGradeOrder = getGradeOrder(gradeId);
+
+  return practiceThemes.filter((theme) => {
+    // 計算種類でフィルタリング
+    if (calculationMode && theme.mode !== calculationMode) {
+      return false;
+    }
+
+    // 学年の最低要件でフィルタリング
+    const themeMinGradeOrder = getGradeOrder(theme.minGrade);
+    return currentGradeOrder >= themeMinGradeOrder;
+  });
+};
+
 export const practiceThemes = [
   {
     id: 'practice-add-two',
@@ -90,6 +115,7 @@ export const practiceThemes = [
     description: 'たし算の基礎練習（答えが50以下）',
     mode: 'add',
     max: 50,
+    minGrade: 'grade-1',
   },
   {
     id: 'practice-sub-two',
@@ -97,6 +123,7 @@ export const practiceThemes = [
     description: 'ひき算の基礎練習（答えが50以下）',
     mode: 'sub',
     max: 50,
+    minGrade: 'grade-1',
   },
   {
     id: 'practice-add-three',
@@ -104,6 +131,7 @@ export const practiceThemes = [
     description: 'たし算の練習（答えが60以下）',
     mode: 'add',
     max: 60,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-add-four',
@@ -111,6 +139,7 @@ export const practiceThemes = [
     description: 'たし算の練習（答えが80以下）',
     mode: 'add',
     max: 80,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-add-mixed-digits',
@@ -118,6 +147,7 @@ export const practiceThemes = [
     description: 'たし算の応用練習（答えが120以下）',
     mode: 'add',
     max: 120,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-sub-double-digit',
@@ -125,6 +155,7 @@ export const practiceThemes = [
     description: 'ひき算の応用練習（答えが99以下）',
     mode: 'sub',
     max: 99,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-mix-three',
@@ -132,6 +163,7 @@ export const practiceThemes = [
     description: 'たし算とひき算の練習（答えが70以下）',
     mode: 'mix',
     max: 70,
+    minGrade: 'grade-5',
   },
   {
     id: 'practice-mix-four',
@@ -139,6 +171,7 @@ export const practiceThemes = [
     description: 'たし算とひき算の応用練習（答えが90以下）',
     mode: 'mix',
     max: 90,
+    minGrade: 'grade-5',
   },
   {
     id: 'practice-mul-table',
@@ -146,6 +179,7 @@ export const practiceThemes = [
     description: 'かけ算の基礎練習（答えが81以下）',
     mode: 'mul',
     max: 81,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-mul-easy',
@@ -153,6 +187,7 @@ export const practiceThemes = [
     description: 'かけ算の入門練習（答えが25以下）',
     mode: 'mul',
     max: 25,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-mul-hard',
@@ -160,6 +195,7 @@ export const practiceThemes = [
     description: 'かけ算の応用練習（答えが180以下）',
     mode: 'mul',
     max: 180,
+    minGrade: 'grade-3',
   },
   {
     id: 'practice-mul-double',
@@ -167,6 +203,7 @@ export const practiceThemes = [
     description: 'かけ算の高度な練習（答えが400以下）',
     mode: 'mul',
     max: 400,
+    minGrade: 'grade-3',
   },
 ] as const;
 

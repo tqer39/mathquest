@@ -162,6 +162,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                 data-grade-id={preset.id}
                 data-mode={preset.mode}
                 data-max={preset.max}
+                data-min-grade={preset.minGrade}
                 data-selected="false"
                 class="theme-card group rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                 aria-pressed="false"

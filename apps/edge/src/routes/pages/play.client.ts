@@ -34,6 +34,8 @@ const MODULE_SOURCE = `
   const skipBtn = document.getElementById('skipBtn');
   const endBtn = document.getElementById('endBtn');
   const againBtn = document.getElementById('againBtn');
+  const endResultBtn = document.getElementById('endResultBtn');
+  const resultActions = document.getElementById('result-actions');
   const feedbackEl = document.getElementById('feedback');
   const workingContainer = document.getElementById('working-container');
   const workingEmpty = document.getElementById('working-empty');
@@ -345,16 +347,37 @@ const MODULE_SOURCE = `
   };
 
   const setSubmitButtonEnabled = (enabled) => {
-    [submitBtn, keypadSubmitButton].forEach((btn) => {
-      if (!btn) return;
-      btn.classList.toggle('keypad-button--disabled', !enabled);
-      btn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
-      btn.tabIndex = enabled ? 0 : -1;
-    });
+    if (submitBtn) {
+      submitBtn.classList.toggle('keypad-button--disabled', !enabled);
+      submitBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      submitBtn.tabIndex = enabled ? 0 : -1;
+    }
+  };
+
+  const updateSubmitButtonText = (isAdvancing) => {
+    if (submitBtn) {
+      submitBtn.textContent = isAdvancing ? 'つぎの問題' : 'こたえる';
+    }
+  };
+
+  const setKeypadSubmitButtonState = (enabled, isAdvancing) => {
+    if (!keypadSubmitButton) return;
+    keypadSubmitButton.classList.toggle('keypad-button--disabled', !enabled);
+    keypadSubmitButton.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    keypadSubmitButton.tabIndex = enabled ? 0 : -1;
+    keypadSubmitButton.textContent = isAdvancing ? '→' : '=';
+  };
+
+  const setSkipButtonEnabled = (enabled) => {
+    if (!skipBtn) return;
+    skipBtn.classList.toggle('keypad-button--disabled', !enabled);
+    skipBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    skipBtn.tabIndex = enabled ? 0 : -1;
   };
 
   const hasWorkingSteps = (question) => {
-    return question && Array.isArray(question.extras) && question.extras.length > 0;
+    // すべての問題で途中式を表示可能にする
+    return question && question.a !== undefined && question.b !== undefined;
   };
 
   const setStepsToggleEnabled = (enabled) => {
@@ -378,8 +401,17 @@ const MODULE_SOURCE = `
   const refreshSubmitButtonState = () => {
     const hasInput = state.answerBuffer.length > 0;
     const isWaiting = state.awaitingAdvance;
-    const shouldEnable = state.sessionActive && (hasInput || isWaiting);
-    setSubmitButtonEnabled(shouldEnable);
+
+    // 待機状態では「つぎの問題」、通常は「こたえる」
+    updateSubmitButtonText(isWaiting);
+
+    // 待機状態ではテキストボタンは常に有効、通常は入力がある場合のみ有効
+    const shouldEnableSubmit = state.sessionActive && (isWaiting || hasInput);
+    setSubmitButtonEnabled(shouldEnableSubmit);
+
+    // キーパッドの = ボタンは待機状態では有効、通常は入力がある場合のみ有効
+    const shouldEnableKeypad = state.sessionActive && (isWaiting || hasInput);
+    setKeypadSubmitButtonState(shouldEnableKeypad, isWaiting);
   };
 
   const playSound = (variant) => {
@@ -457,20 +489,366 @@ const MODULE_SOURCE = `
       workingEmpty.classList.remove('hidden');
       return;
     }
+    if (!hasWorkingSteps(question)) {
+      workingSteps.innerHTML = '';
+      workingEmpty.classList.remove('hidden');
+      return;
+    }
     workingEmpty.classList.add('hidden');
-    const steps = [];
+    workingSteps.innerHTML = '';
+
+    // 段階的な計算過程を表示
+    const container = document.createElement('div');
+    container.className = 'space-y-6 py-4';
+
+    let currentSum = question.a;
+
+    // 数値を右寄せ表示する関数（小数・負の数対応）
+    const formatNumber = (num) => {
+      const str = String(num);
+      return str.padStart(10, ' ');
+    };
+
+    // 最初の計算: a + b
+    const step1 = document.createElement('div');
+    step1.className = 'space-y-2';
+
+    const calc1 = document.createElement('div');
+    calc1.className = 'flex flex-col items-end gap-1 font-mono';
+
+    const num1 = document.createElement('div');
+    num1.className = 'text-xl font-bold';
+    num1.textContent = formatNumber(question.a);
+    calc1.appendChild(num1);
+
+    const num2 = document.createElement('div');
+    num2.className = 'text-xl font-bold';
+    num2.textContent = question.op + ' ' + formatNumber(question.b).trimStart();
+    calc1.appendChild(num2);
+
+    const div1 = document.createElement('div');
+    div1.className = 'w-40 border-t-2 border-[var(--mq-primary)] my-1';
+    calc1.appendChild(div1);
+
+    currentSum = question.op === '+' ? currentSum + question.b :
+                 question.op === '-' ? currentSum - question.b :
+                 question.op === '×' ? currentSum * question.b :
+                 question.op === '÷' ? currentSum / question.b : currentSum;
+
+    const ans1 = document.createElement('div');
+    ans1.className = 'text-xl font-bold text-[var(--mq-primary-strong)]';
+    ans1.textContent = formatNumber(currentSum);
+    calc1.appendChild(ans1);
+
+    step1.appendChild(calc1);
+
+    // 説明文（計算過程の説明を含む）
+    const explain1 = document.createElement('div');
+    explain1.className = 'text-sm text-[#5e718a] space-y-1';
+
+    // 足し算の説明を追加
+    if (question.op === '+' && (question.a >= 10 || question.b >= 10)) {
+      const ones1 = question.a % 10;
+      const tens1 = Math.floor(question.a / 10);
+      const ones2 = question.b % 10;
+      const tens2 = Math.floor(question.b / 10);
+      const onesSum = ones1 + ones2;
+      const carry = Math.floor(onesSum / 10);
+
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+      if (carry > 0) {
+        const onesResult = onesSum % 10;
+        const tensSum = tens1 + tens2 + carry;
+
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 くりあがりの説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesSum +
+          ' → ' + onesResult + ' で ' + carry + ' くりあがる</div>' +
+          '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
+          ' + ' + carry + '(くりあがり) = ' + tensSum + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+      } else {
+        const onesResult = ones1 + ones2;
+        const tensResult = tens1 + tens2;
+
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 たし算の説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesResult + '</div>' +
+          '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 + ' = ' + tensResult + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+      }
+
+      explain1.appendChild(detailDiv);
+    }
+
+    // 引き算の説明を追加
+    if (question.op === '-' && (question.a >= 10 || question.b >= 10)) {
+      const ones1 = question.a % 10;
+      const tens1 = Math.floor(question.a / 10);
+      const ones2 = question.b % 10;
+      const tens2 = Math.floor(question.b / 10);
+      const needsBorrow = ones1 < ones2;
+
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+      if (needsBorrow) {
+        const borrowedOnes = ones1 + 10;
+        const onesResult = borrowedOnes - ones2;
+        const tensResult = tens1 - 1 - tens2;
+
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 くりさがりの説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' では ' + ones2 + ' をひけないので、十のくらいから 10 をかりる</div>' +
+          '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+          '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+      } else {
+        const onesResult = ones1 - ones2;
+        const tensResult = tens1 - tens2;
+
+        detailDiv.innerHTML =
+          '<div class="font-semibold mb-1">💡 ひき算の説明:</div>' +
+          '<div>① 一のくらい: ' + ones1 + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+          '<div>② 十のくらい: ' + tens1 + ' - ' + tens2 + ' = ' + tensResult + '</div>' +
+          '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+      }
+
+      explain1.appendChild(detailDiv);
+    }
+
+    // かけ算の説明を追加
+    if (question.op === '×' && (question.a >= 10 || question.b >= 10)) {
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+      // 筆算形式の説明を生成
+      const bStr = String(question.b);
+      const steps = [];
+      let stepResults = [];
+
+      // 各桁ごとの掛け算を計算
+      for (let i = bStr.length - 1; i >= 0; i--) {
+        const digit = Number(bStr[i]);
+        const place = bStr.length - 1 - i;
+        const multiplier = digit * Math.pow(10, place);
+        const result = question.a * digit * Math.pow(10, place);
+
+        if (digit !== 0) {
+          steps.push({
+            digit,
+            place,
+            multiplier,
+            result,
+            displayResult: question.a * digit
+          });
+          stepResults.push(result);
+        }
+      }
+
+      let html = '<div class="font-semibold mb-1">💡 かけ算の説明:</div>';
+
+      // 各桁の計算を説明
+      steps.forEach((step, index) => {
+        const placeName = step.place === 0 ? '一のくらい' :
+                         step.place === 1 ? '十のくらい' :
+                         step.place === 2 ? '百のくらい' : step.place + '桁目';
+        html += '<div>① ' + placeName + ': ' + question.a + ' × ' + step.digit;
+        if (step.place > 0) {
+          html += ' (×' + Math.pow(10, step.place) + ')';
+        }
+        html += ' = ' + step.result + '</div>';
+      });
+
+      // 足し算の説明
+      if (steps.length > 1) {
+        html += '<div>② 各結果を足す: ' + stepResults.join(' + ') + ' = ' + currentSum + '</div>';
+      }
+
+      html += '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+      detailDiv.innerHTML = html;
+      explain1.appendChild(detailDiv);
+    }
+
+    // わり算の説明を追加
+    if (question.op === '÷' && (question.a >= 10 || question.b >= 10)) {
+      const detailDiv = document.createElement('div');
+      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+      detailDiv.innerHTML =
+        '<div class="font-semibold mb-1">💡 わり算の説明:</div>' +
+        '<div>' + question.a + ' を ' + question.b + ' で割ります</div>' +
+        '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+      explain1.appendChild(detailDiv);
+    }
+
+    const simpleExplain1 = document.createElement('div');
+    simpleExplain1.className = 'text-center';
+    simpleExplain1.textContent = question.a + ' ' + question.op + ' ' + question.b + ' = ' + currentSum;
+    explain1.appendChild(simpleExplain1);
+
+    step1.appendChild(explain1);
+
+    container.appendChild(step1);
+
+    // extras の各計算を順番に追加
     if (Array.isArray(question.extras)) {
-      question.extras.forEach((line) => {
-        if (typeof line === 'string') steps.push(line);
+      question.extras.forEach((extra, index) => {
+        if (extra && typeof extra === 'object' && extra.op && typeof extra.value !== 'undefined') {
+          const prevSum = currentSum;
+
+          const stepDiv = document.createElement('div');
+          stepDiv.className = 'space-y-2';
+
+          const calcDiv = document.createElement('div');
+          calcDiv.className = 'flex flex-col items-end gap-1 font-mono';
+
+          const prevNum = document.createElement('div');
+          prevNum.className = 'text-xl font-bold';
+          prevNum.textContent = formatNumber(prevSum);
+          calcDiv.appendChild(prevNum);
+
+          const extraNum = document.createElement('div');
+          extraNum.className = 'text-xl font-bold';
+          extraNum.textContent = extra.op + ' ' + formatNumber(extra.value).trimStart();
+          calcDiv.appendChild(extraNum);
+
+          const divider = document.createElement('div');
+          divider.className = 'w-40 border-t-2 border-[var(--mq-primary)] my-1';
+          calcDiv.appendChild(divider);
+
+          currentSum = extra.op === '+' ? currentSum + extra.value :
+                       extra.op === '-' ? currentSum - extra.value :
+                       extra.op === '×' ? currentSum * extra.value :
+                       extra.op === '÷' ? currentSum / extra.value : currentSum;
+
+          const stepAns = document.createElement('div');
+          stepAns.className = 'text-xl font-bold text-[var(--mq-primary-strong)]';
+          stepAns.textContent = formatNumber(currentSum);
+          calcDiv.appendChild(stepAns);
+
+          stepDiv.appendChild(calcDiv);
+
+          // 説明文（計算過程の説明を含む）
+          const explain = document.createElement('div');
+          explain.className = 'text-sm text-[#5e718a] space-y-1';
+
+          // 足し算の説明を追加
+          if (extra.op === '+' && (prevSum >= 10 || extra.value >= 10)) {
+            const ones1 = prevSum % 10;
+            const tens1 = Math.floor(prevSum / 10);
+            const ones2 = extra.value % 10;
+            const tens2 = Math.floor(extra.value / 10);
+            const onesSum = ones1 + ones2;
+            const carry = Math.floor(onesSum / 10);
+
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+            if (carry > 0) {
+              const onesResult = onesSum % 10;
+              const tensSum = tens1 + tens2 + carry;
+
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 くりあがりの説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesSum +
+                ' → ' + onesResult + ' で ' + carry + ' くりあがる</div>' +
+                '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 +
+                ' + ' + carry + '(くりあがり) = ' + tensSum + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+            } else {
+              const onesResult = ones1 + ones2;
+              const tensResult = tens1 + tens2;
+
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 たし算の説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' + ' + ones2 + ' = ' + onesResult + '</div>' +
+                '<div>② 十のくらい: ' + tens1 + ' + ' + tens2 + ' = ' + tensResult + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+            }
+
+            explain.appendChild(detailDiv);
+          }
+
+          // 引き算の説明を追加
+          if (extra.op === '-' && (prevSum >= 10 || extra.value >= 10)) {
+            const ones1 = prevSum % 10;
+            const tens1 = Math.floor(prevSum / 10);
+            const ones2 = extra.value % 10;
+            const tens2 = Math.floor(extra.value / 10);
+            const needsBorrow = ones1 < ones2;
+
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+            if (needsBorrow) {
+              const borrowedOnes = ones1 + 10;
+              const onesResult = borrowedOnes - ones2;
+              const tensResult = tens1 - 1 - tens2;
+
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 くりさがりの説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' では ' + ones2 + ' をひけないので、十のくらいから 10 をかりる</div>' +
+                '<div>② 一のくらい: ' + borrowedOnes + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+                '<div>③ 十のくらい: ' + tens1 + ' - 1(かりた分) - ' + tens2 + ' = ' + tensResult + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+            } else {
+              const onesResult = ones1 - ones2;
+              const tensResult = tens1 - tens2;
+
+              detailDiv.innerHTML =
+                '<div class="font-semibold mb-1">💡 ひき算の説明:</div>' +
+                '<div>① 一のくらい: ' + ones1 + ' - ' + ones2 + ' = ' + onesResult + '</div>' +
+                '<div>② 十のくらい: ' + tens1 + ' - ' + tens2 + ' = ' + tensResult + '</div>' +
+                '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+            }
+
+            explain.appendChild(detailDiv);
+          }
+
+          // かけ算の説明を追加
+          if (extra.op === '×' && (prevSum >= 10 || extra.value >= 10)) {
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+            detailDiv.innerHTML =
+              '<div class="font-semibold mb-1">💡 かけ算の説明:</div>' +
+              '<div>' + prevSum + ' × ' + extra.value + ' = ' + currentSum + '</div>' +
+              '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+            explain.appendChild(detailDiv);
+          }
+
+          // わり算の説明を追加
+          if (extra.op === '÷' && (prevSum >= 10 || extra.value >= 10)) {
+            const detailDiv = document.createElement('div');
+            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+
+            detailDiv.innerHTML =
+              '<div class="font-semibold mb-1">💡 わり算の説明:</div>' +
+              '<div>' + prevSum + ' を ' + extra.value + ' で割ります</div>' +
+              '<div class="mt-1 font-semibold">答え: ' + currentSum + '</div>';
+
+            explain.appendChild(detailDiv);
+          }
+
+          const simpleExplain = document.createElement('div');
+          simpleExplain.className = 'text-center';
+          simpleExplain.textContent = prevSum + ' ' + extra.op + ' ' + extra.value + ' = ' + currentSum;
+          explain.appendChild(simpleExplain);
+
+          stepDiv.appendChild(explain);
+
+          container.appendChild(stepDiv);
+        }
       });
     }
-    steps.push('= ' + correctAnswer);
-    workingSteps.innerHTML = '';
-    steps.forEach((line) => {
-      const li = document.createElement('li');
-      li.textContent = line;
-      workingSteps.appendChild(li);
-    });
+
+    workingSteps.appendChild(container);
   };
 
   const updateSessionStorage = () => {
@@ -567,15 +945,8 @@ const MODULE_SOURCE = `
       setAnswerBuffer('');
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
 
-      // 途中式の有無に応じてトグルを有効化/無効化
-      const hasSteps = hasWorkingSteps(question);
-      setStepsToggleEnabled(hasSteps);
-      if (!hasSteps && state.workingEnabled) {
-        // 途中式がない場合は強制的にOFFにする
-        state.workingEnabled = false;
-        toggleButton(stepsToggle, false);
-        applyWorkingVisibility();
-      }
+      // すべての問題で途中式トグルを有効化
+      setStepsToggleEnabled(true);
     } catch (e) {
       console.error(e);
       showFeedback('error', '問題の取得に失敗しました。しばらくしてから再度お試しください。');
@@ -586,12 +957,12 @@ const MODULE_SOURCE = `
     state.sessionActive = false;
     state.awaitingAdvance = false;
     refreshKeypadState();
+    setSkipButtonEnabled(false);
     if (resultCorrectEl) resultCorrectEl.textContent = String(state.sessionCorrect);
     if (resultTotalEl) resultTotalEl.textContent = String(state.sessionAnswered);
-    if (againBtn) {
-      againBtn.classList.remove('hidden');
+    if (resultActions) {
+      resultActions.classList.remove('hidden');
     }
-    showFeedback('info', 'おつかれさま！もう一度練習する場合はボタンを押してね');
   };
 
   const handleAnswer = async (value) => {
@@ -699,10 +1070,11 @@ const MODULE_SOURCE = `
     state.awaitingAdvance = false;
     refreshKeypadState();
     refreshSubmitButtonState();
+    setSkipButtonEnabled(true);
     renderProgress();
     renderWorkingSteps(null);
     hideFeedback();
-    if (againBtn) againBtn.classList.add('hidden');
+    if (resultActions) resultActions.classList.add('hidden');
     updatePreferences();
     updateSessionStorage();
     await nextQuestion();
@@ -739,14 +1111,24 @@ const MODULE_SOURCE = `
     });
   }
 
+  if (endResultBtn) {
+    endResultBtn.addEventListener('click', () => {
+      window.location.href = '/start';
+    });
+  }
+
   if (answerInput) {
     answerInput.addEventListener('input', (event) => {
       const target = event.target;
       if (!(target instanceof HTMLInputElement)) return;
       // setAnswerBuffer()からの更新の場合はスキップ
       if (isUpdatingAnswerBuffer) return;
-      // 半角数字と小数点のみを許可（全角数字などを除去）
-      const filtered = target.value.replace(/[^0-9.]/g, '');
+      // 半角数字、小数点、マイナス記号のみを許可
+      let filtered = target.value.replace(/[^0-9.\-]/g, '');
+      // マイナスは先頭のみ許可
+      if (filtered.indexOf('-') > 0) {
+        filtered = filtered.replace(/-/g, '');
+      }
       if (target.value !== filtered) {
         target.value = filtered;
       }
@@ -762,13 +1144,14 @@ const MODULE_SOURCE = `
         handleSubmit();
         return;
       }
-      // 半角数字、小数点、制御キー以外は入力を拒否
+      // 半角数字、小数点、マイナス、制御キー以外は入力を拒否
       const allowedKeys = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
       const isNumberKey = event.key >= '0' && event.key <= '9';
       const isDecimalPoint = event.key === '.';
+      const isMinus = event.key === '-' && answerInput.selectionStart === 0;
       const isAllowedControlKey = allowedKeys.includes(event.key);
 
-      if (!isNumberKey && !isDecimalPoint && !isAllowedControlKey) {
+      if (!isNumberKey && !isDecimalPoint && !isMinus && !isAllowedControlKey) {
         event.preventDefault();
       }
     });
@@ -800,13 +1183,30 @@ const MODULE_SOURCE = `
     button.addEventListener('click', () => {
       if (!state.sessionActive) return;
       const key = button.dataset.key;
-      // 待機状態の場合は数字入力とバックスペースは無効
+      // 待機状態の場合は数字入力等は無効
       if (state.awaitingAdvance) return;
-      if (key === 'back') {
-        setAnswerBuffer(state.answerBuffer.slice(0, -1));
+
+      // cspell:ignore plusminus
+      if (key === 'plusminus') {
+        // +/-ボタン: 符号を反転
+        if (state.answerBuffer.startsWith('-')) {
+          setAnswerBuffer(state.answerBuffer.slice(1));
+        } else if (state.answerBuffer.length > 0) {
+          setAnswerBuffer('-' + state.answerBuffer);
+        }
         playSound('keypad');
         return;
       }
+
+      if (key === '.') {
+        // 小数点ボタン: 既に小数点がある場合は追加しない
+        if (!state.answerBuffer.includes('.')) {
+          setAnswerBuffer(state.answerBuffer + '.');
+        }
+        playSound('keypad');
+        return;
+      }
+
       setAnswerBuffer(state.answerBuffer + key);
       playSound('keypad');
     });
@@ -815,7 +1215,10 @@ const MODULE_SOURCE = `
   if (keypadSubmitButton) {
     keypadSubmitButton.addEventListener('click', () => {
       if (!state.sessionActive) return;
-      playSound('success');
+      // 待機状態でない場合のみ音を鳴らす
+      if (!state.awaitingAdvance) {
+        playSound('success');
+      }
       handleSubmit();
     });
   }
@@ -833,8 +1236,6 @@ const MODULE_SOURCE = `
     stepsToggle.addEventListener('click', () => {
       // 無効化されている場合はクリックを無視
       if (stepsToggle.hasAttribute('disabled')) return;
-      // 途中式がない問題の場合はクリックを無視
-      if (!hasWorkingSteps(state.currentQuestion)) return;
 
       state.workingEnabled = !state.workingEnabled;
       toggleButton(stepsToggle, state.workingEnabled);

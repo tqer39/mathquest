@@ -1,8 +1,6 @@
 # Cursor Rules
 
-以下のプロジェクト規約に従い、すべて日本語で回答してください。詳細なガイドラインは `docs/AI_RULES.ja.md` と `AGENTS.md` を参照。
-
----
+# AI アシスタント共通ルール（日本語）
 
 本リポジトリで Cursor / GitHub Copilot / Codex CLI / Gemini / Claude Code 等のアシスタントが一貫した挙動になるよう、プロジェクト固有の指示をまとめます。
 
@@ -30,3 +28,19 @@
   - Lint 全実行: `just lint`
   - 自動修正: `just fix`
   - ルール同期（任意導入）: `just rulesync -- --check` / `just rulesync -- apply`
+
+## rulesync による設定ファイル生成
+
+- `just rulesync -- generate` で AI アシスタント向け設定ファイルを生成できる。
+- 生成対象（初期値）:
+  - `.cursorrules`（Cursor）
+  - `.github/copilot-instructions.md`（GitHub Copilot Chat）
+  - `CLAUDE.md`（Claude Code/Dev）
+  - `docs/AI_RULES.ja.md`（本ファイル: 単一ソース）
+- 生成物は本ファイルの内容をベースにし、各ツールに合わせたヘッダーを付す。
+
+## 参考: ガイドラインの要点（抜粋）
+
+- コミットは短く命令形。必要に応じて `#123` で issue を参照。
+- 既存 CI は pre-commit を実行。ワークフロー改変時は注意。
+- Node は `mise`、Python は `uv` で管理。固定バージョンに合わせる。

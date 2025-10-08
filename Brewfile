@@ -10,6 +10,7 @@ brew "pre-commit"  # Git hooks framework
 brew "uv"          # Python package and project manager
 brew "rulesync"    # Synchronize repository rules
 brew "aws-vault"  # AWS 資格情報の安全な管理
+cask "google-cloud-sdk"  # Google Cloud CLI（gcloud）
 tap "jacobbednarz/tap"  # cf-vault 公式リポジトリ（Cloudflare Secrets管理ツール）
 brew "jacobbednarz/tap/cf-vault"  # Cloudflare API Secrets 用 Vault CLI
 

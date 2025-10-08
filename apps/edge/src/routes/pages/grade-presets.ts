@@ -68,7 +68,7 @@ export const calculationTypes = [
 export const gradeCalculationTypes = {
   'grade-1': ['calc-add', 'calc-sub'],
   'grade-2': ['calc-add', 'calc-sub'],
-  'grade-3': ['calc-add', 'calc-sub', 'calc-mul'],
+  'grade-3': ['calc-mul'],
   'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
   'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
   'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],

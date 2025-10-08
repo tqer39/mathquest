@@ -1,317 +1,441 @@
-# Repository Guidelines
+# AGENTS.md
 
-## Project Structure & Module Organization
+## 概要
 
-- Root: development tooling and docs; no app runtime yet.
-- `.github/`: workflows, `CODEOWNERS`, labels, PR template.
-- `docs/`: Japanese docs for setup and usage.
-- `Makefile`, `justfile`, `Brewfile`: environment bootstrap and tasks.
-- Config: `.editorconfig`, `.pre-commit-config.yaml`, `.prettierrc`, `.tool-versions`.
+MathQuestは小学生向けの算数学習プラットフォームで、Cloudflare Workers上で動作するHonoベースのSSRアプリケーションです。monorepoアーキテクチャを採用し、Edge Runtime、API/フロントエンドパッケージ、Terraform管理のインフラストラクチャを一つのリポジトリで管理しています。
 
-## Build, Test, and Development Commands
+## システムアーキテクチャ
 
-- `make bootstrap`: install Homebrew (macOS/Linux) only.
-- `brew bundle install`: install dev tools from `Brewfile`.
-- `just setup`: provision tools via mise, install AI CLIs, install pre-commit.
-- `just lint`: run all pre-commit checks on all files.
-- `just fix`: apply common auto-fixes (EOF, whitespace, markdown).
-- `just update-brew | just update | just update-hooks`: update packages, tools, hooks.
+### 全体構成図
 
-## Coding Style & Naming Conventions
+```mermaid
+graph TB
+    subgraph "User Interface"
+        Browser[ブラウザ]
+    end
 
-- Indentation via `.editorconfig`: 2 spaces default; Python 4; `Makefile` tabs; LF EOL; final newline.
-- Formatting: Prettier (config in `.prettierrc`), markdownlint, yamllint.
-- Text quality: cspell, textlint for Markdown; keep filenames lowercase with hyphens where practical.
-- Shell: shellcheck-compliant; YAML/JSON must be valid and lintable.
+    subgraph "Cloudflare Edge"
+        EdgeApp[Edge App<br/>Hono SSR]
+        KV_Session[KV: Auth Session]
+        KV_Trial[KV: Free Trial]
+        KV_Rate[KV: Rate Limit]
+        KV_Idempotency[KV: Idempotency]
+        D1[D1 Database]
+    end
 
-## Testing Guidelines
+    subgraph "Application Layer"
+        UseCases[Application UseCases<br/>quiz.ts]
+        Session[Session Management<br/>current-user.ts]
+    end
 
-- This boilerplate centers on linting; no unit test framework is preset.
-- If adding code, place tests under `tests/` and follow ecosystem norms:
-  - JavaScript: `__tests__/` or `*.test.ts`.
-  - Python: `tests/test_*.py` with pytest.
-- Ensure `just lint` passes before opening a PR; add CI for new languages as needed.
+    subgraph "Domain Layer"
+        DomainLogic[Domain Logic<br/>@mathquest/domain]
+        AppLogic[App Logic<br/>@mathquest/app]
+    end
 
-## Commit & Pull Request Guidelines
+    subgraph "Infrastructure"
+        Database[Database Client<br/>Drizzle ORM]
+        Schema[Database Schema]
+    end
 
-- Commits: short, imperative mood; optional emoji is fine (see `git log`).
-- Reference issues with `#123` when applicable.
-- PRs: use the template; keep descriptions concise; include rationale and screenshots/output for visible changes.
-- CI: pre-commit runs in GitHub Actions; `CODEOWNERS` auto-requests reviews.
+    subgraph "Routes"
+        Pages[Pages<br/>home, start, play]
+        APIs[APIs<br/>/apis/quiz]
+    end
 
-## Security & Configuration Tips
-
-- Do not commit secrets; pre-commit runs `detect-aws-credentials`, `detect-private-key`, and `secretlint` (recommend preset) to catch hard-coded credentials.
-- GitHub Actions require `OPENAI_API_KEY` for PR description generation.
-- Tool versions are managed by mise (`.tool-versions`, Node.js pinned).
-
-## Agent-Specific Instructions
-
-- Follow these guidelines, keep diffs minimal, and update docs when changing tooling.
-- Run `just lint` locally and ensure workflows remain green.
-
-## 🎯 プロジェクト概要
-
-- 小学生向け算数アプリ（Hono-SSR + Cloudflare Workers で SSR）
-- **学習データの保存は会員登録が必須**（未登録ユーザーの学習履歴はブラウザ `localStorage` で保持）
-- **認証**：Better Auth（メールマジックリンク、Google、2FAオプション/TOTP）
-- **学年別対応**：小学1〜6年（初期単元プリセット済み）
-- **UI言語**：ユーザーエージェント / `Accept-Language` で `ja` / `en` を自動選択（Cookie/クエリで上書き可）
-- **インフラ**：Cloudflare（Workers, KV, D1, Pages, Turnstile, R2）、Terraform管理、CI/CDはGitHub Actions
-- **メール送信**：Resend（カスタムドメイン送信）
-
----
-
-## 🧱 推奨アーキテクチャパターン
-
-### 1) Edge-SSR BFF（モジュラーモノリス）
-
-- **目的**：最小構成でエッジの低レイテンシを最大化。
-- **構成**：1つの Workers（Hono）に SSR（`routes/pages/*`）と BFF API（`routes/apis/*`）を同居。
-- **非機能**：コールドスタート極小、ルーティング/ミドルウェアで共通関心事を集約。
-
-### 2) DDD + ポート/アダプタ（Hexagonal）
-
-- **層**：`domain/*`（純TS） ←→ `application/usecases/*` ←→ `infrastructure/*`（D1/KV/Resend/OAuth のアダプタ）。
-- **テスト**：ドメインはI/Oレスで高速UT、アダプタは契約テスト。
-
-### 3) CQRS-lite & Read-through Cache
-
-- **Write**：D1 を単一の**真実の源泉**。
-- **Read**：頻出読み取りは KV に短TTLで read-through。miss時は D1 → KV 格納。
-- **整合性**：更新時に該当キーを削除/更新（まずは削除運用）。
-
-### 4) エッジ・ミドルウェア（匿名学習/i18n/守り）
-
-- **匿名学習**：ログイン前はブラウザ `localStorage` に学習履歴を保存し、サーバー側では識別情報を持たない。
-- **i18n**：`Accept-Language` → Cookie上書き。
-- **防御**：Turnstile 検証、KV で簡易レート制限（固定窓 or トークンバケット）。
-
-### 5) 外部連携の堅牢化（Idempotency + Circuit Breaker）
-
-- **Idempotency-Key**（ヘッダ）を KV に短期保持して重複処理防止。
-- **簡易 Circuit Breaker**：連続失敗で一定時間フォールバック（例：メール再送案内UI）。
-
-### 6) 認証（Better Auth アダプタ）
-
-- **手段**：メールマジックリンク（Resend）、Google OAuth、任意TOTP。
-- **保管**：シークレットは Wrangler Secrets に投入（Terraformでは管理しない）。
-
-### 7) 配信分離：Pages（静的） × Workers（SSR/API）
-
-- **Pages**：画像・効果音・固定JS。
-- **Workers**：SSR と API のみ（アセットは manifest 参照）。
-
-### 8) マイグレーション戦略（D1）
-
-- **IaC**：D1 インスタンスは Terraform。
-- **スキーマ**：`wrangler d1 migrations apply` を CI で実行。ロールバックは逆マイグレーション。
-
-### 9) 観測性ミニマム
-
-- ルート単位の成功率/中央値・p95、重要イベントは D1 の監査テーブル（append-only）。
-- エラーは一意IDでユーザ提示し相互参照。
-
----
-
-## 🗂️ フォルダ構成（DDD 準拠）
-
-```txt
-math-app/
-apps/
-web/ # プレゼンテーション層（SSR / Hono）
-src/
-server/
-main.ts # エントリ（SSR + ルーティング）
-routes/ # ルーティング（薄い）
-pages/ # SSR ページ（Controller相当）
-apis/ # APIエンドポイント
-middleware/ # セッション/i18n/Turnstile/RateLimit/Idempotency
-views/ # SSR共通レイアウト/パーシャル
-application/ # アプリケーション層
-usecases/ # 匿名学習同期/プロフィール更新/学年進行
-domain/ # ドメイン層（純粋TS）
-entities/ # User/Profile/Progress
-services/ # ProblemGenerator（学年別初期単元）
-repositories/ # ポート定義
-infrastructure/ # インフラ層
-repositories/ # D1/KV 実装
-auth/ # Better Auth 設定
-mail/ # Resend 実装
-i18n/ # 多言語辞書/検出
-interface/ # Controllerアダプタ
-http/ # PlayController/AuthController
-packages/
-ui/ # SSR対応UI（hono/jsx + Tailwind）
-core/ # 算数問題生成/採点ロジック
-config/ # tsconfig/eslint/tailwind preset
-infra/
-terraform/ # Terraform管理
-migrations/ # D1マイグレーション（SQL）
-wrangler.toml # Wrangler 設定
+    Browser --> EdgeApp
+    EdgeApp --> Pages
+    EdgeApp --> APIs
+    EdgeApp --> UseCases
+    UseCases --> AppLogic
+    UseCases --> Session
+    AppLogic --> DomainLogic
+    EdgeApp --> KV_Session
+    EdgeApp --> KV_Trial
+    EdgeApp --> KV_Rate
+    EdgeApp --> KV_Idempotency
+    EdgeApp --> Database
+    Database --> D1
+    Database --> Schema
 ```
 
-## 📚 学年ごとの初期単元
+### モジュール依存関係
 
-- 小1：10までのたしざん
-- 小2：100までのひきざん
-- 小3：かけ算（九九）
-- 小4：割り算（あまりあり）
-- 小5：小数のたしひき
-- 小6：分数のたしひき（通分あり）
+```mermaid
+graph LR
+    subgraph "Apps"
+        Edge[@mathquest/edge]
+        API[@mathquest/api]
+        Web[@mathquest/web]
+    end
 
-## 🌐 インフラ構成
+    subgraph "Packages"
+        Domain[@mathquest/domain]
+        App[@mathquest/app]
+    end
 
-- **Workers (Hono-SSR)**：アプリ本体
-- **KV**：レート制限、Idempotency キー、（必要に応じて）匿名学習データの一時退避
-- **D1**：会員・進捗・2FA・監査ログ
-- **Pages**：静的資産（画像/効果音/固定JS）
-- **Turnstile**：登録/ログインフォーム保護
-- **R2**：効果音/画像、Terraform state保管
+    Edge --> App
+    Edge --> Domain
+    API --> App
+    API --> Domain
+    App --> Domain
+```
 
-## ⚙️ Terraform 管理可/不可リソース（精度版）
+## プロジェクト構成
 
-### ✅ 管理できる
+### ディレクトリ構造
 
-- Cloudflare **Zone / DNS（全レコード）**
-- Cloudflare **Workers / KV / D1 / R2**
-- Cloudflare **Pages プロジェクト**（※後述のとおり**ビルド/配信物のアップロードはCI**）
-- Cloudflare **Turnstile ウィジェット**
-- **Google Cloud Domains 登録**（`google_clouddomains_registration`）
-- **Resend 用 DNS**（SPF/DKIM/CNAME を Cloudflare DNS として IaC）
+```text
+mathquest/
+├── apps/                    # アプリケーション群
+│   ├── edge/               # Cloudflare Workers エッジアプリ（メイン）
+│   │   ├── src/
+│   │   │   ├── application/        # アプリケーション層
+│   │   │   │   ├── usecases/      # ユースケース（quiz.ts）
+│   │   │   │   └── session/       # セッション管理
+│   │   │   ├── infrastructure/    # インフラ層
+│   │   │   │   └── database/      # DB クライアント & スキーマ
+│   │   │   ├── routes/            # ルーティング
+│   │   │   │   ├── pages/         # SSR ページ（home, start, play）
+│   │   │   │   └── apis/          # BFF API（/apis/quiz）
+│   │   │   ├── views/             # ビュー層
+│   │   │   │   └── layouts/       # レイアウトコンポーネント
+│   │   │   ├── middlewares/       # ミドルウェア（i18n等）
+│   │   │   ├── env.ts             # 環境変数型定義
+│   │   │   └── index.tsx          # エントリーポイント
+│   │   └── wrangler.toml          # Cloudflare Workers設定
+│   ├── api/                # Node.js API サーバー（開発用）
+│   └── web/                # Hono Webサーバー（開発用）
+├── packages/                # 共有パッケージ
+│   ├── domain/             # ドメインロジック
+│   │   └── src/
+│   │       └── index.ts    # 問題生成、計算ロジック
+│   └── app/                # アプリケーションロジック
+│       └── src/
+│           └── index.ts    # クイズ管理、回答チェック
+├── infra/                  # インフラ構成
+│   ├── terraform/          # Terraform設定
+│   └── migrations/         # D1 データベースマイグレーション
+└── docs/                   # ドキュメント
+```
 
-### ⚠️ 管理できない/部分的
+### ワークスペース構成
 
-- **Pages のデプロイ実体**：Terraform不可、CIで `wrangler pages deploy`
-- **D1 マイグレーション適用**：Terraform不可、CIで `wrangler d1 migrations apply`
-- **Google OAuth クライアント登録**：手動（GCP Console）、発行値は Secrets で注入
-- **Resend ドメイン登録/検証**：手動（DNSはTerraformで用意）、APIキーも Secrets で注入
+pnpm workspacesによるmonorepo構成：
 
----
+- **apps/**: 実行可能なアプリケーション
 
-## 🧩 手動/CI が必要なポイントと順序
+  - `@mathquest/edge`: Cloudflare Workers上のメインアプリ（SSR + BFF API）
+  - `@mathquest/api`: Node.js開発用APIサーバー
+  - `@mathquest/web`: Hono開発用Webサーバー
 
-### 0. 初回のみ（必要なら）R2 バケットを先行作成
+- **packages/**: 共有ライブラリ
+  - `@mathquest/domain`: ドメインロジック（問題生成、計算ルール）
+  - `@mathquest/app`: アプリケーションロジック（クイズ管理、回答検証）
 
-- 目的：Terraform の remote state を R2 で運用する場合、初回はバケットが必要。
-- 方法：一時的にローカル state で R2 バケットを Terraform 作成 → backend を R2 に切替。
+## 主要機能モジュール
 
-### 1. `terraform apply`（インフラ一式作成）
+### 1. ドメイン層（@mathquest/domain）
 
-- 作成対象：Zone/DNS、Workers/KV/D1/R2、Pagesプロジェクト、Turnstileウィジェット、Resend 用 DNS、GCD登録。
-- 出力：KV/D1識別子、Pagesプロジェクト名、Turnstileサイトキー 等。
+**責務**: 算数問題の生成と計算ロジック
 
-### 2. Google OAuth クライアント（**手動**）
+**主要な型・関数**:
 
-- OAuth同意画面 → WebアプリのクライアントID/Secret 発行。
-- **Redirect URI**：`https://<domain>/auth/callback` などを登録。
+- `Mode`: 問題モード (`'add' | 'sub' | 'mul' | 'mix'`)
+- `QuizConfig`: クイズ設定（モード、最大値）
+- `Question`: 問題データ構造（a, b, op, extras, answer）
+- `ExtraStep`: 途中式ステップ（op: '+' | '-', value: number）
 
-### 3. Resend ドメイン登録・検証（**手動**）
+**主要関数**:
 
-- Resend ダッシュボードで送信ドメイン（例: `mail.<domain>`）を追加 → 表示された **SPF/TXT, DKIM/CNAME** を **Cloudflare DNS（Terraform）** に反映。
-- 検証完了後、**Resend API Key** を取得。
+- `generateQuestion(config)`: 基本問題生成
+- `generateGradeOneQuestion(max)`: 1年生向け問題生成
+- `evaluateQuestion(question)`: 問題の答えを計算
+- `formatQuestion(question)`: 問題を文字列化
+- `checkAnswer(question, input)`: 回答の正誤判定
+- `pickOp(mode)`: モードから演算子を選択
 
-### 4. Secrets 注入（**CI から Wrangler**）
+**ファイル**: `packages/domain/src/index.ts:1-223`
 
-- `wrangler secret put` で以下を投入：
-  - `MAILGUN_API_KEY`
-  - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
-  - `TURNSTILE_SECRET_KEY`
-  - そのほか Better Auth 設定に必要な値
-- **Wrangler.toml** の Bindings もこの段階で確定。
+### 2. アプリケーション層（@mathquest/app）
 
-### 5. データベース準備（**CI**）
+**責務**: クイズセッションの管理と状態管理
 
-- `wrangler d1 migrations apply`（未適用SQLを順次適用）。
-- 監査テーブル/ユーザ/進捗などの初期スキーマが作成されることを確認。
+**主要な型・関数**:
 
-### 6. アプリのデプロイ（**CI**）
+- `Quiz`: クイズセッション状態（config, index, correct）
+- `StartQuizInput`: クイズ開始時の入力
 
-- Workers（SSR/BFF）：`wrangler deploy`
-- Pages（静的資産）：`wrangler pages deploy --project-name <name> ./public`
-- 初回は HTTPS 証明書の発行を数分待つ可能性あり。
+**主要関数**:
 
-### 7. スモーク/E2E
+- `createQuiz(input)`: 新規クイズセッション作成
+- `nextQuestion(quiz)`: 次の問題を生成
+- `checkAnswer(quiz, question, value)`: 回答チェック & 状態更新
 
-- 匿名→3回→登録→学年出題の一連が通ることを確認。
+**ファイル**: `packages/app/src/index.ts:1-32`
 
-## 🛠️ CI/CD（ジョブ分割の推奨）
+### 3. エッジアプリケーション（@mathquest/edge）
 
-- **infra.yml**：Terraform のみ（インフラ変更時に実行）
-- **deploy.yml**：ビルド→Secrets注入→D1マイグレーション→Workers デプロイ→Pages デプロイ→スモーク
-- 依存関係：`deploy.yml` は `infra.yml` 成功後（もしくは最新 state 参照後）に実行。
+#### 3.1 エントリーポイント（`src/index.tsx`）
 
-## 🔐 認証フロー（Better Auth）
+**責務**: Honoアプリケーションの初期化とルーティング
 
-- **メールマジックリンク**（Resend 経由送信）
-- **Google アカウントログイン**（GCP Console でクライアント発行）
-- **2FA（TOTP）** 任意設定（D1 にシード保存、レート制限/ロックアウトあり）
+**主要設定**:
 
-## 🧭 i18n
+- ミドルウェア: logger, secureHeaders, prettyJSON, i18n
+- SSR レンダラー: jsxRenderer + Document layout
 
-- 自動判定：`Accept-Language` / UA
-- 手動上書き：Cookie / クエリ
-- 辞書：`infrastructure/i18n/messages/{ja,en}.ts`
+**ルート構成**:
 
-## 📬 メール（Resend）
+- **Pages**:
 
-- サブドメイン：`mail.<domain>`（または Resend 推奨の任意サブドメイン）
-- 必須レコード例：
-  - SPF (TXT): Resend が提示する値を設定
-  - DKIM (CNAME/TXT): Resend が提示するキーを設定
-- 詳細な DNS レコードは Resend ダッシュボードの指示に従い、Terraform で管理
+  - `/`: ホーム（Home）
+  - `/start`: 設定ウィザード（Start）
+  - `/play`: 練習セッション（Play）
 
-## 🌏 ドメイン
+- **Auth**:
 
-- **登録**：Google Cloud Domains（Terraform管理。登録と同時に NS を Cloudflare に）
-- **DNS**：Cloudflare Provider で IaC 化
+  - `/auth/guest-login`: ゲストログイン
+  - `/auth/logout`: ログアウト
+  - `/auth/signin`: サインインページ（ダミー）
 
-### 環境別ドメイン方針
+- **API**:
+  - `/apis/quiz`: クイズ関連API
 
-- 本番（prod）：`mathquest.app`
-- 開発（dev）：`dev.mathquest.app`（親 `mathquest.app` から NS 委任してサブゾーン運用）
+**ファイル**: `apps/edge/src/index.tsx:1-104`
 
-## ✅ 要件と前提・制約（サマリ）
+#### 3.2 アプリケーションユースケース（`src/application/usecases/quiz.ts`）
 
-| 要件/パターン               | 充足 | 前提・制約                                                      |
-| --------------------------- | ---- | --------------------------------------------------------------- |
-| Edge-SSR BFF（モノリス）    | 可能 | Hono on WorkersでSSR+BFF同居。ルーティング/ミドルウェアで整理。 |
-| Hexagonal（DDD）            | 可能 | `domain` 純TS、外部I/Oはアダプタ層に隔離。                      |
-| CQRS-lite + KVキャッシュ    | 可能 | KVは最終的整合。強整合が必要な箇所はD1直読みに絞る。            |
-| 匿名学習のローカル保持      | 可能 | ブラウザ `localStorage` に保存し、会員登録後にサーバーへ同期。  |
-| Turnstile/Rate-limit        | 可能 | ミドルウェアで検証・制限。過剰制限は UX に注意。                |
-| Idempotency/Circuit Breaker | 可能 | KV に短命キー。CB は簡易実装（将来 Queues 導入余地）。          |
-| 認証（Better Auth）         | 可能 | Google OAuth クライアントは手動作成→Secrets 注入。              |
-| D1 マイグレーション         | 可能 | Terraform 外。CI で Wrangler 適用が前提。                       |
-| Pages/Workers 分離          | 可能 | Pages ビルド/デプロイは CI。Terraform はプロジェクト作成まで。  |
+**責務**: 問題生成と回答検証のビジネスロジック
 
-## 🧪 テスト戦略
+**主要関数**:
 
-- **単体**：ドメイン層は完全純TSで高速UT（I/O不要）。
-- **契約**：ポート/アダプタの契約テスト（リポジトリ・メール送信）。
-- **E2E**：匿名→3回→登録→学年出題が 1 本のシナリオで通ること。
+- `generateQuizQuestion(input)`: 学年・モード・最大値に応じた問題生成
 
-## 🧭 次の作業ステップ（更新版）
+  - `gradeId`に応じて異なる問題パターン生成
+    - `'grade-1'`: 1年生向け
+    - `'practice-add-three'`: 3項加算
+    - `'practice-add-four'`: 4項加算
+    - `'practice-add-mixed-digits'`: 1桁+2桁
+    - `'practice-sub-double-digit'`: 2桁減算
+    - `'practice-mix-three'`: 3項加減混合
+    - `'practice-mix-four'`: 4項加減混合
 
-1. **Terraform 適用** → Zone/DNS/KV/D1/Pages/Turnstile/R2 作成
-2. **Resend** で送信ドメインを追加 → DNS 検証完了（SPF/TXT/CNAME 反映）
-3. **Google OAuth** クライアント発行 → Redirect URI 設定
-4. **Wrangler Secrets** に Resend API / OAuth / Turnstile を投入
-5. **D1 マイグレーション** を適用（`wrangler d1 migrations apply`）
-6. **Workers/Pages** をデプロイ（`wrangler deploy`, `wrangler pages deploy`）
-7. **E2E** で「匿名で学習 → 会員登録 → 学習履歴同期」確認
+- `verifyAnswer(input)`: 回答の正誤検証
 
-### ローカルからの Terraform 操作
+**補助関数**:
 
-AWS / Cloudflare 認証を用意した端末では、`just tf` 経由で Terraform CLI を直接実行できる。
+- `clauseAddQuestion(values, op)`: 連続加算問題生成
+- `generateAdditionMulti(terms, max)`: 多項加算生成
+- `generateOneDigitPlusTwoDigit()`: 1桁+2桁問題生成
+- `generateDoubleDigitSubtraction()`: 2桁減算生成
+- `generateAddSubMix(terms, max)`: 加減混合問題生成
 
-- Cloudflare API Token は macOS なら `cf-vault add mathquest` を実行し、キーチェーンに保存しておく。
+**ファイル**: `apps/edge/src/application/usecases/quiz.ts:1-152`
+
+#### 3.3 セッション管理（`src/application/session/current-user.ts`）
+
+**責務**: ユーザー認証・セッション管理
+
+**ファイル**: `apps/edge/src/application/session/current-user.ts`
+
+#### 3.4 インフラストラクチャ層（`src/infrastructure/database/`）
+
+**責務**: データベースアクセスとスキーマ定義
+
+**主要ファイル**:
+
+- `client.ts`: Drizzle ORMクライアント
+- `schema.ts`: D1データベーススキーマ定義
+
+#### 3.5 ルート定義
+
+**Pages**（`src/routes/pages/`）:
+
+- `home.tsx`: ホームページSSR
+- `start.tsx`: 設定ウィザードSSR
+- `start.client.ts`: 設定ウィザードクライアントロジック（~20KB）
+- `play.tsx`: 練習セッションSSR
+- `play.client.ts`: 練習セッションクライアントロジック（~39KB）
+- `grade-presets.ts`: 学年別プリセット定義
+
+**APIs**（`src/routes/apis/`）:
+
+- `quiz.ts`: クイズAPI（問題生成、回答検証）
+
+#### 3.6 ミドルウェア（`src/middlewares/`）
+
+- `i18n.ts`: 国際化ミドルウェア（言語設定）
+
+#### 3.7 環境設定（`src/env.ts`）
+
+**Cloudflare Bindings**:
+
+- `KV_FREE_TRIAL`: 無料トライアル管理
+- `KV_AUTH_SESSION`: 認証セッション
+- `KV_RATE_LIMIT`: レート制限
+- `KV_IDEMPOTENCY`: 冪等性保証
+- `DB`: D1データベース
+- `DEFAULT_LANG`: デフォルト言語（'ja'）
+- `USE_MOCK_USER`: モックユーザー設定（開発用）
+
+**ファイル**: `apps/edge/src/env.ts:1-12`
+
+### 4. インフラストラクチャ
+
+**構成**:
+
+- `infra/terraform/`: Cloudflare Workers、KV、D1の設定
+- `infra/migrations/`: D1データベースマイグレーションSQL
+
+## 技術スタック
+
+### ランタイム・フレームワーク
+
+- **Cloudflare Workers**: エッジコンピューティングプラットフォーム
+- **Hono**: 軽量Webフレームワーク（SSR対応）
+- **Node.js 22**: 開発用サーバー
+- **TypeScript 5.5**: 型安全な開発
+
+### データストア
+
+- **Cloudflare KV**: キー・バリューストア（セッション、キャッシュ）
+- **Cloudflare D1**: SQLite互換データベース
+- **Drizzle ORM**: TypeScript ORMライブラリ
+
+### 開発ツール
+
+- **pnpm 10**: パッケージマネージャー
+- **mise**: ツールバージョン管理
+- **just**: タスクランナー
+- **pre-commit**: Git フック管理
+- **Wrangler**: Cloudflare Workers CLI
+
+### テスト
+
+- **Vitest**: テストフレームワーク
+
+## ビルド・デプロイフロー
+
+### ビルド順序
 
 ```bash
-just tf -- -chdir=dev/bootstrap init -reconfigure  # 初期化（backend 再設定）
-just tf -- -chdir=dev/bootstrap validate           # 設定検証
-just tf -- -chdir=dev/bootstrap plan               # 差分確認
-just tf -- -chdir=dev/bootstrap apply -auto-approve# 適用
+pnpm build
 ```
 
-`-chdir=dev/bootstrap` を他環境ディレクトリに差し替えることで同じフローを使い回せる。
+1. `@mathquest/domain` のビルド（ドメインロジック）
+2. `@mathquest/app` のビルド（アプリケーションロジック）
+3. `@mathquest/api` のビルド
+4. `@mathquest/web` のビルド
+
+※ `@mathquest/edge`はWranglerが直接TypeScriptをバンドル
+
+### 開発サーバー
+
+```bash
+# Edgeアプリ（推奨）
+pnpm dev:edge
+
+# APIサーバー
+pnpm dev:api
+
+# Webサーバー
+pnpm dev:web
+```
+
+### デプロイ
+
+```bash
+cd apps/edge
+pnpm deploy
+```
+
+## データフロー
+
+### 問題生成フロー
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant EdgeApp
+    participant QuizAPI
+    participant UseCase
+    participant Domain
+
+    User->>Browser: 設定選択（/start）
+    Browser->>EdgeApp: GET /start
+    EdgeApp-->>Browser: SSR: Start page
+    User->>Browser: 問題開始
+    Browser->>QuizAPI: POST /apis/quiz/generate
+    QuizAPI->>UseCase: generateQuizQuestion(input)
+    UseCase->>Domain: generateQuestion(config)
+    Domain-->>UseCase: Question
+    UseCase-->>QuizAPI: Question
+    QuizAPI-->>Browser: JSON response
+    Browser-->>User: 問題表示
+```
+
+### 回答検証フロー
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant QuizAPI
+    participant UseCase
+    participant Domain
+
+    User->>Browser: 回答入力
+    Browser->>QuizAPI: POST /apis/quiz/verify
+    QuizAPI->>UseCase: verifyAnswer(question, value)
+    UseCase->>Domain: evaluateQuestion(question)
+    Domain-->>UseCase: correctAnswer
+    UseCase->>Domain: checkAnswer(question, value)
+    Domain-->>UseCase: ok: boolean
+    UseCase-->>QuizAPI: {ok, correctAnswer}
+    QuizAPI-->>Browser: JSON response
+    Browser-->>User: 正誤フィードバック
+```
+
+## セキュリティ
+
+- **Secure Headers**: Honoミドルウェアによる自動設定
+- **Rate Limiting**: KV_RATE_LIMITによる制限
+- **Idempotency**: KV_IDEMPOTENCYによる重複リクエスト防止
+- **Session Management**: KV_AUTH_SESSIONによる認証管理
+
+## パフォーマンス最適化
+
+- **エッジコンピューティング**: Cloudflare Workersによる低レイテンシ
+- **KVキャッシング**: セッションデータの高速アクセス
+- **クライアントサイドロジック**: play.client.ts（39KB）、start.client.ts（20KB）で即応性確保
+- **SSR**: 初回レンダリングの高速化
+
+## 国際化（i18n）
+
+- デフォルト言語: 日本語（`ja`）
+- ミドルウェア: `apps/edge/src/middlewares/i18n.ts`
+- 環境変数: `DEFAULT_LANG` in `wrangler.toml:32`
+
+## テスト
+
+- ユニットテスト: `apps/edge/src/application/usecases/__tests__/quiz.test.ts`
+- テストフレームワーク: Vitest
+
+## 今後の拡張ポイント
+
+1. **ユーザー認証**: 現在はゲストログインのみ。本格的な認証機能追加可能
+2. **学習履歴**: D1データベースを活用した学習データ永続化
+3. **AIチューター**: 問題の難易度調整や個別最適化
+4. **マルチプレイ**: リアルタイム対戦機能
+5. **学年別コンテンツ拡充**: 2年生以上の単元追加
+
+## 参考リンク
+
+- [README.md](README.md): プロジェクトセットアップ
+- [CLAUDE.md](CLAUDE.md): Claude Code向けプロジェクト規約
+- [docs/AI_RULES.ja.md](docs/AI_RULES.ja.md): 詳細なコーディング規約
+- [Hono Documentation](https://hono.dev/)
+- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+- [Drizzle ORM Documentation](https://orm.drizzle.team/)

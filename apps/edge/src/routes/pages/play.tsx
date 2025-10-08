@@ -164,11 +164,11 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
     >
       <div class="countdown-card">
         <div class="countdown-ring" aria-hidden="true"></div>
-        <span class="countdown-label">集中モード</span>
+        <span class="countdown-label">まもなく開始</span>
         <span id="countdown-number" class="countdown-number">
           3
         </span>
-        <span class="countdown-caption">深呼吸して準備完了</span>
+        <span class="countdown-caption">0になると問題が表示されます</span>
       </div>
     </div>
 
@@ -255,16 +255,13 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
           >
             こたえを送信すると、計算の流れがここに出るよ。
           </p>
-          <ol
-            id="working-steps"
-            class="mt-4 space-y-2 text-lg font-semibold"
-          ></ol>
+          <div id="working-steps" class="mt-4"></div>
         </div>
       </section>
 
       <aside class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
         <div class="rounded-3xl border border-[var(--mq-outline)] bg-white p-6 shadow-sm">
-          <p class="text-sm font-semibold text-[#5e718a]">こたえ</p>
+          <p class="text-sm font-semibold text-[#5e718a]">あなたのこたえ</p>
           <p
             id="answer-display"
             class="mt-2 text-center text-5xl font-extrabold tracking-[0.35em] text-[var(--mq-ink)]"
@@ -288,9 +285,9 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             <button
               type="button"
               class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)]"
-              data-key="back"
+              data-key="plusminus"
             >
-              ⌫
+              +/−
             </button>
             <button
               type="button"
@@ -301,7 +298,16 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             </button>
             <button
               type="button"
-              class="keypad-button rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
+              class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+              data-key="."
+            >
+              .
+            </button>
+          </div>
+          <div class="mt-3">
+            <button
+              type="button"
+              class="keypad-button w-full rounded-2xl bg-[var(--mq-primary)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow-lg transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
               data-key="submit"
             >
               =
@@ -315,13 +321,22 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
             正解 <span id="result-correct">0</span> /{' '}
             <span id="result-total">0</span>
           </p>
-          <button
-            id="againBtn"
-            type="button"
-            class="hidden w-full rounded-2xl bg-[var(--mq-primary)] px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-md transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
-          >
-            もういちど練習する
-          </button>
+          <div id="result-actions" class="hidden flex flex-col gap-2">
+            <button
+              id="againBtn"
+              type="button"
+              class="w-full rounded-2xl bg-[var(--mq-primary)] px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-md transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-strong)] hover:text-white"
+            >
+              もういちど練習する
+            </button>
+            <button
+              id="endResultBtn"
+              type="button"
+              class="w-full rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-surface-strong)]"
+            >
+              やめる
+            </button>
+          </div>
         </div>
       </aside>
     </main>

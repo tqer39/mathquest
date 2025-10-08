@@ -109,98 +109,164 @@ export const getAvailableThemes = (
 };
 
 export const practiceThemes = [
+  // 小1向け - たし算（10以下）
   {
-    id: 'practice-add-two',
-    label: 'たし算（基礎）',
-    description: 'たし算の基礎練習（答えが50以下）',
+    id: 'practice-add-10',
+    label: 'たし算（10までのかず）',
+    description: '答えが10以下のたし算',
     mode: 'add',
-    max: 50,
+    max: 10,
     minGrade: 'grade-1',
   },
+  // 小1向け - ひき算（10以下）
   {
-    id: 'practice-sub-two',
-    label: 'ひき算（基礎）',
-    description: 'ひき算の基礎練習（答えが50以下）',
+    id: 'practice-sub-10',
+    label: 'ひき算（10までのかず）',
+    description: '答えが10以下のひき算',
     mode: 'sub',
-    max: 50,
+    max: 10,
     minGrade: 'grade-1',
   },
+  // 小1向け - たし算（20以下）
   {
-    id: 'practice-add-three',
-    label: 'たし算（少し大きい数）',
-    description: 'たし算の練習（答えが60以下）',
+    id: 'practice-add-20',
+    label: 'たし算（20までのかず）',
+    description: '答えが20以下のたし算',
     mode: 'add',
-    max: 60,
-    minGrade: 'grade-3',
+    max: 20,
+    minGrade: 'grade-1',
   },
+  // 小1向け - ひき算（20以下）
   {
-    id: 'practice-add-four',
-    label: 'たし算（大きい数）',
-    description: 'たし算の練習（答えが80以下）',
-    mode: 'add',
-    max: 80,
-    minGrade: 'grade-3',
-  },
-  {
-    id: 'practice-add-mixed-digits',
-    label: 'たし算（応用）',
-    description: 'たし算の応用練習（答えが120以下）',
-    mode: 'add',
-    max: 120,
-    minGrade: 'grade-3',
-  },
-  {
-    id: 'practice-sub-double-digit',
-    label: 'ひき算（応用）',
-    description: 'ひき算の応用練習（答えが99以下）',
+    id: 'practice-sub-20',
+    label: 'ひき算（20までのかず）',
+    description: '答えが20以下のひき算',
     mode: 'sub',
-    max: 99,
+    max: 20,
+    minGrade: 'grade-1',
+  },
+  // 小2向け - たし算（50以下）
+  {
+    id: 'practice-add-50',
+    label: 'たし算（50までのかず）',
+    description: '答えが50以下のたし算',
+    mode: 'add',
+    max: 50,
+    minGrade: 'grade-2',
+  },
+  // 小2向け - ひき算（50以下）
+  {
+    id: 'practice-sub-50',
+    label: 'ひき算（50までのかず）',
+    description: '答えが50以下のひき算',
+    mode: 'sub',
+    max: 50,
+    minGrade: 'grade-2',
+  },
+  // 小2向け - たし算（100以下）
+  {
+    id: 'practice-add-100',
+    label: 'たし算（100までのかず）',
+    description: '答えが100以下のたし算',
+    mode: 'add',
+    max: 100,
+    minGrade: 'grade-2',
+  },
+  // 小2向け - ひき算（100以下）
+  {
+    id: 'practice-sub-100',
+    label: 'ひき算（100までのかず）',
+    description: '答えが100以下のひき算',
+    mode: 'sub',
+    max: 100,
+    minGrade: 'grade-2',
+  },
+  // 小3向け - たし算（応用・大きい数）
+  {
+    id: 'practice-add-200',
+    label: 'たし算（200までのかず）',
+    description: '答えが200以下のたし算',
+    mode: 'add',
+    max: 200,
     minGrade: 'grade-3',
   },
+  // 小3向け - ひき算（応用・大きい数）
   {
-    id: 'practice-mix-three',
-    label: 'たし算・ひき算（基礎）',
-    description: 'たし算とひき算の練習（答えが70以下）',
-    mode: 'mix',
-    max: 70,
-    minGrade: 'grade-5',
-  },
-  {
-    id: 'practice-mix-four',
-    label: 'たし算・ひき算（応用）',
-    description: 'たし算とひき算の応用練習（答えが90以下）',
-    mode: 'mix',
-    max: 90,
-    minGrade: 'grade-5',
-  },
-  {
-    id: 'practice-mul-table',
-    label: 'かけ算（基礎）',
-    description: 'かけ算の基礎練習（答えが81以下）',
-    mode: 'mul',
-    max: 81,
+    id: 'practice-sub-200',
+    label: 'ひき算（200までのかず）',
+    description: '答えが200以下のひき算',
+    mode: 'sub',
+    max: 200,
     minGrade: 'grade-3',
   },
+  // 小3向け - たし算（さらに大きい数）
+  {
+    id: 'practice-add-500',
+    label: 'たし算（500までのかず）',
+    description: '答えが500以下のたし算',
+    mode: 'add',
+    max: 500,
+    minGrade: 'grade-3',
+  },
+  // 小3向け - ひき算（さらに大きい数）
+  {
+    id: 'practice-sub-500',
+    label: 'ひき算（500までのかず）',
+    description: '答えが500以下のひき算',
+    mode: 'sub',
+    max: 500,
+    minGrade: 'grade-3',
+  },
+  // 小5向け - ミックス（基礎）
+  {
+    id: 'practice-mix-100',
+    label: 'たし算・ひき算（100まで）',
+    description: '答えが100以下のたし算とひき算',
+    mode: 'mix',
+    max: 100,
+    minGrade: 'grade-5',
+  },
+  // 小5向け - ミックス（応用）
+  {
+    id: 'practice-mix-500',
+    label: 'たし算・ひき算（500まで）',
+    description: '答えが500以下のたし算とひき算',
+    mode: 'mix',
+    max: 500,
+    minGrade: 'grade-5',
+  },
+  // かけ算 - 小3向け（やさしい）
   {
     id: 'practice-mul-easy',
     label: 'かけ算（やさしい）',
-    description: 'かけ算の入門練習（答えが25以下）',
+    description: '答えが25以下のかけ算',
     mode: 'mul',
     max: 25,
     minGrade: 'grade-3',
   },
+  // かけ算 - 小3向け（九九）
+  {
+    id: 'practice-mul-table',
+    label: 'かけ算（九九）',
+    description: '答えが81以下のかけ算',
+    mode: 'mul',
+    max: 81,
+    minGrade: 'grade-3',
+  },
+  // かけ算 - 小3向け（むずかしい）
   {
     id: 'practice-mul-hard',
     label: 'かけ算（むずかしい）',
-    description: 'かけ算の応用練習（答えが180以下）',
+    description: '答えが180以下のかけ算',
     mode: 'mul',
     max: 180,
     minGrade: 'grade-3',
   },
+  // かけ算 - 小3向け（とてもむずかしい）
   {
     id: 'practice-mul-double',
     label: 'かけ算（とてもむずかしい）',
-    description: 'かけ算の高度な練習（答えが400以下）',
+    description: '答えが400以下のかけ算',
     mode: 'mul',
     max: 400,
     minGrade: 'grade-3',

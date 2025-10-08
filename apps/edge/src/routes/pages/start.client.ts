@@ -33,12 +33,12 @@ const MODULE_SOURCE = `
 
   // 学年ごとの利用可能な計算種類
   const gradeCalculationTypes = {
-    'grade-1': ['calc-add', 'calc-sub'],
-    'grade-2': ['calc-add', 'calc-sub'],
-    'grade-3': ['calc-add', 'calc-sub', 'calc-mul'],
-    'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
-    'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
-    'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+    'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
+    'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
+    'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul'],
+    'grade-4': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div'],
+    'grade-5': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
+    'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
   };
 
   // 学年の順序を取得する関数（比較用）

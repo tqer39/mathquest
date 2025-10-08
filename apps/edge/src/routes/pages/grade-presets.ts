@@ -45,6 +45,12 @@ export const calculationTypes = [
     mode: 'sub',
   },
   {
+    id: 'calc-add-sub-mix',
+    label: 'たし算・ひき算',
+    description: 'たし算とひき算の混合練習',
+    mode: 'add-sub-mix',
+  },
+  {
     id: 'calc-mul',
     label: 'かけ算',
     description: 'かけ算の練習',
@@ -58,7 +64,7 @@ export const calculationTypes = [
   },
   {
     id: 'calc-mix',
-    label: 'ミックス',
+    label: '四則演算',
     description: '複合的な計算練習',
     mode: 'mix',
   },
@@ -66,12 +72,32 @@ export const calculationTypes = [
 
 // 学年ごとの利用可能な計算種類
 export const gradeCalculationTypes = {
-  'grade-1': ['calc-add', 'calc-sub'],
-  'grade-2': ['calc-add', 'calc-sub'],
-  'grade-3': ['calc-add', 'calc-sub', 'calc-mul'],
-  'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
-  'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
-  'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+  'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
+  'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
+  'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul'],
+  'grade-4': [
+    'calc-add',
+    'calc-sub',
+    'calc-add-sub-mix',
+    'calc-mul',
+    'calc-div',
+  ],
+  'grade-5': [
+    'calc-add',
+    'calc-sub',
+    'calc-add-sub-mix',
+    'calc-mul',
+    'calc-div',
+    'calc-mix',
+  ],
+  'grade-6': [
+    'calc-add',
+    'calc-sub',
+    'calc-add-sub-mix',
+    'calc-mul',
+    'calc-div',
+    'calc-mix',
+  ],
 } as const;
 
 // 学年に応じて利用可能な計算種類を取得する関数
@@ -257,20 +283,74 @@ export const practiceThemes = [
     minGrade: 'grade-4',
     isDecimal: true,
   },
-  // 小5向け - ミックス（基礎）
+  // 小1向け - たし算・ひき算ミックス（10まで）
   {
-    id: 'practice-mix-100',
+    id: 'practice-add-sub-mix-10',
+    label: 'たし算・ひき算（10まで）',
+    description: '答えが10以下のたし算とひき算',
+    mode: 'add-sub-mix',
+    max: 10,
+    minGrade: 'grade-1',
+  },
+  // 小1向け - たし算・ひき算ミックス（20まで）
+  {
+    id: 'practice-add-sub-mix-20',
+    label: 'たし算・ひき算（20まで）',
+    description: '答えが20以下のたし算とひき算',
+    mode: 'add-sub-mix',
+    max: 20,
+    minGrade: 'grade-1',
+  },
+  // 小2向け - たし算・ひき算ミックス（50まで）
+  {
+    id: 'practice-add-sub-mix-50',
+    label: 'たし算・ひき算（50まで）',
+    description: '答えが50以下のたし算とひき算',
+    mode: 'add-sub-mix',
+    max: 50,
+    minGrade: 'grade-2',
+  },
+  // 小2向け - たし算・ひき算ミックス（100まで）
+  {
+    id: 'practice-add-sub-mix-100',
     label: 'たし算・ひき算（100まで）',
     description: '答えが100以下のたし算とひき算',
+    mode: 'add-sub-mix',
+    max: 100,
+    minGrade: 'grade-2',
+  },
+  // 小3向け - たし算・ひき算ミックス（200まで）
+  {
+    id: 'practice-add-sub-mix-200',
+    label: 'たし算・ひき算（200まで）',
+    description: '答えが200以下のたし算とひき算',
+    mode: 'add-sub-mix',
+    max: 200,
+    minGrade: 'grade-3',
+  },
+  // 小3向け - たし算・ひき算ミックス（500まで）
+  {
+    id: 'practice-add-sub-mix-500',
+    label: 'たし算・ひき算（500まで）',
+    description: '答えが500以下のたし算とひき算',
+    mode: 'add-sub-mix',
+    max: 500,
+    minGrade: 'grade-3',
+  },
+  // 小5向け - 四則演算ミックス（基礎）
+  {
+    id: 'practice-mix-100',
+    label: '四則演算（100まで）',
+    description: '答えが100以下の四則演算',
     mode: 'mix',
     max: 100,
     minGrade: 'grade-5',
   },
-  // 小5向け - ミックス（応用）
+  // 小5向け - 四則演算ミックス（応用）
   {
     id: 'practice-mix-500',
-    label: 'たし算・ひき算（500まで）',
-    description: '答えが500以下のたし算とひき算',
+    label: '四則演算（500まで）',
+    description: '答えが500以下の四則演算',
     mode: 'mix',
     max: 500,
     minGrade: 'grade-5',

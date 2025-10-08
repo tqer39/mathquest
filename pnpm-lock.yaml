@@ -16,7 +16,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.11.0
-        version: 1.19.5(hono@4.9.9)
+        version: 1.19.5(hono@4.9.10)
       '@mathquest/app':
         specifier: workspace:*
         version: link:../../packages/app
@@ -25,7 +25,7 @@ importers:
         version: link:../../packages/domain
       hono:
         specifier: ^4.4.3
-        version: 4.9.9
+        version: 4.9.10
     devDependencies:
       typescript:
         specifier: ^5.5.0
@@ -41,7 +41,7 @@ importers:
         version: 0.44.6(@cloudflare/workers-types@4.20251004.0)
       hono:
         specifier: ^4.4.3
-        version: 4.9.9
+        version: 4.9.10
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250923.0
@@ -63,10 +63,10 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.11.0
-        version: 1.19.5(hono@4.9.9)
+        version: 1.19.5(hono@4.9.10)
       hono:
         specifier: ^4.4.3
-        version: 4.9.9
+        version: 4.9.10
     devDependencies:
       '@types/node':
         specifier: ^22.7.5
@@ -1090,8 +1090,8 @@ packages:
   glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
 
-  hono@4.9.9:
-    resolution: {integrity: sha512-Hxw4wT6zjJGZJdkJzAx9PyBdf7ZpxaTSA0NfxqjLghwMrLBX8p33hJBzoETRakF3UJu6OdNQBZAlNSkGqKFukw==}
+  hono@4.9.10:
+    resolution: {integrity: sha512-AlI15ijFyKTXR7eHo7QK7OR4RoKIedZvBuRjO8iy4zrxvlY5oFCdiRG/V/lFJHCNXJ0k72ATgnyzx8Yqa5arug==}
     engines: {node: '>=16.9.0'}
 
   is-arrayish@0.3.4:
@@ -1611,9 +1611,9 @@ snapshots:
   '@esbuild/win32-x64@0.25.4':
     optional: true
 
-  '@hono/node-server@1.19.5(hono@4.9.9)':
+  '@hono/node-server@1.19.5(hono@4.9.10)':
     dependencies:
-      hono: 4.9.9
+      hono: 4.9.10
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -2011,7 +2011,7 @@ snapshots:
 
   glob-to-regexp@0.4.1: {}
 
-  hono@4.9.9: {}
+  hono@4.9.10: {}
 
   is-arrayish@0.3.4: {}
 

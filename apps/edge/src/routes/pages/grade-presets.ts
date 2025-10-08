@@ -217,6 +217,46 @@ export const practiceThemes = [
     max: 500,
     minGrade: 'grade-3',
   },
+  // 小3向け - 小数のたし算（基礎）
+  {
+    id: 'practice-add-decimal-basic',
+    label: 'たし算（小数・基礎）',
+    description: '小数点以下1桁までのたし算',
+    mode: 'add',
+    max: 10,
+    minGrade: 'grade-3',
+    isDecimal: true,
+  },
+  // 小3向け - 小数のひき算（基礎）
+  {
+    id: 'practice-sub-decimal-basic',
+    label: 'ひき算（小数・基礎）',
+    description: '小数点以下1桁までのひき算',
+    mode: 'sub',
+    max: 10,
+    minGrade: 'grade-3',
+    isDecimal: true,
+  },
+  // 小4向け - 小数のたし算（応用）
+  {
+    id: 'practice-add-decimal-adv',
+    label: 'たし算（小数・応用）',
+    description: '小数点以下2桁までのたし算',
+    mode: 'add',
+    max: 100,
+    minGrade: 'grade-4',
+    isDecimal: true,
+  },
+  // 小4向け - 小数のひき算（応用）
+  {
+    id: 'practice-sub-decimal-adv',
+    label: 'ひき算（小数・応用）',
+    description: '小数点以下2桁までのひき算',
+    mode: 'sub',
+    max: 100,
+    minGrade: 'grade-4',
+    isDecimal: true,
+  },
   // 小5向け - ミックス（基礎）
   {
     id: 'practice-mix-100',

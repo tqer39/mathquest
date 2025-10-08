@@ -392,7 +392,7 @@ const MODULE_SOURCE = `
 
     // 設定トグルを初期状態に戻す
     toggleButton(soundToggle, false);
-    toggleButton(stepsToggle, false);
+    toggleButton(stepsToggle, true);
 
     // プログレスも初期化
     progress.lastLevel = selectedGradeId;

@@ -24,6 +24,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Setup Terraform
+      uses: ./.github/actions/setup-terraform
+      with:
+        working-directory: ${{ inputs.working-directory }}
+
     - name: Generate terraform.auto.tfvars for prod
       if: contains(inputs.working-directory, '/prod/')
       run: |
@@ -43,11 +48,6 @@ runs:
         EOF
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-
-    - name: Setup Terraform
-      uses: ./.github/actions/setup-terraform
-      with:
-        working-directory: ${{ inputs.working-directory }}
 
     - name: Terraform Validate
       uses: ./.github/actions/terraform-validate

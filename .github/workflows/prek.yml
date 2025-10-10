@@ -30,4 +30,4 @@ jobs:
       # Run prek with official action
       - uses: j178/prek-action@v1
         with:
-          extra_args: --all-files --show-diff-on-failure
+          extra_args: --all-files

@@ -1,5 +1,5 @@
 ---
-name: pre-commit
+name: prek
 
 on:
   push:
@@ -11,15 +11,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  pre-commit:
+  prek:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
-      # pre-commit の terraform-fmt 用
+      # prek の terraform-fmt 用
       - uses: jdx/mise-action@v3
         with:
           version: 2025.9.13
@@ -27,6 +28,12 @@ jobs:
 
       - run: mise install
 
-      - uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: -a --show-diff-on-failure
+      # Install prek
+      - name: Install prek
+        run: |
+          brew install prek
+
+      # Run prek on all files
+      - name: Run prek
+        run: |
+          prek run --all-files --show-diff-on-failure

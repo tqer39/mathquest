@@ -22,7 +22,7 @@ setup:
         echo "⚠ mise not found. Please run 'make bootstrap' first."; \
         exit 1; \
     fi
-    pre-commit install
+    prek install
     @if command -v pnpm >/dev/null 2>&1; then \
         echo "→ Installing JS dependencies with pnpm..."; \
         pnpm install; \
@@ -33,40 +33,31 @@ setup:
     fi
     @echo "Setup complete!"
 
-# Run pre-commit hooks on all files
+# Run prek hooks on all files
 lint:
-    pre-commit run --all-files
+    prek run --all-files
 
-# Run specific pre-commit hook
+# Run specific prek hook
 lint-hook hook:
-    pre-commit run {{hook}}
-
-# Update pre-commit hooks to latest versions
-update-hooks:
-    pre-commit autoupdate
+    prek run --hook {{hook}}
 
 # Fix common formatting issues
 fix:
-    pre-commit run end-of-file-fixer --all-files
-    pre-commit run trailing-whitespace --all-files
-    pre-commit run markdownlint-cli2 --all-files
+    prek run --hook end-of-file-fixer --all-files
+    prek run --hook trailing-whitespace --all-files
+    prek run --hook markdownlint-cli2 --all-files
 
-# Format all supported files with Prettier (via pre-commit hook)
+# Format all supported files with Prettier (via prek hook)
 format:
-    pre-commit run prettier --all-files
+    prek run --hook prettier --all-files
 
 # Format only staged files (typical git commit flow)
 format-staged:
-    pre-commit run prettier
+    prek run --hook prettier
 
-# Clean pre-commit cache
+# Clean prek cache (if any)
 clean:
-    @echo "Cleaning pre-commit cache..."
-    -pre-commit clean
-    @if [ -d ~/.cache/pre-commit ]; then \
-        echo "→ Force removing pre-commit cache directory..."; \
-        rm -rf ~/.cache/pre-commit; \
-    fi
+    @echo "Cleaning prek cache..."
     @echo "Clean complete!"
 
 # Show mise status

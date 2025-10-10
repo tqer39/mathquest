@@ -10,6 +10,7 @@
     "pnpm-workspace.yaml"
   ],
   "words": [
+    "ACMR",
     "apne",
     "autobuild",
     "Autobuild",
@@ -70,6 +71,7 @@
     "ooyama",
     "pipefail",
     "pkgs",
+    "prek",
     "pyenv",
     "pyproject",
     "pytest",

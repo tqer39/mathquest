@@ -6,7 +6,7 @@
 brew "mise"        # Version manager for multiple languages
 brew "just"        # Command runner and task automation
 brew "git"         # Version control system
-brew "pre-commit"  # Git hooks framework
+brew "prek"        # Git hooks framework
 brew "uv"          # Python package and project manager
 brew "rulesync"    # Synchronize repository rules
 brew "aws-vault"  # AWS 資格情報の安全な管理

@@ -29,6 +29,13 @@ runs:
       with:
         working-directory: ${{ inputs.working-directory }}
 
+    - name: Terraform Validate (pre-tfvars check)
+      if: "!contains(inputs.working-directory, '/prod/')"
+      uses: ./.github/actions/terraform-validate
+      with:
+        github-token: ${{ inputs.github-token }}
+        working-directory: ${{ inputs.working-directory }}
+
     - name: Generate terraform.auto.tfvars for prod
       if: contains(inputs.working-directory, '/prod/')
       run: |
@@ -49,7 +56,8 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
 
-    - name: Terraform Validate
+    - name: Terraform Validate (post-tfvars check for prod)
+      if: contains(inputs.working-directory, '/prod/')
       uses: ./.github/actions/terraform-validate
       with:
         github-token: ${{ inputs.github-token }}

@@ -16,8 +16,8 @@ locals {
 }
 
 resource "cloudflare_zone" "root" {
-  account = var.cloudflare_account_id
-  name    = var.root_domain
+  account_id = var.cloudflare_account_id
+  zone       = var.root_domain
 }
 
 resource "google_clouddomains_registration" "root" {

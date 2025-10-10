@@ -10,6 +10,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "4.52.5"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.4"
+    }
   }
 
   backend "s3" {

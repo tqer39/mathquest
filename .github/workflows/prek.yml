@@ -27,6 +27,10 @@ jobs:
 
       - run: mise install
 
+      # Install pnpm dependencies
+      - name: Install dependencies
+        run: pnpm install
+
       # Run prek with official action
       - uses: j178/prek-action@v1
         with:

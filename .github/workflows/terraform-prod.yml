@@ -56,7 +56,7 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:

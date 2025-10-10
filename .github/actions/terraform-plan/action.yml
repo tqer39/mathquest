@@ -63,8 +63,24 @@ runs:
         github-token: ${{ inputs.github-token }}
         working-directory: ${{ inputs.working-directory }}
 
+    - name: Cache tfcmt
+      id: cache-tfcmt
+      uses: actions/cache@v4
+      with:
+        path: ~/bin/tfcmt
+        key: tfcmt-${{ runner.os }}-v4.16.0
+
     - name: Setup tfcmt
-      uses: itkq/actions-tfcmt/setup@main
+      if: steps.cache-tfcmt.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ~/bin
+        curl -fsSL https://github.com/suzuki-shunsuke/tfcmt/releases/download/v4.16.0/tfcmt_linux_amd64.tar.gz | tar -xz -C ~/bin tfcmt
+        chmod +x ~/bin/tfcmt
+      shell: bash
+
+    - name: Add tfcmt to PATH
+      run: echo "$HOME/bin" >> $GITHUB_PATH
+      shell: bash
 
     - name: Terraform Plan
       continue-on-error: true

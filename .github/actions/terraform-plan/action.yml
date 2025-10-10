@@ -68,13 +68,13 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/bin/tfcmt
-        key: tfcmt-${{ runner.os }}-v4.16.0
+        key: tfcmt-${{ runner.os }}-v4.14.12
 
     - name: Setup tfcmt
       if: steps.cache-tfcmt.outputs.cache-hit != 'true'
       run: |
         mkdir -p ~/bin
-        curl -fsSL https://github.com/suzuki-shunsuke/tfcmt/releases/download/v4.16.0/tfcmt_linux_amd64.tar.gz | tar -xz -C ~/bin tfcmt
+        curl -fsSL https://github.com/suzuki-shunsuke/tfcmt/releases/download/v4.14.12/tfcmt_linux_amd64.tar.gz | tar -xz -C ~/bin tfcmt
         chmod +x ~/bin/tfcmt
       shell: bash
 

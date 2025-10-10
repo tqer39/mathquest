@@ -24,6 +24,26 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Generate terraform.auto.tfvars for prod
+      if: contains(inputs.working-directory, '/prod/')
+      run: |
+        cat > terraform.auto.tfvars <<EOF
+        gcp_project_id = "$GCP_PROJECT_ID"
+        cloudflare_account_id = "$CLOUDFLARE_ACCOUNT_ID"
+        contact_country_code = "$CONTACT_COUNTRY_CODE"
+        contact_postal_code = "$CONTACT_POSTAL_CODE"
+        contact_administrative_area = "$CONTACT_ADMINISTRATIVE_AREA"
+        contact_locality = "$CONTACT_LOCALITY"
+        contact_address_lines = $(echo "$CONTACT_ADDRESS_LINES" | jq -R 'split(",")')
+        contact_recipient = "$CONTACT_RECIPIENT"
+        contact_email = "$CONTACT_EMAIL"
+        contact_phone = "$CONTACT_PHONE"
+        yearly_price_currency = "$YEARLY_PRICE_CURRENCY"
+        yearly_price_units = $YEARLY_PRICE_UNITS
+        EOF
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+
     - name: Setup Terraform
       uses: ./.github/actions/setup-terraform
       with:

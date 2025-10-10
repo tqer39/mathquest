@@ -71,6 +71,18 @@ jobs:
         uses: ./.github/actions/terraform-plan
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CONTACT_COUNTRY_CODE: ${{ secrets.CONTACT_COUNTRY_CODE }}
+          CONTACT_POSTAL_CODE: ${{ secrets.CONTACT_POSTAL_CODE }}
+          CONTACT_ADMINISTRATIVE_AREA: ${{ secrets.CONTACT_ADMINISTRATIVE_AREA }}
+          CONTACT_LOCALITY: ${{ secrets.CONTACT_LOCALITY }}
+          CONTACT_ADDRESS_LINES: ${{ secrets.CONTACT_ADDRESS_LINES }}
+          CONTACT_RECIPIENT: ${{ secrets.CONTACT_RECIPIENT }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          CONTACT_PHONE: ${{ secrets.CONTACT_PHONE }}
+          YEARLY_PRICE_CURRENCY: ${{ secrets.YEARLY_PRICE_CURRENCY }}
+          YEARLY_PRICE_UNITS: ${{ secrets.YEARLY_PRICE_UNITS }}
         with:
           AWS_ENV_NAME: ${{ env.AWS_ENV_NAME }}
           CHECK_DIFF: ${{ env.CHECK_DIFF }}
@@ -92,6 +104,18 @@ jobs:
         uses: ./.github/actions/terraform-apply
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CONTACT_COUNTRY_CODE: ${{ secrets.CONTACT_COUNTRY_CODE }}
+          CONTACT_POSTAL_CODE: ${{ secrets.CONTACT_POSTAL_CODE }}
+          CONTACT_ADMINISTRATIVE_AREA: ${{ secrets.CONTACT_ADMINISTRATIVE_AREA }}
+          CONTACT_LOCALITY: ${{ secrets.CONTACT_LOCALITY }}
+          CONTACT_ADDRESS_LINES: ${{ secrets.CONTACT_ADDRESS_LINES }}
+          CONTACT_RECIPIENT: ${{ secrets.CONTACT_RECIPIENT }}
+          CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+          CONTACT_PHONE: ${{ secrets.CONTACT_PHONE }}
+          YEARLY_PRICE_CURRENCY: ${{ secrets.YEARLY_PRICE_CURRENCY }}
+          YEARLY_PRICE_UNITS: ${{ secrets.YEARLY_PRICE_UNITS }}
         with:
           working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
 

@@ -1,0 +1,24 @@
+# このファイルは環境変数の例を示すテンプレートです
+# 本番環境では GitHub Secrets を使用します
+
+gcp_project_id = "gcp-project-id"
+root_domain    = "mathquest.app"
+
+# Cloudflare
+cloudflare_account_id = "your-cloudflare-account-id"
+# cloudflare_api_token は GitHub Secrets の CLOUDFLARE_API_TOKEN を使用
+
+# Contact Information
+# ドメイン登録に必要な連絡先情報
+contact_country_code        = "JP"                        # 国コード（ISO 3166-1 alpha-2）
+contact_postal_code         = "1234567"                   # 郵便番号（ハイフンなし）
+contact_administrative_area = "Tokyo"                     # 都道府県
+contact_locality            = "Shibuya"                   # 市区町村
+contact_address_lines       = ["1-2-3 Example Street"]   # 住所（配列形式、複数行可）
+contact_recipient           = "Your Name"                 # 受信者名
+contact_email               = "your-email@example.com"    # メールアドレス
+contact_phone               = "+81.312345678"             # 電話番号（E.164形式: +国番号.市外局番（0除く）市内局番加入者番号）
+
+# Pricing
+yearly_price_currency = "USD"
+yearly_price_units    = 12

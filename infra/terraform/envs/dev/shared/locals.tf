@@ -1,3 +1,4 @@
+# tflint-ignore: terraform_unused_declarations
 locals {
   aws_account_id   = "072693953877"
   aws_env_name     = "portfolio"
@@ -11,6 +12,7 @@ locals {
   }
 }
 
+# tflint-ignore: terraform_unused_declarations
 locals {
   base_tags = {
     "env"        = local.app_env_name

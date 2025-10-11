@@ -9,10 +9,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "mathquest-terraform-state-portfolio-dev"
-    region         = "ap-northeast-1"
-    key            = "subdomain/terraform.tfstate"
-    dynamodb_table = "mathquest-terraform-state-lock-portfolio-dev"
-    encrypt        = true
+    bucket  = "terraform-tfstate-tqer39-072693953877-ap-northeast-1"
+    key     = "mathquest/infra/terraform/envs/dev/dev-subdomain.tfstate"
+    encrypt = true
+    region  = "ap-northeast-1"
   }
 }

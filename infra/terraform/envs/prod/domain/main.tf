@@ -21,3 +21,14 @@ module "domain_register_delegate" {
 resource "null_resource" "wait_service_enable" {
   depends_on = [google_project_service.domains]
 }
+
+# dev サブドメイン用 DNS レコード
+# 実際の Workers/Pages の URL にポイントさせる
+resource "cloudflare_record" "dev" {
+  zone_id = module.domain_register_delegate.cloudflare_zone_id
+  name    = "dev"
+  type    = "CNAME"
+  content = var.dev_subdomain_target
+  proxied = true
+  comment = "Dev environment subdomain"
+}

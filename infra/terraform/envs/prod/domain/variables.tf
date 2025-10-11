@@ -26,6 +26,12 @@ variable "cloudflare_account_id" {
   type        = string
 }
 
+variable "dev_subdomain_target" {
+  description = "dev サブドメインの転送先 (Workers/Pages の URL など)"
+  type        = string
+  default     = "mathquest-dev.pages.dev"
+}
+
 # Contact
 variable "contact_country_code" { type = string }
 variable "contact_postal_code" { type = string }

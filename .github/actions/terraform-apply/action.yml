@@ -29,6 +29,7 @@ runs:
       run: |
         cat > terraform.auto.tfvars <<EOF
         gcp_project_id = "$GCP_PROJECT_ID"
+        cloudflare_api_token = "$CLOUDFLARE_API_TOKEN"
         cloudflare_account_id = "$CLOUDFLARE_ACCOUNT_ID"
         contact_country_code = "$CONTACT_COUNTRY_CODE"
         contact_postal_code = "$CONTACT_POSTAL_CODE"

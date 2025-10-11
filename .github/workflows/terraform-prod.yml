@@ -89,6 +89,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_PROD }}
           working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
+          gcp-workload-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Start Deployment
         if: env.TF_PLAN_STATUS == 'has-diff' && github.ref == 'refs/heads/main'
@@ -118,6 +120,8 @@ jobs:
           YEARLY_PRICE_UNITS: ${{ secrets.YEARLY_PRICE_UNITS }}
         with:
           working-directory: ./infra/terraform/envs/${{ env.AWS_ENV_NAME }}/${{ matrix.directory }}
+          gcp-workload-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          gcp-service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Finish Deployment
         if: env.TF_PLAN_STATUS == 'has-diff' && always() && github.ref == 'refs/heads/main'

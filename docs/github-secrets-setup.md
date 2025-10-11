@@ -10,9 +10,11 @@ prod 環境の Terraform デプロイで使用する GitHub Secrets の設定方
 
 ### GCP 関連
 
-| Secret 名        | 説明                | 例          |
-| ---------------- | ------------------- | ----------- |
-| `GCP_PROJECT_ID` | GCP プロジェクト ID | `portfolio` |
+| Secret 名                        | 説明                                                   | 例                                                                                  |
+| -------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `GCP_PROJECT_ID`                 | GCP プロジェクト ID                                    | `portfolio`                                                                         |
+| `GCP_WORKLOAD_IDENTITY_PROVIDER` | GCP Workload Identity Provider (GitHub Actions OIDC用) | `projects/123456789/locations/global/workloadIdentityPools/github/providers/github` |
+| `GCP_SERVICE_ACCOUNT`            | GCP Service Account (terraform実行用)                  | `terraform@your-project.iam.gserviceaccount.com`                                    |
 
 ### Cloudflare 関連
 
@@ -88,6 +90,95 @@ prod 環境の Terraform デプロイで使用する GitHub Secrets の設定方
 ドメイン登録の価格は GCP Cloud Domains のドキュメントで確認できます：
 
 - [Cloud Domains Pricing](https://cloud.google.com/domains/pricing)
+
+### GCP Workload Identity の設定方法
+
+`GCP_WORKLOAD_IDENTITY_PROVIDER` と `GCP_SERVICE_ACCOUNT` を取得するには、以下の手順で設定します。
+
+#### 1. サービスアカウントの作成
+
+```bash
+# プロジェクトIDを設定
+export GCP_PROJECT_ID="your-project-id"
+
+# サービスアカウントを作成
+gcloud iam service-accounts create github-actions-terraform \
+  --project="${GCP_PROJECT_ID}" \
+  --display-name="GitHub Actions Terraform"
+
+# サービスアカウントのメールアドレスを確認（これが GCP_SERVICE_ACCOUNT）
+export SERVICE_ACCOUNT="github-actions-terraform@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
+echo "GCP_SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}"
+```
+
+#### 2. サービスアカウントに権限を付与
+
+```bash
+# Cloud Domains 管理者権限
+gcloud projects add-iam-policy-binding "${GCP_PROJECT_ID}" \
+  --member="serviceAccount:${SERVICE_ACCOUNT}" \
+  --role="roles/domains.admin"
+
+# Service Usage Consumer 権限（API 有効化のため）
+gcloud projects add-iam-policy-binding "${GCP_PROJECT_ID}" \
+  --member="serviceAccount:${SERVICE_ACCOUNT}" \
+  --role="roles/serviceusage.serviceUsageConsumer"
+```
+
+#### 3. Workload Identity Pool の作成
+
+```bash
+# Workload Identity Pool を作成
+gcloud iam workload-identity-pools create "github" \
+  --project="${GCP_PROJECT_ID}" \
+  --location="global" \
+  --display-name="GitHub Actions"
+
+# プロジェクト番号を取得
+export PROJECT_NUMBER=$(gcloud projects describe "${GCP_PROJECT_ID}" --format="value(projectNumber)")
+```
+
+#### 4. Workload Identity Provider の作成
+
+```bash
+# GitHub 用の Provider を作成
+gcloud iam workload-identity-pools providers create-oidc "github" \
+  --project="${GCP_PROJECT_ID}" \
+  --location="global" \
+  --workload-identity-pool="github" \
+  --display-name="GitHub Actions Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" \
+  --attribute-condition="assertion.repository_owner == 'YOUR_GITHUB_USERNAME'" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
+
+# Provider の完全な ID を取得（これが GCP_WORKLOAD_IDENTITY_PROVIDER）
+export WORKLOAD_IDENTITY_PROVIDER="projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/providers/github"
+echo "GCP_WORKLOAD_IDENTITY_PROVIDER: ${WORKLOAD_IDENTITY_PROVIDER}"
+```
+
+**重要**: `YOUR_GITHUB_USERNAME` を実際の GitHub ユーザー名またはオーガニゼーション名に置き換えてください。
+
+#### 5. サービスアカウントに Workload Identity User 権限を付与
+
+```bash
+# GitHub Actions からサービスアカウントを使用できるようにする
+gcloud iam service-accounts add-iam-policy-binding "${SERVICE_ACCOUNT}" \
+  --project="${GCP_PROJECT_ID}" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github/attribute.repository/YOUR_GITHUB_USERNAME/mathquest"
+```
+
+**重要**: `YOUR_GITHUB_USERNAME/mathquest` を実際のリポジトリパスに置き換えてください。
+
+#### 6. GitHub Secrets に登録
+
+以下の値を GitHub リポジトリの Secrets に登録します：
+
+```bash
+# これらの値をコピーして GitHub Secrets に設定
+echo "GCP_WORKLOAD_IDENTITY_PROVIDER: ${WORKLOAD_IDENTITY_PROVIDER}"
+echo "GCP_SERVICE_ACCOUNT: ${SERVICE_ACCOUNT}"
+```
 
 ## ローカルでの Terraform 実行
 

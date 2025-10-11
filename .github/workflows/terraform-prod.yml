@@ -4,15 +4,8 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
-  workflow_call:
-    inputs:
-      CHECK_DIFF:
-        description: '差分チェックフラグ'
-        required: true
-        type: string
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       CHECK_DIFF:
@@ -35,7 +28,24 @@ env:
   CHECK_DIFF: ${{ inputs.CHECK_DIFF || github.event.inputs.CHECK_DIFF || '_false' }}
 
 jobs:
+  validate-semver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'release'
+    steps:
+      - name: Validate SemVer tag
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          if [[ ! "$TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Error: Tag '$TAG' is not a valid SemVer format"
+            echo "Expected format: v1.2.3 or 1.2.3 (with optional pre-release and build metadata)"
+            exit 1
+          fi
+          echo "Tag '$TAG' is valid SemVer format"
+
   set-matrix:
+    needs: [validate-semver]
+    if: always() && (needs.validate-semver.result == 'success' || needs.validate-semver.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -93,7 +103,7 @@ jobs:
           gcp-service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Start Deployment
-        if: env.TF_PLAN_STATUS == 'has-diff' && github.ref == 'refs/heads/main'
+        if: env.TF_PLAN_STATUS == 'has-diff' && github.event_name == 'release'
         uses: bobheadxi/deployments@v1
         id: deployment
         with:
@@ -102,7 +112,7 @@ jobs:
           env: ${{ env.AWS_ENV_NAME }}
 
       - name: Terraform Apply
-        if: env.TF_PLAN_STATUS == 'has-diff' && contains(fromJSON('["push", "workflow_dispatch"]'), github.event_name)
+        if: env.TF_PLAN_STATUS == 'has-diff' && github.event_name == 'release'
         uses: ./.github/actions/terraform-apply
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -124,7 +134,7 @@ jobs:
           gcp-service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Finish Deployment
-        if: env.TF_PLAN_STATUS == 'has-diff' && always() && github.ref == 'refs/heads/main'
+        if: env.TF_PLAN_STATUS == 'has-diff' && always() && github.event_name == 'release'
         uses: bobheadxi/deployments@v1
         with:
           step: finish
@@ -135,7 +145,7 @@ jobs:
 
   delete-pr-comments:
     needs: [terraform-prod]
-    if: contains(fromJSON('["pull_request"]'), github.event_name)
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

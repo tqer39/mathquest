@@ -101,6 +101,17 @@ runs:
       run: terraform plan -detailed-exitcode -no-color > tf_plan.txt
       working-directory: ${{ inputs.working-directory }}
       shell: bash
+      env:
+        TF_LOG: DEBUG
+        TF_LOG_PATH: ${{ runner.temp }}/terraform-debug.log
+
+    - name: Upload Terraform Debug Log
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-debug-log-${{ inputs.AWS_ENV_NAME }}-${{ github.run_id }}
+        path: ${{ runner.temp }}/terraform-debug.log
+        retention-days: 7
 
     - name: tfcmt
       if: steps.terraform-plan.outputs.exitcode != '1'

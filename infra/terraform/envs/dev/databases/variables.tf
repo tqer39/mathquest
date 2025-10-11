@@ -39,3 +39,21 @@ variable "turnstile_region" {
   type        = string
   default     = "world"
 }
+
+variable "existing_d1_database_id" {
+  description = "既存の D1 データベースを取り込む場合の ID"
+  type        = string
+  default     = null
+}
+
+variable "existing_kv_namespace_ids" {
+  description = "既存の Workers KV Namespace を取り込む場合の ID マップ"
+  type        = map(string)
+  default     = {}
+}
+
+variable "existing_turnstile_widget_id" {
+  description = "既存の Turnstile ウィジェットを取り込む場合の ID"
+  type        = string
+  default     = null
+}

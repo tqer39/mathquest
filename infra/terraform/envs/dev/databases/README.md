@@ -22,7 +22,20 @@ turnstile_allowed_domains    = []    # 必要に応じてドメインを追加
 turnstile_widget_mode        = "managed"
 turnstile_bot_fight_mode     = false
 turnstile_region             = "world"
+existing_d1_database_id      = null  # 既存リソースを取り込む場合は ID を設定
+existing_kv_namespace_ids    = {}    # { free_trial = "<namespace_id>" など }
+existing_turnstile_widget_id = null  # 既存 Turnstile を取り込む場合に設定
 ```
+
+## 既存リソースの取り込み
+
+Cloudflare 上に同名のリソースが既に存在する場合は、上記の `existing_*` 変数に ID を設定すると、`terraform apply` 実行時に import ブロックを通じて自動的に状態へ取り込まれます。
+
+- D1 データベース: `existing_d1_database_id = "<account_id>/<database_id>"`
+- Workers KV: `existing_kv_namespace_ids = { free_trial = "<account_id>/<namespace_id>", ... }`
+- Turnstile: `existing_turnstile_widget_id = "<account_id>/<widget_id>"`
+
+ID は `terraform state` や Cloudflare ダッシュボード／API から確認してください。値を設定しない場合は通常通り新規作成されます。
 
 ## 実行
 

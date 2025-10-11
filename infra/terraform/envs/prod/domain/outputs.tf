@@ -12,3 +12,8 @@ output "registration_state" {
   description = "ドメイン登録の状態"
   value       = module.domain_register_delegate.registration_state
 }
+
+output "dev_subdomain_record_id" {
+  description = "dev サブドメインの DNS レコード ID"
+  value       = cloudflare_record.dev.id
+}

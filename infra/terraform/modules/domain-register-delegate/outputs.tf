@@ -10,5 +10,5 @@ output "cloudflare_zone_id" {
 
 output "registration_state" {
   description = "ドメイン登録の状態"
-  value       = try(google_clouddomains_registration.root.state, null)
+  value       = try(google_clouddomains_registration.root[0].state, null)
 }

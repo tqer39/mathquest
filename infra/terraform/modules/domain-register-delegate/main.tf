@@ -18,9 +18,15 @@ locals {
 resource "cloudflare_zone" "root" {
   account_id = var.cloudflare_account_id
   zone       = var.root_domain
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "google_clouddomains_registration" "root" {
+  count = var.create_domain_registration ? 1 : 0
+
   domain_name = var.root_domain
   location    = "global"
 
@@ -85,5 +91,19 @@ resource "google_clouddomains_registration" "root" {
     custom_dns {
       name_servers = cloudflare_zone.root.name_servers
     }
+  }
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [
+      # ドメイン登録後は変更しない
+      yearly_price,
+      contact_settings,
+    ]
+  }
+
+  timeouts {
+    create = "10m"
+    update = "10m"
   }
 }

@@ -57,3 +57,9 @@ variable "yearly_price_units" {
   description = "年額（整数）。実価格に合わせて更新してください"
   type        = number
 }
+
+variable "create_domain_registration" {
+  description = "ドメイン登録リソースを作成するかどうか（既存ドメインの場合は false）"
+  type        = bool
+  default     = false
+}

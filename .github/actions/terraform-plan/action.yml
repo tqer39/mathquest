@@ -98,20 +98,11 @@ runs:
     - name: Terraform Plan
       continue-on-error: true
       id: terraform-plan
-      run: terraform plan -detailed-exitcode -no-color > tf_plan.txt
+      run: |
+        # デバッグログをリアルタイムで標準エラー出力に流しながら、plan結果はファイルに保存
+        TF_LOG=DEBUG terraform plan -detailed-exitcode -no-color 2>&1 | tee tf_plan.txt
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-      env:
-        TF_LOG: DEBUG
-        TF_LOG_PATH: ${{ runner.temp }}/terraform-debug.log
-
-    - name: Upload Terraform Debug Log
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-debug-log-${{ inputs.AWS_ENV_NAME }}-${{ github.run_id }}
-        path: ${{ runner.temp }}/terraform-debug.log
-        retention-days: 7
 
     - name: tfcmt
       if: steps.terraform-plan.outputs.exitcode != '1'

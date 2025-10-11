@@ -31,22 +31,20 @@ runs:
       shell: bash
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve
+      run: |
+        export CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN}"
+        export TF_VAR_gcp_project_id="${GCP_PROJECT_ID}"
+        export TF_VAR_cloudflare_api_token="${CLOUDFLARE_API_TOKEN}"
+        export TF_VAR_cloudflare_account_id="${CLOUDFLARE_ACCOUNT_ID}"
+        export TF_VAR_contact_country_code="${CONTACT_COUNTRY_CODE}"
+        export TF_VAR_contact_postal_code="${CONTACT_POSTAL_CODE}"
+        export TF_VAR_contact_administrative_area="${CONTACT_ADMINISTRATIVE_AREA}"
+        export TF_VAR_contact_locality="${CONTACT_LOCALITY}"
+        export TF_VAR_contact_recipient="${CONTACT_RECIPIENT}"
+        export TF_VAR_contact_email="${CONTACT_EMAIL}"
+        export TF_VAR_contact_phone="${CONTACT_PHONE}"
+        export TF_VAR_yearly_price_currency="${YEARLY_PRICE_CURRENCY}"
+        export TF_VAR_yearly_price_units="${YEARLY_PRICE_UNITS}"
+        terraform apply -auto-approve
       working-directory: ${{ inputs.working-directory }}
       shell: bash
-      env:
-        # Cloudflare provider 用の環境変数
-        CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
-        # domain ディレクトリで使用される変数を TF_VAR_ で渡す
-        TF_VAR_gcp_project_id: ${{ env.GCP_PROJECT_ID }}
-        TF_VAR_cloudflare_api_token: ${{ env.CLOUDFLARE_API_TOKEN }}
-        TF_VAR_cloudflare_account_id: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
-        TF_VAR_contact_country_code: ${{ env.CONTACT_COUNTRY_CODE }}
-        TF_VAR_contact_postal_code: ${{ env.CONTACT_POSTAL_CODE }}
-        TF_VAR_contact_administrative_area: ${{ env.CONTACT_ADMINISTRATIVE_AREA }}
-        TF_VAR_contact_locality: ${{ env.CONTACT_LOCALITY }}
-        TF_VAR_contact_recipient: ${{ env.CONTACT_RECIPIENT }}
-        TF_VAR_contact_email: ${{ env.CONTACT_EMAIL }}
-        TF_VAR_contact_phone: ${{ env.CONTACT_PHONE }}
-        TF_VAR_yearly_price_currency: ${{ env.YEARLY_PRICE_CURRENCY }}
-        TF_VAR_yearly_price_units: ${{ env.YEARLY_PRICE_UNITS }}

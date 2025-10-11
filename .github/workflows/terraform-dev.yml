@@ -56,7 +56,7 @@ jobs:
       contents: read # For aws-actions/configure-aws-credentials
       deployments: write # For bobheadxi/deployments
       pull-requests: write # For bobheadxi/deployments
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:

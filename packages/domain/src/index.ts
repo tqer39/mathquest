@@ -1,4 +1,4 @@
-export type Mode = 'add' | 'sub' | 'mul' | 'mix';
+export type Mode = 'add' | 'sub' | 'mul' | 'add-sub-mix' | 'mix';
 
 export type QuizConfig = {
   mode: Mode;
@@ -31,12 +31,18 @@ const clampIntInclusive = (min: number, max: number) => {
 
 export const pickOp = (mode: Mode): Question['op'] => {
   if (mode === 'mix') return pick(['+', '-', '×'] as const);
+  if (mode === 'add-sub-mix') return pick(['+', '-'] as const);
   if (mode === 'add') return '+';
   if (mode === 'sub') return '-';
   return '×';
 };
 
 export const generateQuestion = (config: QuizConfig): Question => {
+  // add-sub-mix モードの場合は、複数ステップの問題を生成
+  if (config.mode === 'add-sub-mix') {
+    return generateGradeOneQuestion(config.max);
+  }
+
   const op = pickOp(config.mode);
   let a: number;
   let b: number;

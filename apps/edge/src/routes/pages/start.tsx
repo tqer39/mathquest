@@ -92,7 +92,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
         </button>
       </div>
       <p class="max-w-2xl text-sm text-[#4f6076]">
-        下のカードから学年（または練習テーマ）をえらび、右側で効果音・途中式・集中モードと問題数をまとめて調整します。設定はブラウザに保存されるので、次回はそのまま再開できます。
+        学年と計算の種類をえらんでください。テーマを選ぶと、特定の範囲に集中して練習できます。右側では効果音・途中式の表示と問題数を設定できます。設定はブラウザに保存されるので、次回も同じ設定で始められます。
       </p>
     </header>
 
@@ -162,6 +162,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                 data-grade-id={preset.id}
                 data-mode={preset.mode}
                 data-max={preset.max}
+                data-min-grade={preset.minGrade}
                 data-selected="false"
                 class="theme-card group rounded-2xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--mq-primary)] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
                 aria-pressed="false"

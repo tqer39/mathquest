@@ -14,9 +14,13 @@
     "clean": "pnpm --filter @mathquest/domain run clean && pnpm --filter @mathquest/app run clean && pnpm --filter @mathquest/api run clean && pnpm --filter @mathquest/web run clean",
     "format": "pre-commit run prettier --all-files",
     "format:staged": "pre-commit run prettier",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "check": "biome check .",
     "drizzle:generate": "pnpm --filter @mathquest/edge run drizzle:generate"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.2.5",
     "wrangler": "4"
   }
 }

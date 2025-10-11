@@ -1,6 +1,5 @@
 (() => {
   const el = (id) => document.getElementById(id);
-  const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
   const startBtn = el('startBtn');
@@ -31,7 +30,7 @@
     total: 10,
   };
 
-  let state = {
+  const state = {
     index: 0,
     correct: 0,
     a: 0,

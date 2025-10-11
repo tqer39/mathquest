@@ -271,8 +271,26 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
         </div>
         <div class="rounded-3xl border border-[var(--mq-outline)] bg-white p-6 shadow-sm">
           <p class="text-sm font-semibold text-[#5e718a]">テンキー</p>
-          <div class="mt-4 grid grid-cols-3 gap-3">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+          <div class="mt-4 grid grid-cols-4 gap-3">
+            {[7, 8, 9].map((digit) => (
+              <button
+                key={digit}
+                type="button"
+                class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+                data-key={digit}
+              >
+                {digit}
+              </button>
+            ))}
+            <button
+              type="button"
+              class="keypad-button rounded-2xl bg-red-50 px-4 py-5 text-xl font-extrabold text-red-600 shadow transition hover:-translate-y-0.5 hover:bg-red-100 border border-red-200"
+              data-key="backspace"
+              title="1文字削除"
+            >
+              ⌫
+            </button>
+            {[4, 5, 6].map((digit) => (
               <button
                 key={digit}
                 type="button"
@@ -286,22 +304,34 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
               type="button"
               class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-xl font-semibold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-secondary)]"
               data-key="plusminus"
+              title="符号を変更"
             >
               +/−
             </button>
-            <button
-              type="button"
-              class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
-              data-key="0"
-            >
-              0
-            </button>
+            {[1, 2, 3].map((digit) => (
+              <button
+                key={digit}
+                type="button"
+                class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+                data-key={digit}
+              >
+                {digit}
+              </button>
+            ))}
             <button
               type="button"
               class="keypad-button rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
               data-key="."
+              title="小数点"
             >
               .
+            </button>
+            <button
+              type="button"
+              class="keypad-button col-span-2 rounded-2xl bg-[var(--mq-surface-strong)] px-4 py-5 text-2xl font-extrabold text-[var(--mq-ink)] shadow transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)]"
+              data-key="0"
+            >
+              0
             </button>
           </div>
           <div class="mt-3">

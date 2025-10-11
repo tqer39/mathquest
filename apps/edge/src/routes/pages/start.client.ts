@@ -33,12 +33,18 @@ const MODULE_SOURCE = `
 
   // 学年ごとの利用可能な計算種類
   const gradeCalculationTypes = {
-    'grade-1': ['calc-add', 'calc-sub'],
-    'grade-2': ['calc-add', 'calc-sub'],
-    'grade-3': ['calc-mul'],
-    'grade-4': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div'],
-    'grade-5': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
-    'grade-6': ['calc-add', 'calc-sub', 'calc-mul', 'calc-div', 'calc-mix'],
+    'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
+    'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
+    'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul'],
+    'grade-4': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div'],
+    'grade-5': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
+    'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
+  };
+
+  // 学年の順序を取得する関数（比較用）
+  const getGradeOrder = (gradeId) => {
+    const index = gradeLevels.findIndex((g) => g.id === gradeId);
+    return index === -1 ? 0 : index;
   };
   const gradeRadios = Array.from(
     document.querySelectorAll('input[name="grade-selection"]')
@@ -225,6 +231,25 @@ const MODULE_SOURCE = `
       \`;
 
       const radio = label.querySelector('input[type="radio"]');
+      const card = label.querySelector('.calc-type-card');
+
+      // カードクリックで選択/解除を切り替え
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (radio.checked) {
+          // 既に選択されている場合は選択を解除
+          radio.checked = false;
+          filterThemesByCalculationType(null);
+          updateStartButtonState();
+        } else {
+          // 選択されていない場合は選択
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change'));
+        }
+      });
+
       radio.addEventListener('change', () => {
         if (radio.checked) {
           filterThemesByCalculationType(calcType.mode);
@@ -254,9 +279,22 @@ const MODULE_SOURCE = `
   };
 
   const filterThemesByCalculationType = (calculationMode) => {
+    // 現在選択されている学年を取得
+    const currentGrade = gradeRadios.find((radio) => radio.checked)?.value;
+    const currentGradeOrder = currentGrade ? getGradeOrder(currentGrade) : 0;
+
     themeButtons.forEach((button) => {
       const themeMode = button.dataset.mode;
-      const shouldShow = !calculationMode || themeMode === calculationMode;
+      const themeMinGrade = button.dataset.minGrade;
+
+      // 計算種類でフィルタリング
+      const matchesCalculationType = !calculationMode || themeMode === calculationMode;
+
+      // 学年でフィルタリング（テーマの最低学年要件をチェック）
+      const themeMinGradeOrder = themeMinGrade ? getGradeOrder(themeMinGrade) : 0;
+      const matchesGradeRequirement = currentGradeOrder >= themeMinGradeOrder;
+
+      const shouldShow = matchesCalculationType && matchesGradeRequirement;
 
       if (shouldShow) {
         button.style.display = '';
@@ -354,7 +392,7 @@ const MODULE_SOURCE = `
 
     // 設定トグルを初期状態に戻す
     toggleButton(soundToggle, false);
-    toggleButton(stepsToggle, false);
+    toggleButton(stepsToggle, true);
 
     // プログレスも初期化
     progress.lastLevel = selectedGradeId;
@@ -607,8 +645,8 @@ const MODULE_SOURCE = `
 
 export const renderStartClientScript = (
   presets: readonly GradePreset[],
-  calculationTypes: any,
-  gradeLevels: any
+  calculationTypes: unknown,
+  gradeLevels: unknown
 ) => html`
   <script id="grade-presets" type="application/json">
     ${raw(JSON.stringify(presets))}

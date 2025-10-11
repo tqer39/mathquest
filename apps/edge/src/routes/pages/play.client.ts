@@ -254,6 +254,7 @@ const MODULE_SOURCE = `
     currentQuestion: null,
     answerBuffer: '',
     awaitingAdvance: false,
+    userAnswer: null,
   };
 
   state.questionCount = Math.max(1, Math.min(100, state.questionCount));
@@ -404,6 +405,11 @@ const MODULE_SOURCE = `
 
     // 待機状態では「つぎの問題」、通常は「こたえる」
     updateSubmitButtonText(isWaiting);
+
+    // 待機状態では、ユーザーが入力した答えを表示
+    if (isWaiting && state.userAnswer !== null && answerDisplay) {
+      answerDisplay.textContent = String(state.userAnswer);
+    }
 
     // 待機状態ではテキストボタンは常に有効、通常は入力がある場合のみ有効
     const shouldEnableSubmit = state.sessionActive && (isWaiting || hasInput);
@@ -556,7 +562,7 @@ const MODULE_SOURCE = `
       const carry = Math.floor(onesSum / 10);
 
       const detailDiv = document.createElement('div');
-      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+      detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
       if (carry > 0) {
         const onesResult = onesSum % 10;
@@ -592,7 +598,7 @@ const MODULE_SOURCE = `
       const needsBorrow = ones1 < ones2;
 
       const detailDiv = document.createElement('div');
-      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+      detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
       if (needsBorrow) {
         const borrowedOnes = ones1 + 10;
@@ -622,7 +628,7 @@ const MODULE_SOURCE = `
     // かけ算の説明を追加
     if (question.op === '×' && (question.a >= 10 || question.b >= 10)) {
       const detailDiv = document.createElement('div');
-      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+      detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
       // 筆算形式の説明を生成
       const bStr = String(question.b);
@@ -676,7 +682,7 @@ const MODULE_SOURCE = `
     // わり算の説明を追加
     if (question.op === '÷' && (question.a >= 10 || question.b >= 10)) {
       const detailDiv = document.createElement('div');
-      detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+      detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
       detailDiv.innerHTML =
         '<div class="font-semibold mb-1">💡 わり算の説明:</div>' +
@@ -747,7 +753,7 @@ const MODULE_SOURCE = `
             const carry = Math.floor(onesSum / 10);
 
             const detailDiv = document.createElement('div');
-            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+            detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
             if (carry > 0) {
               const onesResult = onesSum % 10;
@@ -783,7 +789,7 @@ const MODULE_SOURCE = `
             const needsBorrow = ones1 < ones2;
 
             const detailDiv = document.createElement('div');
-            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+            detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
             if (needsBorrow) {
               const borrowedOnes = ones1 + 10;
@@ -813,7 +819,7 @@ const MODULE_SOURCE = `
           // かけ算の説明を追加
           if (extra.op === '×' && (prevSum >= 10 || extra.value >= 10)) {
             const detailDiv = document.createElement('div');
-            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+            detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
             detailDiv.innerHTML =
               '<div class="font-semibold mb-1">💡 かけ算の説明:</div>' +
@@ -826,7 +832,7 @@ const MODULE_SOURCE = `
           // わり算の説明を追加
           if (extra.op === '÷' && (prevSum >= 10 || extra.value >= 10)) {
             const detailDiv = document.createElement('div');
-            detailDiv.className = 'text-xs text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
+            detailDiv.className = 'text-sm text-[#6c7c90] bg-[var(--mq-primary-soft)] rounded-lg px-3 py-2';
 
             detailDiv.innerHTML =
               '<div class="font-semibold mb-1">💡 わり算の説明:</div>' +
@@ -929,6 +935,7 @@ const MODULE_SOURCE = `
 
   const nextQuestion = async () => {
     state.awaitingAdvance = false;
+    state.userAnswer = null;
     refreshKeypadState();
     refreshSubmitButtonState();
     renderWorkingSteps(null);
@@ -990,6 +997,7 @@ const MODULE_SOURCE = `
       state.progress.lastAnsweredAt = new Date().toISOString();
       state.progress.lastGrade = state.grade.id;
       state.sessionAnswered += 1;
+      state.userAnswer = value;
       if (ok) {
         state.progress.totalCorrect += 1;
         state.progress.streak += 1;
@@ -1124,7 +1132,7 @@ const MODULE_SOURCE = `
       // setAnswerBuffer()からの更新の場合はスキップ
       if (isUpdatingAnswerBuffer) return;
       // 半角数字、小数点、マイナス記号のみを許可
-      let filtered = target.value.replace(/[^0-9.\-]/g, '');
+      let filtered = target.value.replace(/[^0-9.-]/g, '');
       // マイナスは先頭のみ許可
       if (filtered.indexOf('-') > 0) {
         filtered = filtered.replace(/-/g, '');
@@ -1193,6 +1201,15 @@ const MODULE_SOURCE = `
           setAnswerBuffer(state.answerBuffer.slice(1));
         } else if (state.answerBuffer.length > 0) {
           setAnswerBuffer('-' + state.answerBuffer);
+        }
+        playSound('keypad');
+        return;
+      }
+
+      if (key === 'backspace') {
+        // バックスペースボタン: 最後の1文字を削除
+        if (state.answerBuffer.length > 0) {
+          setAnswerBuffer(state.answerBuffer.slice(0, -1));
         }
         playSound('keypad');
         return;

@@ -7,10 +7,44 @@ inputs:
   working-directory:
     description: Terraform CLI 実行時のパス
     required: true
+  gcp-workload-identity-provider:
+    description: GCP Workload Identity Provider (domain ディレクトリの場合に必要)
+    required: false
+  gcp-service-account:
+    description: GCP Service Account (domain ディレクトリの場合に必要)
+    required: false
 
 runs:
   using: composite
   steps:
+    - name: Authenticate to Google Cloud (for domain directory)
+      if: inputs.gcp-workload-identity-provider != '' && inputs.gcp-service-account != ''
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ inputs.gcp-workload-identity-provider }}
+        service_account: ${{ inputs.gcp-service-account }}
+
+    - name: Generate terraform.auto.tfvars for prod
+      if: contains(inputs.working-directory, '/prod/')
+      run: |
+        cat > terraform.auto.tfvars <<EOF
+        gcp_project_id = "$GCP_PROJECT_ID"
+        cloudflare_api_token = "$CLOUDFLARE_API_TOKEN"
+        cloudflare_account_id = "$CLOUDFLARE_ACCOUNT_ID"
+        contact_country_code = "$CONTACT_COUNTRY_CODE"
+        contact_postal_code = "$CONTACT_POSTAL_CODE"
+        contact_administrative_area = "$CONTACT_ADMINISTRATIVE_AREA"
+        contact_locality = "$CONTACT_LOCALITY"
+        contact_address_lines = $(echo "$CONTACT_ADDRESS_LINES" | jq -R 'split(",")')
+        contact_recipient = "$CONTACT_RECIPIENT"
+        contact_email = "$CONTACT_EMAIL"
+        contact_phone = "$CONTACT_PHONE"
+        yearly_price_currency = "$YEARLY_PRICE_CURRENCY"
+        yearly_price_units = $YEARLY_PRICE_UNITS
+        EOF
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+
     - name: Terraform Apply
       run: terraform apply -auto-approve
       working-directory: ${{ inputs.working-directory }}

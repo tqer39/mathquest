@@ -1,8 +1,3 @@
-output "cloudflare_zone_id" {
-  value       = module.cf_subdomain_zone.zone_id
-  description = "Cloudflare Zone ID（dev サブドメイン）"
-}
-
 output "d1_database" {
   value       = module.cf_app_resources.d1_database
   description = "Cloudflare D1 データベース情報"

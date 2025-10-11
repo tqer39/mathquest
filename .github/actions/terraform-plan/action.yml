@@ -82,6 +82,8 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       env:
+        # Cloudflare provider 用の環境変数
+        CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
         # domain ディレクトリで使用される変数を TF_VAR_ で渡す
         TF_VAR_gcp_project_id: ${{ env.GCP_PROJECT_ID }}
         TF_VAR_cloudflare_api_token: ${{ env.CLOUDFLARE_API_TOKEN }}

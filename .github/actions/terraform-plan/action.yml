@@ -42,36 +42,7 @@ runs:
       with:
         working-directory: ${{ inputs.working-directory }}
 
-    - name: Terraform Validate (pre-tfvars check)
-      if: "!contains(inputs.working-directory, '/prod/')"
-      uses: ./.github/actions/terraform-validate
-      with:
-        github-token: ${{ inputs.github-token }}
-        working-directory: ${{ inputs.working-directory }}
-
-    - name: Generate terraform.auto.tfvars for prod
-      if: contains(inputs.working-directory, '/prod/')
-      run: |
-        cat > terraform.auto.tfvars <<EOF
-        gcp_project_id = "$GCP_PROJECT_ID"
-        cloudflare_api_token = "$CLOUDFLARE_API_TOKEN"
-        cloudflare_account_id = "$CLOUDFLARE_ACCOUNT_ID"
-        contact_country_code = "$CONTACT_COUNTRY_CODE"
-        contact_postal_code = "$CONTACT_POSTAL_CODE"
-        contact_administrative_area = "$CONTACT_ADMINISTRATIVE_AREA"
-        contact_locality = "$CONTACT_LOCALITY"
-        contact_address_lines = $(echo "$CONTACT_ADDRESS_LINES" | jq -R 'split(",")')
-        contact_recipient = "$CONTACT_RECIPIENT"
-        contact_email = "$CONTACT_EMAIL"
-        contact_phone = "$CONTACT_PHONE"
-        yearly_price_currency = "$YEARLY_PRICE_CURRENCY"
-        yearly_price_units = $YEARLY_PRICE_UNITS
-        EOF
-      working-directory: ${{ inputs.working-directory }}
-      shell: bash
-
-    - name: Terraform Validate (post-tfvars check for prod)
-      if: contains(inputs.working-directory, '/prod/')
+    - name: Terraform Validate
       uses: ./.github/actions/terraform-validate
       with:
         github-token: ${{ inputs.github-token }}
@@ -96,6 +67,12 @@ runs:
       run: echo "$HOME/bin" >> $GITHUB_PATH
       shell: bash
 
+    - name: Set contact_address_lines as JSON
+      if: env.CONTACT_ADDRESS_LINES != ''
+      run: |
+        echo "TF_VAR_contact_address_lines=$(echo "$CONTACT_ADDRESS_LINES" | jq -R -c 'split(",")')" >> $GITHUB_ENV
+      shell: bash
+
     - name: Terraform Plan
       continue-on-error: true
       id: terraform-plan
@@ -104,6 +81,20 @@ runs:
         TF_LOG=DEBUG terraform plan -detailed-exitcode -no-color 2>&1 | tee tf_plan.txt
       working-directory: ${{ inputs.working-directory }}
       shell: bash
+      env:
+        # domain ディレクトリで使用される変数を TF_VAR_ で渡す
+        TF_VAR_gcp_project_id: ${{ env.GCP_PROJECT_ID }}
+        TF_VAR_cloudflare_api_token: ${{ env.CLOUDFLARE_API_TOKEN }}
+        TF_VAR_cloudflare_account_id: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+        TF_VAR_contact_country_code: ${{ env.CONTACT_COUNTRY_CODE }}
+        TF_VAR_contact_postal_code: ${{ env.CONTACT_POSTAL_CODE }}
+        TF_VAR_contact_administrative_area: ${{ env.CONTACT_ADMINISTRATIVE_AREA }}
+        TF_VAR_contact_locality: ${{ env.CONTACT_LOCALITY }}
+        TF_VAR_contact_recipient: ${{ env.CONTACT_RECIPIENT }}
+        TF_VAR_contact_email: ${{ env.CONTACT_EMAIL }}
+        TF_VAR_contact_phone: ${{ env.CONTACT_PHONE }}
+        TF_VAR_yearly_price_currency: ${{ env.YEARLY_PRICE_CURRENCY }}
+        TF_VAR_yearly_price_units: ${{ env.YEARLY_PRICE_UNITS }}
 
     - name: tfcmt
       if: steps.terraform-plan.outputs.exitcode != '1'

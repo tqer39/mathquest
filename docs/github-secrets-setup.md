@@ -89,6 +89,30 @@ prod 環境の Terraform デプロイで使用する GitHub Secrets の設定方
 
 - [Cloud Domains Pricing](https://cloud.google.com/domains/pricing)
 
+## ローカルでの Terraform 実行
+
+### prod/domain で terraform plan を実行する場合
+
+ローカル環境で `infra/terraform/envs/prod/domain` の terraform plan を実行する際は、事前に GCP 認証が必要です：
+
+```bash
+# GCP プロジェクトを設定
+gcloud config set project ${GCP_PROJECT_ID}
+
+# Application Default Credentials で認証
+gcloud auth application-default login
+```
+
+その後、terraform コマンドを実行できます：
+
+```bash
+cd infra/terraform/envs/prod/domain
+terraform init
+terraform plan
+```
+
+**注意**: GitHub Actions では OIDC 認証を使用するため、この手順は不要です。
+
 ## 動作確認
 
 Secrets を設定後、以下の手順で動作確認できます：

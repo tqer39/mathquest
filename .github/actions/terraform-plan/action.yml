@@ -91,7 +91,7 @@ runs:
         export TF_VAR_contact_phone="${CONTACT_PHONE}"
         export TF_VAR_yearly_price_currency="${YEARLY_PRICE_CURRENCY}"
         export TF_VAR_yearly_price_units="${YEARLY_PRICE_UNITS}"
-        TF_LOG=DEBUG terraform plan -detailed-exitcode -no-color 2>&1 | tee tf_plan.txt
+        terraform plan -detailed-exitcode -no-color 2>&1 | tee tf_plan.txt
       working-directory: ${{ inputs.working-directory }}
       shell: bash
 

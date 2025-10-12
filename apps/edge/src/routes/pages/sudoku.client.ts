@@ -305,25 +305,25 @@ const MODULE_SOURCE = `
       if (!feedbackEl) return;
 
       feedbackEl.textContent = message;
-      feedbackEl.className = 'flex min-h-[48px] items-center justify-center rounded-2xl text-center text-sm font-semibold';
+      feedbackEl.className = 'flex min-h-[64px] items-center justify-center rounded-2xl text-center text-base font-bold px-4 py-3 border-2 shadow-lg transition-all duration-300';
 
       if (type === 'success') {
-        feedbackEl.classList.add('bg-green-50', 'text-green-700');
+        feedbackEl.classList.add('bg-gradient-to-r', 'from-green-50', 'to-emerald-50', 'text-green-700', 'border-green-300', 'feedback--success');
       } else if (type === 'error') {
-        feedbackEl.classList.add('bg-red-50', 'text-red-700');
+        feedbackEl.classList.add('bg-gradient-to-r', 'from-red-50', 'to-rose-50', 'text-red-700', 'border-red-300');
       } else {
-        feedbackEl.classList.add('bg-blue-50', 'text-blue-700');
+        feedbackEl.classList.add('bg-gradient-to-r', 'from-blue-50', 'to-indigo-50', 'text-blue-700', 'border-blue-300');
       }
 
       setTimeout(() => {
         clearFeedback();
-      }, 3000);
+      }, 3500);
     }
 
     function clearFeedback() {
       if (!feedbackEl) return;
       feedbackEl.textContent = '';
-      feedbackEl.className = 'flex min-h-[48px] items-center justify-center rounded-2xl text-center text-sm font-semibold';
+      feedbackEl.className = 'flex min-h-[64px] items-center justify-center rounded-2xl text-center text-base font-bold px-4 py-3';
     }
 
     // 初期化

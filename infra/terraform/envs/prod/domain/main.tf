@@ -24,11 +24,12 @@ resource "null_resource" "wait_service_enable" {
 
 # dev サブドメイン用 DNS レコード
 # 実際の Workers/Pages の URL にポイントさせる
-resource "cloudflare_record" "dev" {
+resource "cloudflare_dns_record" "dev" {
   zone_id = module.domain_register_delegate.cloudflare_zone_id
   name    = "dev"
   type    = "CNAME"
   content = var.dev_subdomain_target
+  ttl     = 1 # proxied = true の場合、自動的に設定される
   proxied = true
   comment = "Dev environment subdomain"
 }

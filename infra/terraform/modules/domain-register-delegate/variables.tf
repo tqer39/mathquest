@@ -6,6 +6,7 @@ variable "root_domain" {
 variable "cloudflare_account_id" {
   description = "Cloudflare Account ID"
   type        = string
+  default     = "3c9a0adf6781e171e263a64f78c41ec4"
 }
 
 variable "contact_country_code" {

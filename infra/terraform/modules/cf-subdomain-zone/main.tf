@@ -1,4 +1,4 @@
 resource "cloudflare_zone" "subzone" {
-  account_id = var.cloudflare_account_id
-  zone       = var.zone_domain
+  account = var.cloudflare_account_id
+  name    = var.zone_domain
 }

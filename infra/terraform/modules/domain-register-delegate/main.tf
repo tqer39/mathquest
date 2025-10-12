@@ -16,8 +16,10 @@ locals {
 }
 
 resource "cloudflare_zone" "root" {
-  account_id = var.cloudflare_account_id
-  zone       = var.root_domain
+  account = {
+    id = var.cloudflare_account_id
+  }
+  name = var.root_domain
 
   lifecycle {
     prevent_destroy = true

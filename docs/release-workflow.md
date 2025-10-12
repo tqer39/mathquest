@@ -38,7 +38,7 @@ Create Release ワークフローは以下の処理を自動的に実行しま�
 
 ### 3. 本番環境へのデプロイ
 
-GitHub Release が作成されると、タグがプッシュされ、**Terraform - prod** ワークフローが自動的にトリガーされます：
+GitHub Release が作成されると、`repository_dispatch` イベントを使用して **Terraform - prod** ワークフローが自動的にトリガーされます：
 
 1. SemVer 形式のバリデーション
 2. Terraform の差分確認（plan）
@@ -46,9 +46,12 @@ GitHub Release が作成されると、タグがプッシュされ、**Terraform
 
 **注**: `terraform-prod.yml` は以下のイベントでトリガーされます:
 
-- `push: tags: v*.*.*` - SemVer 形式のタグがプッシュされたとき（デプロイ実行）
+- `push: tags: v*.*.*` - SemVer 形式のタグが直接プッシュされたとき（デプロイ実行）
+- `repository_dispatch: types: [release-created]` - `create-release.yml` からのトリガー（デプロイ実行）
 - `pull_request: branches: main` - main ブランチへの PR（plan のみ）
 - `workflow_dispatch` - 手動実行
+
+**重要**: GitHub Actions の `GITHUB_TOKEN` で作成されたタグは、他のワークフローをトリガーしないため、`create-release.yml` は `repository_dispatch` イベントを使用して明示的に `terraform-prod.yml` をトリガーします。
 
 ## バージョニング規則
 

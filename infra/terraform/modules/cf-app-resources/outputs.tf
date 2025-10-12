@@ -6,17 +6,6 @@ output "d1_database" {
   }
 }
 
-output "kv_namespaces" {
-  description = "Map of KV bindings to namespace metadata"
-  value = {
-    for key, cfg in local.kv_namespaces :
-    cfg.binding => {
-      id    = cloudflare_workers_kv_namespace.kv[key].id
-      title = cloudflare_workers_kv_namespace.kv[key].title
-    }
-  }
-}
-
 output "turnstile_widget" {
   description = "Turnstile widget details (null when disabled)"
   value = try({

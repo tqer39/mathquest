@@ -174,13 +174,18 @@ jobs:
     needs: [terraform-prod]
     if: always()
     steps:
-      - name: Failure
-        if: >-
-          contains(needs.*.result, 'failure')
-          || contains(needs.*.result, 'cancelled')
+      - name: Check Results
         run: |
-          echo "workflow failure"
-          exit 1
-      - name: Success
-        run: |
-          echo "workflow success"
+          RESULT="${{ needs.terraform-prod.result }}"
+          echo "terraform-prod result: $RESULT"
+
+          if [ "$RESULT" = "failure" ] || [ "$RESULT" = "cancelled" ]; then
+            echo "❌ Workflow failed or cancelled"
+            exit 1
+          elif [ "$RESULT" = "skipped" ]; then
+            echo "⏭️  Workflow skipped (no changes to deploy)"
+            exit 0
+          else
+            echo "✅ Workflow completed successfully"
+            exit 0
+          fi

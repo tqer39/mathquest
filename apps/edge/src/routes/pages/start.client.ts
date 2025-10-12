@@ -66,13 +66,31 @@ const MODULE_SOURCE = `
     function showStep(stepElement) {
       if (stepElement) {
         stepElement.classList.remove('step-hidden');
+        updateStepNumbers();
       }
     }
 
     function hideStep(stepElement) {
       if (stepElement) {
         stepElement.classList.add('step-hidden');
+        updateStepNumbers();
       }
+    }
+
+    // ステップ番号を更新
+    function updateStepNumbers() {
+      const allSteps = [step1, step2Grade, step2Activity, step3CalcType, step4Theme, step4Game];
+      let currentStep = 0;
+
+      allSteps.forEach(stepElement => {
+        if (stepElement && !stepElement.classList.contains('step-hidden')) {
+          currentStep++;
+          const stepNumberElement = stepElement.querySelector('.step-number');
+          if (stepNumberElement) {
+            stepNumberElement.textContent = \`STEP \${currentStep}\`;
+          }
+        }
+      });
     }
 
     function hideAllStepsAfter(stepNumber) {
@@ -128,9 +146,17 @@ const MODULE_SOURCE = `
         state.selectedGrade = gradeId;
         selectButton(gradeBtns, btn);
 
-        // 学年でえらぶ → 次は活動選択
+        // すべての後続ステップを非表示
         hideAllStepsAfter(2);
-        showStep(step2Activity);
+
+        if (state.filterType === 'grade') {
+          // 学年でえらぶ → 次は活動選択
+          showStep(step2Activity);
+        } else if (state.filterType === 'activity') {
+          // なにをするかえらぶ → 計算モード → 次は計算種類選択
+          showStep(step3CalcType);
+          renderCalculationTypes();
+        }
 
         updateStartButtonState();
       });
@@ -143,11 +169,17 @@ const MODULE_SOURCE = `
         state.selectedActivity = activity;
         selectButton(activityBtns, btn);
 
+        // すべての後続ステップを非表示
         hideAllStepsAfter(2);
 
         if (state.filterType === 'activity') {
-          // なにをするかえらぶ → 次は学年選択
-          showStep(step2Grade);
+          // なにをするかえらぶ → 計算なら計算種類選択、ゲームならゲーム選択
+          if (activity === 'math') {
+            showStep(step3CalcType);
+            renderCalculationTypesWithoutGrade();
+          } else if (activity === 'game') {
+            showStep(step4Game);
+          }
         } else if (state.filterType === 'grade') {
           // 学年でえらぶ → 次は計算種類 or ゲーム選択
           if (activity === 'math') {
@@ -162,7 +194,7 @@ const MODULE_SOURCE = `
       });
     });
 
-    // 計算の種類をレンダリング
+    // 計算の種類をレンダリング（学年制約あり）
     function renderCalculationTypes() {
       if (!calcTypeGrid || !state.selectedGrade) return;
 
@@ -179,6 +211,26 @@ const MODULE_SOURCE = `
       const availableTypes = calculationTypes.filter(calcType =>
         availableCalcTypes.includes(calcType.id)
       );
+
+      renderCalculationTypeButtons(availableTypes);
+    }
+
+    // 計算の種類をレンダリング（学年制約なし）
+    function renderCalculationTypesWithoutGrade() {
+      if (!calcTypeGrid) return;
+
+      // 学年が選択されていない場合、小1の計算種類のみ表示
+      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix'];
+      const availableTypes = calculationTypes.filter(calcType =>
+        defaultCalcTypes.includes(calcType.id)
+      );
+
+      renderCalculationTypeButtons(availableTypes);
+    }
+
+    // 計算種類ボタンを生成
+    function renderCalculationTypeButtons(availableTypes) {
+      if (!calcTypeGrid) return;
 
       calcTypeGrid.innerHTML = '';
 
@@ -200,7 +252,14 @@ const MODULE_SOURCE = `
 
           hideAllStepsAfter(3);
           showStep(step4Theme);
-          filterThemesByCalculationType(calcType.mode);
+          if (state.selectedGrade) {
+            filterThemesByCalculationType(calcType.mode);
+          } else {
+            // 学年が選択されていない場合は全テーマを表示
+            themeBtns.forEach(btn => {
+              btn.style.display = '';
+            });
+          }
 
           updateStartButtonState();
         });
@@ -270,8 +329,8 @@ const MODULE_SOURCE = `
         canStart = true;
       }
 
-      // 計算モードの場合
-      if (state.selectedActivity === 'math' && state.selectedGrade && state.selectedCalculationType) {
+      // 計算モードの場合（学年は任意）
+      if (state.selectedActivity === 'math' && state.selectedCalculationType) {
         canStart = true;
       }
 
@@ -339,8 +398,8 @@ const MODULE_SOURCE = `
           return;
         }
 
-        // 計算モードの場合
-        if (state.selectedActivity === 'math' && state.selectedGrade && state.selectedCalculationType) {
+        // 計算モードの場合（学年は任意）
+        if (state.selectedActivity === 'math' && state.selectedCalculationType) {
           const soundEnabled = soundToggle?.dataset.state === 'on';
           const workingEnabled = stepsToggle?.dataset.state === 'on';
           const questionCount = Number(
@@ -355,11 +414,11 @@ const MODULE_SOURCE = `
             console.warn('failed to persist settings', e);
           }
 
-          const gradePreset = presets.find(p => p.id === state.selectedGrade) || gradeLevels.find(l => l.id === state.selectedGrade);
+          const gradePreset = state.selectedGrade ? (presets.find(p => p.id === state.selectedGrade) || gradeLevels.find(l => l.id === state.selectedGrade)) : gradeLevels[0];
           const themePreset = state.selectedTheme ? presets.find(p => p.id === state.selectedTheme) : null;
 
           const session = {
-            gradeId: state.selectedGrade,
+            gradeId: state.selectedGrade || gradePreset.id,
             gradeLabel: gradePreset?.label || '',
             gradeDescription: gradePreset?.description || '',
             mode: state.selectedCalculationType.mode,
@@ -368,7 +427,7 @@ const MODULE_SOURCE = `
             soundEnabled,
             workingEnabled,
             createdAt: Date.now(),
-            baseGradeId: state.selectedGrade,
+            baseGradeId: state.selectedGrade || gradePreset.id,
             baseGradeLabel: gradePreset?.label || '',
             baseGradeDescription: gradePreset?.description || '',
             baseGradeMode: gradePreset?.mode || '',

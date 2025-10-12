@@ -100,12 +100,10 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        {/* STEP 2A: 学年選択 (学年でえらぶ を選んだ場合) */}
+        {/* 学年選択 */}
         <div id="step-2-grade" class="step-hidden space-y-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
-              STEP 2
-            </p>
+            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
               学年をえらぼう
             </h2>
@@ -148,12 +146,10 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        {/* STEP 2B: 活動選択 (なにをするかえらぶ を選んだ場合) */}
+        {/* 活動選択 */}
         <div id="step-2-activity" class="step-hidden space-y-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
-              STEP 2
-            </p>
+            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
               なにをするか えらぼう
             </h2>
@@ -184,12 +180,10 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        {/* STEP 3: 計算の種類選択 (計算を選んだ場合のみ) */}
+        {/* 計算の種類選択 */}
         <div id="step-3-calc-type" class="step-hidden space-y-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
-              STEP 3
-            </p>
+            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
               計算の種類をえらぼう
             </h2>
@@ -202,12 +196,10 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        {/* STEP 4A: テーマ選択 (計算を選んだ場合) */}
+        {/* テーマ選択 */}
         <div id="step-4-theme" class="step-hidden space-y-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
-              STEP 4
-            </p>
+            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
               テーマをえらぼう（任意）
             </h2>
@@ -235,12 +227,10 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        {/* STEP 4B: ゲーム選択 (ゲームを選んだ場合) */}
+        {/* ゲーム選択 */}
         <div id="step-4-game" class="step-hidden space-y-4">
           <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
-              STEP 4
-            </p>
+            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
               ゲームをえらぼう
             </h2>

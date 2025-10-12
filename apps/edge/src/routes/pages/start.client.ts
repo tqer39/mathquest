@@ -49,11 +49,16 @@ const MODULE_SOURCE = `
   const gradeRadios = Array.from(
     document.querySelectorAll('input[name="grade-selection"]')
   );
+  const modeRadios = Array.from(
+    document.querySelectorAll('input[name="mode-selection"]')
+  );
   const themeButtons = Array.from(
     document.querySelectorAll('#theme-grid button')
   );
   const selectedGradeLabel = document.getElementById('selected-grade-label');
+  const calculationTypeSection = document.getElementById('calculation-type-section');
   const calculationTypeGrid = document.getElementById('calculation-type-grid');
+  const themeSection = document.getElementById('theme-section');
   const questionCountRadios = Array.from(
     document.querySelectorAll('input[name="question-count"]')
   );
@@ -310,9 +315,55 @@ const MODULE_SOURCE = `
     updateStartButtonState();
   };
 
+  const getSelectedMode = () => {
+    const selectedModeRadio = modeRadios.find((radio) => radio.checked);
+    return selectedModeRadio ? selectedModeRadio.value : 'math';
+  };
+
+  const updateModeDisplay = () => {
+    const selectedMode = getSelectedMode();
+
+    if (selectedMode === 'math') {
+      // 計算モード: 計算の種類とテーマを表示
+      if (calculationTypeSection) {
+        calculationTypeSection.style.display = '';
+      }
+      if (themeSection) {
+        themeSection.style.display = '';
+      }
+      if (stepsToggle) {
+        stepsToggle.style.display = '';
+      }
+    } else if (selectedMode === 'game') {
+      // ゲームモード: 計算の種類とテーマを非表示、途中式トグルも非表示
+      if (calculationTypeSection) {
+        calculationTypeSection.style.display = 'none';
+      }
+      if (themeSection) {
+        themeSection.style.display = 'none';
+      }
+      if (stepsToggle) {
+        stepsToggle.style.display = 'none';
+      }
+    }
+
+    updateStartButtonState();
+  };
+
   const updateStartButtonState = () => {
     if (!startButton) return;
 
+    const selectedMode = getSelectedMode();
+
+    if (selectedMode === 'game') {
+      // ゲームモードは常に有効
+      startButton.disabled = false;
+      startButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      startButton.classList.add('hover:-translate-y-0.5', 'hover:bg-[var(--mq-primary-strong)]');
+      return;
+    }
+
+    // 計算モードの場合
     // 計算種類が選択されているかチェック
     const calculationTypeSelected = document.querySelector('input[name="calculation-type-selection"]:checked');
 
@@ -360,6 +411,18 @@ const MODULE_SOURCE = `
 
   // 初期状態でボタンの状態を更新
   updateStartButtonState();
+
+  // 初期表示を更新
+  updateModeDisplay();
+
+  // モード選択のイベントリスナーを追加
+  modeRadios.forEach((radio) => {
+    radio.addEventListener('change', () => {
+      if (radio.checked) {
+        updateModeDisplay();
+      }
+    });
+  });
 
   const resetToInitialState = () => {
     // 学年選択を小1に戻す
@@ -515,6 +578,15 @@ const MODULE_SOURCE = `
   }
 
   startButton.addEventListener('click', () => {
+    const selectedMode = getSelectedMode();
+
+    // ゲームモードの場合は数独ページへ遷移
+    if (selectedMode === 'game') {
+      window.location.href = '/sudoku';
+      return;
+    }
+
+    // 計算モードの場合は既存のロジック
     if (!selectedGradeId) {
       const ensured = ensureGradeSelection();
       if (ensured && findPreset(ensured)) {

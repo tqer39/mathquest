@@ -135,6 +135,49 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           ))}
         </div>
 
+        <div id="mode-selection-section" class="space-y-2">
+          <p class="text-sm font-semibold text-[var(--mq-ink)]">
+            モードをえらぶ
+          </p>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <label class="group cursor-pointer">
+              <input
+                type="radio"
+                name="mode-selection"
+                value="math"
+                data-group="mode"
+                class="peer sr-only"
+                defaultChecked={true}
+              />
+              <div class="mode-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
+                <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
+                  🧮 計算する
+                </p>
+                <p class="text-base font-semibold text-[var(--mq-ink)]">
+                  算数の問題を解こう
+                </p>
+              </div>
+            </label>
+            <label class="group cursor-pointer">
+              <input
+                type="radio"
+                name="mode-selection"
+                value="game"
+                data-group="mode"
+                class="peer sr-only"
+              />
+              <div class="mode-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
+                <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
+                  🎮 ゲームする
+                </p>
+                <p class="text-base font-semibold text-[var(--mq-ink)]">
+                  数独で遊ぼう
+                </p>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <div id="calculation-type-section" class="space-y-2">
           <p class="text-sm font-semibold text-[var(--mq-ink)]">
             計算の種類をえらぶ
@@ -147,7 +190,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        <div class="space-y-2">
+        <div id="theme-section" class="space-y-2">
           <p class="text-sm font-semibold text-[var(--mq-ink)]">
             テーマでえらぶ（任意）
           </p>

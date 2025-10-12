@@ -28,6 +28,9 @@ locals {
 resource "cloudflare_d1_database" "app" {
   account_id = var.cloudflare_account_id
   name       = local.d1_name
+  read_replication = {
+    mode = "disabled"
+  }
 }
 
 resource "cloudflare_workers_kv_namespace" "kv" {

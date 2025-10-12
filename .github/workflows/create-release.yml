@@ -1,0 +1,140 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'バージョンアップの種類'
+        required: true
+        type: choice
+        default: 'patch'
+        options:
+          - major
+          - minor
+          - patch
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get-latest-tag
+        run: |
+          # 最新のタグを取得（SemVer形式のみ）
+          LATEST_TAG="$(git tag -l 'v*.*.*' --sort=-v:refname | head -n 1)"
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous tag found, using v0.0.0 as base"
+            LATEST_TAG="v0.0.0"
+          else
+            echo "Latest tag: $LATEST_TAG"
+          fi
+
+          echo "latest_tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Calculate next version
+        id: calc-version
+        run: |
+          LATEST_TAG="${{ steps.get-latest-tag.outputs.latest_tag }}"
+          VERSION_BUMP="${{ inputs.version_bump }}"
+
+          # v プレフィックスを削除
+          VERSION=${LATEST_TAG#v}
+
+          # バージョン番号を分解
+          IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=${VERSION_PARTS[2]}
+
+          # バージョンをインクリメント
+          case "$VERSION_BUMP" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          LATEST_TAG="${{ steps.get-latest-tag.outputs.latest_tag }}"
+          NEW_VERSION="${{ steps.calc-version.outputs.new_version }}"
+
+          # リリースノートを生成
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            # 初回リリース: 全コミット履歴を取得
+            echo "Generating release notes from all commits..."
+            RELEASE_NOTES="$(git log --pretty=format:"- %s (%h)" --reverse)"
+          else
+            # 前回のタグからの差分を取得
+            echo "Generating release notes from $LATEST_TAG to HEAD..."
+            RELEASE_NOTES="$(git log "${LATEST_TAG}..HEAD" --pretty=format:"- %s (%h)" --reverse)"
+          fi
+
+          # リリースノートが空の場合
+          if [ -z "$RELEASE_NOTES" ]; then
+            RELEASE_NOTES="No changes since last release"
+          fi
+
+          # リリースノートをファイルに保存（複数行対応）
+          cat << EOF > release_notes.txt
+          ## What's Changed
+
+          $RELEASE_NOTES
+
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${LATEST_TAG}...${NEW_VERSION}
+          EOF
+
+          # デバッグ用
+          echo "Release notes:"
+          cat release_notes.txt
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_VERSION="${{ steps.calc-version.outputs.new_version }}"
+
+          # リリースを作成
+          gh release create "$NEW_VERSION" \
+            --title "$NEW_VERSION" \
+            --notes-file release_notes.txt \
+            --target main
+
+          echo "✅ Release $NEW_VERSION created successfully!"
+
+      - name: Summary
+        run: |
+          LATEST_TAG="${{ steps.get-latest-tag.outputs.latest_tag }}"
+          NEW_VERSION="${{ steps.calc-version.outputs.new_version }}"
+
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          ## 🎉 Release Created
+
+          - **Previous Version**: $LATEST_TAG
+          - **New Version**: $NEW_VERSION
+          - **Version Bump**: ${{ inputs.version_bump }}
+          - **Release URL**: https://github.com/${{ github.repository }}/releases/tag/$NEW_VERSION
+          EOF

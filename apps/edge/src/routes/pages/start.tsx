@@ -113,26 +113,56 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           id="grade-level-grid"
           class="grid gap-3 sm:grid-cols-3 xl:grid-cols-6"
         >
-          {gradeLevels.map((preset, index) => (
-            <label key={preset.id} class="group cursor-pointer">
-              <input
-                type="radio"
-                name="grade-selection"
-                value={preset.id}
-                data-group="level"
-                class="peer sr-only"
-                defaultChecked={index === 0}
-              />
-              <div class="grade-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)] peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl">
-                <p class="text-sm font-bold text-[var(--mq-primary-strong)]">
-                  {preset.label}
-                </p>
-                <p class="text-base font-semibold text-[var(--mq-ink)]">
-                  {preset.description}
-                </p>
-              </div>
-            </label>
-          ))}
+          {gradeLevels.map((preset, index) => {
+            const isDisabled = index >= 2; // 小3以降を無効化
+            return (
+              <label
+                key={preset.id}
+                class={`group ${
+                  isDisabled
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="grade-selection"
+                  value={preset.id}
+                  data-group="level"
+                  class="peer sr-only"
+                  defaultChecked={index === 0}
+                  disabled={isDisabled}
+                />
+                <div
+                  class={`grade-card rounded-2xl border border-transparent bg-white p-4 text-left shadow-sm transition ${
+                    isDisabled
+                      ? 'bg-gray-100'
+                      : 'group-hover:-translate-y-0.5 group-hover:border-[var(--mq-primary)] group-hover:bg-[var(--mq-primary-soft)]'
+                  } peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--mq-primary)] peer-checked:border-[var(--mq-primary)] peer-checked:bg-[var(--mq-primary-soft)] peer-checked:shadow-xl`}
+                >
+                  <p
+                    class={`text-sm font-bold ${
+                      isDisabled
+                        ? 'text-gray-400'
+                        : 'text-[var(--mq-primary-strong)]'
+                    }`}
+                  >
+                    {preset.label}
+                  </p>
+                  <p
+                    class={`text-base font-semibold ${
+                      isDisabled ? 'text-gray-500' : 'text-[var(--mq-ink)]'
+                    }`}
+                  >
+                    {preset.description}
+                  </p>
+                  {isDisabled && (
+                    <p class="mt-1 text-xs text-gray-400">準備中</p>
+                  )}
+                </div>
+              </label>
+            );
+          })}
         </div>
 
         <div id="mode-selection-section" class="space-y-2">

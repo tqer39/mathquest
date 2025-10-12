@@ -7,6 +7,8 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  repository_dispatch:
+    types: [release-created]
   workflow_dispatch:
     inputs:
       CHECK_DIFF:
@@ -32,11 +34,15 @@ jobs:
   validate-semver:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
     steps:
       - name: Validate SemVer tag
         run: |
-          TAG="${{ github.ref_name }}"
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            TAG="${{ github.event.client_payload.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
 
           if [[ ! "$TAG" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$ ]]; then
             echo "Error: Tag '$TAG' is not a valid SemVer format"
@@ -105,7 +111,7 @@ jobs:
           gcp-service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Start Deployment
-        if: env.TF_PLAN_STATUS == 'has-diff' && github.event_name == 'push'
+        if: env.TF_PLAN_STATUS == 'has-diff' && (github.event_name == 'push' || github.event_name == 'repository_dispatch')
         uses: bobheadxi/deployments@v1
         id: deployment
         with:
@@ -114,7 +120,7 @@ jobs:
           env: ${{ env.AWS_ENV_NAME }}
 
       - name: Terraform Apply
-        if: env.TF_PLAN_STATUS == 'has-diff' && github.event_name == 'push'
+        if: env.TF_PLAN_STATUS == 'has-diff' && (github.event_name == 'push' || github.event_name == 'repository_dispatch')
         uses: ./.github/actions/terraform-apply
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -136,7 +142,7 @@ jobs:
           gcp-service-account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Finish Deployment
-        if: env.TF_PLAN_STATUS == 'has-diff' && always() && github.event_name == 'push'
+        if: env.TF_PLAN_STATUS == 'has-diff' && always() && (github.event_name == 'push' || github.event_name == 'repository_dispatch')
         uses: bobheadxi/deployments@v1
         with:
           step: finish

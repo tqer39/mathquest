@@ -9,6 +9,7 @@ import { quiz } from './routes/apis/quiz';
 import { Home } from './routes/pages/home';
 import { Start } from './routes/pages/start';
 import { Play } from './routes/pages/play';
+import { Sudoku } from './routes/pages/sudoku';
 import { Login } from './routes/pages/login';
 import { BetterAuthService } from './application/auth/service';
 import { resolveCurrentUser } from './application/session/current-user';
@@ -62,6 +63,14 @@ app.get('/play', async (c) =>
     title: 'MathQuest | 練習セッション',
     description:
       '選択した学年の問題に挑戦します。カウントダウン後にテンキーで解答し、途中式を確認できます。',
+  })
+);
+
+app.get('/sudoku', (c) =>
+  c.render(<Sudoku currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
+    title: 'MathQuest | 数独',
+    description:
+      '数独パズルで論理的思考力を鍛えよう。数字を使った楽しいパズルゲームです。',
   })
 );
 

@@ -618,7 +618,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
             >
               <span class="flex items-center justify-center gap-2">
                 <span class="text-xl">🎲</span>
-                あたらしいゲーム
+                プリセットをえらぶ
               </span>
             </button>
             <button

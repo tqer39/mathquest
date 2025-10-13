@@ -300,6 +300,17 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               <span>🧮 途中式</span>
               <span class="text-xs text-[#5e718a]">計算の流れを自動で表示</span>
             </button>
+            <button
+              id="toggle-countdown"
+              type="button"
+              data-state="on"
+              class="setting-toggle setting-toggle--on inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold transition hover:bg-[var(--mq-primary-soft)]"
+            >
+              <span>⏱️ カウントダウン</span>
+              <span class="text-xs text-[#5e718a]">
+                ゲーム開始前のカウントダウン
+              </span>
+            </button>
           </div>
         </fieldset>
 

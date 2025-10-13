@@ -1,4 +1,5 @@
 import type { Env } from '../../env';
+import { BetterAuthService } from '../auth/service';
 
 export type CurrentUser = {
   id: string;
@@ -106,11 +107,25 @@ const resolveGuestFromCookie = (
   return guestProfiles[0] ?? null;
 };
 
-export const resolveCurrentUser = (
+export const resolveCurrentUser = async (
   env: Env,
   req: Request
-): CurrentUser | null => {
+): Promise<CurrentUser | null> => {
   const cookies = parseCookie(req.headers.get('Cookie'));
+
+  const authService = new BetterAuthService(env);
+  const sessionToken = cookies.get(BetterAuthService.sessionCookieName);
+  if (sessionToken) {
+    try {
+      const member = await authService.resolveCurrentUser(sessionToken);
+      if (member) {
+        return member;
+      }
+    } catch (error) {
+      console.error('Failed to resolve auth session', error);
+    }
+  }
+
   const guest = resolveGuestFromCookie(cookies);
   if (guest) return guest;
   if (shouldUseMockUser(env)) {

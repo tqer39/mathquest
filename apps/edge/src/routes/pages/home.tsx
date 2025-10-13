@@ -16,13 +16,31 @@ const HomeNav: FC<{ currentUser: CurrentUser | null }> = ({ currentUser }) => (
         小学生の算数を、遊ぶように練習しよう
       </p>
       {currentUser ? (
+        <>
+          <span class="hidden text-sm font-semibold text-[var(--mq-ink)] sm:inline-flex sm:items-center sm:gap-2">
+            <span
+              class="inline-flex h-8 w-8 items-center justify-center rounded-xl text-xs font-bold text-white"
+              style={`background:${currentUser.avatarColor}`}
+            >
+              {currentUser.displayName.slice(0, 1)}
+            </span>
+            {currentUser.displayName}
+          </span>
+          <a
+            href="/auth/logout"
+            class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
+          >
+            ログアウト
+          </a>
+        </>
+      ) : (
         <a
-          href="/auth/logout"
+          href="/auth/login"
           class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-3 py-2 text-xs font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
         >
-          ログアウト
+          ログイン
         </a>
-      ) : null}
+      )}
     </div>
   </nav>
 );

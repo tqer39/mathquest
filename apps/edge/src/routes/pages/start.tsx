@@ -244,7 +244,11 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
       >
         <h2 class="text-xl font-semibold text-[var(--mq-ink)]">プレイ設定</h2>
 
-        <fieldset class="space-y-3">
+        <fieldset
+          id="question-count-fieldset"
+          class="space-y-3"
+          style="display: none;"
+        >
           <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             問題数
           </legend>
@@ -267,7 +271,11 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </fieldset>
 
-        <fieldset class="space-y-3">
+        <fieldset
+          id="on-off-settings-fieldset"
+          class="space-y-3"
+          style="display: none;"
+        >
           <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             ON / OFF 設定
           </legend>

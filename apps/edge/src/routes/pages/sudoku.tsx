@@ -52,6 +52,15 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
           cursor: default;
         }
 
+        .sudoku-cell.completed {
+          background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
+          color: var(--mq-ink);
+          font-weight: 800;
+          cursor: not-allowed;
+          opacity: 0.85;
+          pointer-events: none;
+        }
+
         .sudoku-cell[readonly].sudoku-cell--duplicate-error {
           animation: duplicateErrorReadonly 0.8s ease-out;
         }

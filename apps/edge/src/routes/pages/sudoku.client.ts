@@ -513,9 +513,9 @@ const MODULE_SOURCE = `
       if (!isValid) {
         const uniqueErrorCells = [...new Set(errorCells)];
         uniqueErrorCells.forEach(cell => cell.classList.add('sudoku-cell--error'));
-        showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error');
+        showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error', true);
       } else {
-        showFeedback('🎉 正解です！おめでとう！', 'success');
+        showFeedback('🎉 正解です！おめでとう！', 'success', true);
       }
     }
 
@@ -570,7 +570,7 @@ const MODULE_SOURCE = `
       });
     }
 
-    function showFeedback(message, type = 'info') {
+    function showFeedback(message, type = 'info', persistent = false) {
       if (!feedbackEl) return;
 
       feedbackEl.textContent = message;
@@ -584,9 +584,12 @@ const MODULE_SOURCE = `
         feedbackEl.classList.add('bg-gradient-to-r', 'from-blue-50', 'to-indigo-50', 'text-blue-700', 'border-blue-300');
       }
 
-      setTimeout(() => {
-        clearFeedback();
-      }, 3500);
+      // 答え合わせ結果以外は自動的に消える
+      if (!persistent) {
+        setTimeout(() => {
+          clearFeedback();
+        }, 3500);
+      }
     }
 
     function clearFeedback() {

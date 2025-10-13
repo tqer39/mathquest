@@ -9,18 +9,27 @@ const MODULE_SOURCE = `
   }
 
   function initializeSudokuPage() {
+    // グリッドサイズの設定
+    const GRID_CONFIGS = {
+      4: { size: 4, boxRows: 2, boxCols: 2 },
+      6: { size: 6, boxRows: 2, boxCols: 3 },
+      9: { size: 9, boxRows: 3, boxCols: 3 }
+    };
+
+    let currentGridSize = 9;
+
     // 数独ソルバー - バックトラッキングアルゴリズム
-    function solveSudoku(grid) {
-      const emptyCell = findEmptyCell(grid);
+    function solveSudoku(grid, size) {
+      const emptyCell = findEmptyCell(grid, size);
       if (!emptyCell) return true; // 完成
 
       const [row, col] = emptyCell;
 
-      for (let num = 1; num <= 9; num++) {
-        if (isValidPlacement(grid, row, col, num)) {
+      for (let num = 1; num <= size; num++) {
+        if (isValidPlacement(grid, row, col, num, size)) {
           grid[row][col] = num;
 
-          if (solveSudoku(grid)) {
+          if (solveSudoku(grid, size)) {
             return true;
           }
 
@@ -31,9 +40,9 @@ const MODULE_SOURCE = `
       return false;
     }
 
-    function findEmptyCell(grid) {
-      for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
+    function findEmptyCell(grid, size) {
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
           if (grid[row][col] === 0) {
             return [row, col];
           }
@@ -42,22 +51,24 @@ const MODULE_SOURCE = `
       return null;
     }
 
-    function isValidPlacement(grid, row, col, num) {
+    function isValidPlacement(grid, row, col, num, size) {
+      const config = GRID_CONFIGS[size];
+
       // 行チェック
-      for (let x = 0; x < 9; x++) {
+      for (let x = 0; x < size; x++) {
         if (grid[row][x] === num) return false;
       }
 
       // 列チェック
-      for (let x = 0; x < 9; x++) {
+      for (let x = 0; x < size; x++) {
         if (grid[x][col] === num) return false;
       }
 
-      // 3x3ボックスチェック
-      const startRow = Math.floor(row / 3) * 3;
-      const startCol = Math.floor(col / 3) * 3;
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
+      // ボックスチェック
+      const startRow = Math.floor(row / config.boxRows) * config.boxRows;
+      const startCol = Math.floor(col / config.boxCols) * config.boxCols;
+      for (let i = 0; i < config.boxRows; i++) {
+        for (let j = 0; j < config.boxCols; j++) {
           if (grid[startRow + i][startCol + j] === num) return false;
         }
       }
@@ -66,38 +77,38 @@ const MODULE_SOURCE = `
     }
 
     // 数独パズル生成
-    function generateSudoku(difficulty = 'easy') {
-      const grid = Array.from({ length: 9 }, () => Array(9).fill(0));
+    function generateSudoku(size, difficulty = 'easy') {
+      const grid = Array.from({ length: size }, () => Array(size).fill(0));
 
       // ランダムな完成した数独を生成
-      fillGrid(grid);
+      fillGrid(grid, size);
 
       // 難易度に応じてセルを削除
       const cellsToRemove = {
-        easy: 30,
-        medium: 40,
-        hard: 50
-      }[difficulty] || 30;
+        4: { easy: 8, medium: 10 },
+        6: { easy: 18, medium: 22, hard: 26 },
+        9: { easy: 30, medium: 40, hard: 50 }
+      }[size][difficulty] || Math.floor(size * size * 0.4);
 
       const solution = grid.map(row => [...row]);
-      removeCells(grid, cellsToRemove);
+      removeCells(grid, size, cellsToRemove);
 
       return { puzzle: grid, solution };
     }
 
-    function fillGrid(grid) {
-      const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    function fillGrid(grid, size) {
+      const numbers = Array.from({ length: size }, (_, i) => i + 1);
 
-      for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
           if (grid[row][col] === 0) {
             shuffleArray(numbers);
 
             for (const num of numbers) {
-              if (isValidPlacement(grid, row, col, num)) {
+              if (isValidPlacement(grid, row, col, num, size)) {
                 grid[row][col] = num;
 
-                if (fillGrid(grid)) {
+                if (fillGrid(grid, size)) {
                   return true;
                 }
 
@@ -113,11 +124,11 @@ const MODULE_SOURCE = `
       return true;
     }
 
-    function removeCells(grid, count) {
+    function removeCells(grid, size, count) {
       let removed = 0;
       while (removed < count) {
-        const row = Math.floor(Math.random() * 9);
-        const col = Math.floor(Math.random() * 9);
+        const row = Math.floor(Math.random() * size);
+        const col = Math.floor(Math.random() * size);
 
         if (grid[row][col] !== 0) {
           grid[row][col] = 0;
@@ -134,7 +145,7 @@ const MODULE_SOURCE = `
     }
 
     // DOM要素
-    const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
+    const sudokuGrid = document.getElementById('sudoku-grid');
     const numberButtons = Array.from(document.querySelectorAll('.number-pad-button'));
     const clearButton = document.getElementById('clear-button');
     const checkButton = document.getElementById('check-button');
@@ -143,21 +154,85 @@ const MODULE_SOURCE = `
     const feedbackEl = document.getElementById('feedback');
     const remainingCountEl = document.getElementById('remaining-count');
     const difficultyLabelEl = document.getElementById('difficulty-label');
+    const sizeLabelEl = document.getElementById('size-label');
+    const presetSelector = document.getElementById('preset-selector');
+    const gameContainer = document.getElementById('game-container');
+    const presetButtons = Array.from(document.querySelectorAll('.preset-button'));
 
     let currentPuzzle = null;
     let currentSolution = null;
     let selectedCell = null;
 
+    // グリッドを動的に生成
+    function createGrid(size) {
+      if (!sudokuGrid) return;
+
+      sudokuGrid.innerHTML = '';
+      sudokuGrid.setAttribute('data-size', size);
+      currentGridSize = size;
+
+      for (let i = 0; i < size * size; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.inputMode = 'numeric';
+        input.maxLength = 1;
+        input.className = 'sudoku-cell';
+        input.dataset.index = i;
+        input.dataset.row = Math.floor(i / size);
+        input.dataset.col = i % size;
+
+        // イベントリスナー
+        input.addEventListener('focus', () => {
+          selectedCell = input;
+        });
+
+        input.addEventListener('input', (e) => {
+          const value = e.target.value;
+          const maxNum = currentGridSize;
+
+          // 数字のみを許可
+          if (value && (!/^[1-9]$/.test(value) || Number(value) > maxNum)) {
+            e.target.value = '';
+            return;
+          }
+
+          e.target.classList.remove('sudoku-cell--error');
+          updateRemainingCount();
+        });
+
+        sudokuGrid.appendChild(input);
+      }
+
+      // 数字パッドも更新
+      updateNumberPad(size);
+    }
+
+    // 数字パッドを更新
+    function updateNumberPad(size) {
+      numberButtons.forEach((button, index) => {
+        const num = index + 1;
+        if (num <= size) {
+          button.style.display = '';
+          button.disabled = false;
+        } else {
+          button.style.display = 'none';
+        }
+      });
+    }
+
     // 新しいゲームを開始
-    function startNewGame(difficulty = 'easy') {
-      const { puzzle, solution } = generateSudoku(difficulty);
+    function startNewGame(size, difficulty = 'easy') {
+      createGrid(size);
+
+      const { puzzle, solution } = generateSudoku(size, difficulty);
       currentPuzzle = puzzle;
       currentSolution = solution;
 
       // グリッドを更新
+      const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
       cells.forEach((cell, index) => {
-        const row = Math.floor(index / 9);
-        const col = index % 9;
+        const row = Math.floor(index / size);
+        const col = index % size;
         const value = puzzle[row][col];
 
         if (value !== 0) {
@@ -182,33 +257,30 @@ const MODULE_SOURCE = `
       if (difficultyLabelEl) {
         difficultyLabelEl.textContent = difficultyLabels[difficulty] || 'かんたん';
       }
+      if (sizeLabelEl) {
+        sizeLabelEl.textContent = size + '×' + size;
+      }
+
+      // プリセット選択を非表示、ゲームを表示
+      if (presetSelector) presetSelector.classList.add('hidden');
+      if (gameContainer) gameContainer.classList.remove('hidden');
     }
 
     // 残りのマス数を更新
     function updateRemainingCount() {
       if (!remainingCountEl) return;
 
+      const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
       const emptyCount = cells.filter(cell => !cell.readOnly && cell.value === '').length;
       remainingCountEl.textContent = emptyCount;
     }
 
-    // セル選択
-    cells.forEach(cell => {
-      cell.addEventListener('focus', () => {
-        selectedCell = cell;
-      });
-
-      cell.addEventListener('input', (e) => {
-        const value = e.target.value;
-
-        // 数字1-9のみを許可
-        if (value && (!/^[1-9]$/.test(value))) {
-          e.target.value = '';
-          return;
-        }
-
-        e.target.classList.remove('sudoku-cell--error');
-        updateRemainingCount();
+    // プリセットボタン
+    presetButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const size = Number(button.dataset.size);
+        const difficulty = button.dataset.difficulty;
+        startNewGame(size, difficulty);
       });
     });
 
@@ -240,12 +312,13 @@ const MODULE_SOURCE = `
       checkButton.addEventListener('click', () => {
         if (!currentSolution) return;
 
+        const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
         let isCorrect = true;
         let hasEmpty = false;
 
         cells.forEach((cell, index) => {
-          const row = Math.floor(index / 9);
-          const col = index % 9;
+          const row = Math.floor(index / currentGridSize);
+          const col = index % currentGridSize;
           const expectedValue = currentSolution[row][col];
 
           if (!cell.readOnly) {
@@ -273,7 +346,9 @@ const MODULE_SOURCE = `
     // 新しいゲームボタン
     if (newGameButton) {
       newGameButton.addEventListener('click', () => {
-        startNewGame('easy');
+        // プリセット選択画面に戻る
+        if (presetSelector) presetSelector.classList.remove('hidden');
+        if (gameContainer) gameContainer.classList.add('hidden');
       });
     }
 
@@ -282,6 +357,7 @@ const MODULE_SOURCE = `
       hintButton.addEventListener('click', () => {
         if (!currentSolution) return;
 
+        const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
         // 空のセルからランダムに1つ選んでヒントを表示
         const emptyCells = cells.filter(cell => !cell.readOnly && cell.value === '');
         if (emptyCells.length === 0) {
@@ -291,8 +367,8 @@ const MODULE_SOURCE = `
 
         const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
         const index = cells.indexOf(randomCell);
-        const row = Math.floor(index / 9);
-        const col = index % 9;
+        const row = Math.floor(index / currentGridSize);
+        const col = index % currentGridSize;
 
         randomCell.value = currentSolution[row][col];
         randomCell.classList.remove('sudoku-cell--error');
@@ -326,8 +402,9 @@ const MODULE_SOURCE = `
       feedbackEl.className = 'flex min-h-[64px] items-center justify-center rounded-2xl text-center text-base font-bold px-4 py-3';
     }
 
-    // 初期化
-    startNewGame('easy');
+    // 初期化: プリセット選択画面を表示
+    if (presetSelector) presetSelector.classList.remove('hidden');
+    if (gameContainer) gameContainer.classList.add('hidden');
   }
 })();
 `;

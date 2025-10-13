@@ -77,7 +77,6 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
         .sudoku-grid {
           display: grid;
-          grid-template-columns: repeat(9, 1fr);
           gap: 0;
           border: 3px solid rgba(148, 163, 184, 0.4);
           max-width: 540px;
@@ -88,12 +87,52 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
           background: white;
         }
 
-        .sudoku-grid .sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
+        .sudoku-grid[data-size='4'] {
+          grid-template-columns: repeat(4, 1fr);
+        }
+
+        .sudoku-grid[data-size='6'] {
+          grid-template-columns: repeat(6, 1fr);
+        }
+
+        .sudoku-grid[data-size='9'] {
+          grid-template-columns: repeat(9, 1fr);
+        }
+
+        /* 4x4グリッド: 2x2ブロック */
+        .sudoku-grid[data-size='4']
+          .sudoku-cell:nth-child(2n):not(:nth-child(4n)) {
           border-right: 2.5px solid rgba(148, 163, 184, 0.5);
         }
 
-        .sudoku-grid .sudoku-cell:nth-child(n + 19):nth-child(-n + 27),
-        .sudoku-grid .sudoku-cell:nth-child(n + 46):nth-child(-n + 54) {
+        .sudoku-grid[data-size='4']
+          .sudoku-cell:nth-child(n + 5):nth-child(-n + 8) {
+          border-bottom: 2.5px solid rgba(148, 163, 184, 0.5);
+        }
+
+        /* 6x6グリッド: 2x3ブロック */
+        .sudoku-grid[data-size='6']
+          .sudoku-cell:nth-child(2n):not(:nth-child(6n)) {
+          border-right: 2.5px solid rgba(148, 163, 184, 0.5);
+        }
+
+        .sudoku-grid[data-size='6']
+          .sudoku-cell:nth-child(n + 7):nth-child(-n + 12),
+        .sudoku-grid[data-size='6']
+          .sudoku-cell:nth-child(n + 19):nth-child(-n + 24) {
+          border-bottom: 2.5px solid rgba(148, 163, 184, 0.5);
+        }
+
+        /* 9x9グリッド: 3x3ブロック */
+        .sudoku-grid[data-size='9']
+          .sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
+          border-right: 2.5px solid rgba(148, 163, 184, 0.5);
+        }
+
+        .sudoku-grid[data-size='9']
+          .sudoku-cell:nth-child(n + 19):nth-child(-n + 27),
+        .sudoku-grid[data-size='9']
+          .sudoku-cell:nth-child(n + 46):nth-child(-n + 54) {
           border-bottom: 2.5px solid rgba(148, 163, 184, 0.5);
         }
 
@@ -217,52 +256,201 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
     <main class="grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:px-16 xl:px-24">
       <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
-        <div class="flex items-center justify-between gap-4">
-          <div class="difficulty-badge">
-            <span class="text-2xl">🎯</span>
-            <div class="flex flex-col">
-              <span class="text-xs uppercase tracking-wide opacity-75">
-                難易度
-              </span>
-              <span id="difficulty-label" class="text-base font-bold">
-                かんたん
-              </span>
-            </div>
-          </div>
-          <div class="difficulty-badge">
-            <span class="text-2xl">📝</span>
-            <div class="flex flex-col">
-              <span class="text-xs uppercase tracking-wide opacity-75">
-                残り
-              </span>
-              <span id="remaining-count" class="text-base font-bold">
-                0
-              </span>
-            </div>
+        <div id="preset-selector" class="space-y-4">
+          <h2 class="text-lg font-semibold text-[var(--mq-ink)]">
+            プリセット選択
+          </h2>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="4"
+              data-difficulty="easy"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🌱</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    4×4 かんたん
+                  </div>
+                  <div class="text-xs text-[#5e718a]">初心者向け</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="4"
+              data-difficulty="medium"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🌿</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    4×4 ふつう
+                  </div>
+                  <div class="text-xs text-[#5e718a]">初心者向け</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="6"
+              data-difficulty="easy"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🌸</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    6×6 かんたん
+                  </div>
+                  <div class="text-xs text-[#5e718a]">入門</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="6"
+              data-difficulty="medium"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🌺</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    6×6 ふつう
+                  </div>
+                  <div class="text-xs text-[#5e718a]">入門</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="6"
+              data-difficulty="hard"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🌹</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    6×6 むずかしい
+                  </div>
+                  <div class="text-xs text-[#5e718a]">入門</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="9"
+              data-difficulty="easy"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">⭐</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    9×9 かんたん
+                  </div>
+                  <div class="text-xs text-[#5e718a]">標準</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="9"
+              data-difficulty="medium"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🌟</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    9×9 ふつう
+                  </div>
+                  <div class="text-xs text-[#5e718a]">標準</div>
+                </div>
+              </div>
+            </button>
+            <button
+              type="button"
+              class="preset-button rounded-2xl border-2 border-[var(--mq-outline)] bg-gradient-to-br from-white to-[var(--mq-surface)] p-4 text-left transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
+              data-size="9"
+              data-difficulty="hard"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">💫</span>
+                <div>
+                  <div class="text-base font-bold text-[var(--mq-ink)]">
+                    9×9 むずかしい
+                  </div>
+                  <div class="text-xs text-[#5e718a]">標準</div>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
 
-        <div class="rounded-3xl border border-[var(--mq-outline)] bg-white p-6 shadow-sm">
-          <div id="sudoku-grid" class="sudoku-grid">
-            {Array.from({ length: 81 }).map((_, i) => (
-              <input
-                key={i}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                class="sudoku-cell"
-                data-index={i}
-                data-row={Math.floor(i / 9)}
-                data-col={i % 9}
-              />
-            ))}
+        <div id="game-container" class="hidden space-y-6">
+          <div class="flex items-center justify-between gap-4">
+            <div class="difficulty-badge">
+              <span class="text-2xl">🎯</span>
+              <div class="flex flex-col">
+                <span class="text-xs uppercase tracking-wide opacity-75">
+                  難易度
+                </span>
+                <span id="difficulty-label" class="text-base font-bold">
+                  かんたん
+                </span>
+              </div>
+            </div>
+            <div class="difficulty-badge">
+              <span class="text-2xl">📏</span>
+              <div class="flex flex-col">
+                <span class="text-xs uppercase tracking-wide opacity-75">
+                  サイズ
+                </span>
+                <span id="size-label" class="text-base font-bold">
+                  9×9
+                </span>
+              </div>
+            </div>
+            <div class="difficulty-badge">
+              <span class="text-2xl">📝</span>
+              <div class="flex flex-col">
+                <span class="text-xs uppercase tracking-wide opacity-75">
+                  残り
+                </span>
+                <span id="remaining-count" class="text-base font-bold">
+                  0
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div
-          id="feedback"
-          class="flex min-h-[48px] items-center justify-center rounded-2xl text-center text-sm font-semibold"
-        ></div>
+          <div class="rounded-3xl border border-[var(--mq-outline)] bg-white p-6 shadow-sm">
+            <div id="sudoku-grid" class="sudoku-grid">
+              {Array.from({ length: 81 }).map((_, i) => (
+                <input
+                  key={i}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  class="sudoku-cell"
+                  data-index={i}
+                  data-row={Math.floor(i / 9)}
+                  data-col={i % 9}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div
+            id="feedback"
+            class="flex min-h-[48px] items-center justify-center rounded-2xl text-center text-sm font-semibold"
+          ></div>
+        </div>
       </section>
 
       <aside class="flex flex-col gap-6">

@@ -16,7 +16,7 @@ MathQuest is a learning service that provides arithmetic practice experiences fo
 ### Layered Structure
 
 - **Domain Layer (`packages/domain`)**
-  - Question generation algorithms, multi-step calculations (e.g., addition then subtraction), answer checking, and display formatting.
+  - Question generation algorithms, multi-step calculations (e.g., addition then subtraction), inverse arithmetic problems (`? + 5 = 10`), answer checking, and display formatting.
 - **Application Layer (`packages/app`, `apps/edge/src/application`)**
   - Manages quiz progression (number of questions, correct answers), use cases (`generateQuizQuestion`, `verifyAnswer`), and session handling.
 - **Infrastructure Layer (`apps/edge/src/infrastructure`)**
@@ -51,7 +51,7 @@ graph LR
 - `@mathquest/edge`: The production Cloudflare Workers app. It embeds presets as JSON on the start screen, and a client script configures the dynamic UI (theme selection, progress saving, sound effect/show-working toggles).
 - `@mathquest/api` / `@mathquest/web`: Node + Hono servers for local validation without Workers. Useful for checking domain/API logic or for Storybook-like purposes.
 - `@mathquest/app`: Handles the calculation of quiz progress objects (current question number, correct count, etc.), allowing the UI to manage state transitions without side effects.
-- `@mathquest/domain`: The rules for generating calculation problems. When a grade-level theme is specified, it calls composite logic like `generateGradeOneQuestion`.
+- `@mathquest/domain`: The rules for generating calculation problems. When a grade-level theme is specified, it calls composite logic like `generateGradeOneQuestion`. For inverse arithmetic problems, it uses `generateInverseQuestion`.
 
 ## 4. Directory Structure
 
@@ -110,6 +110,29 @@ mathquest/
   - Output: Correctness judgment and the correct value
 
 The API utilizes the logic from `@mathquest/domain` via `apps/edge/src/application/usecases/quiz.ts`. This ensures that the same specification for questions is generated on both the UI and API sides, and tests can be written at the use-case level.
+
+### Inverse Arithmetic Problems
+
+Inverse arithmetic problems are questions where one operand is unknown (e.g., `? + 5 = 10` or `3 + ? = 9`).
+
+**Implementation features:**
+
+- **Question Generation**: The `generateInverseQuestion` function generates questions with `isInverse: true` and `inverseSide: 'left' | 'right'`.
+- **Display Format**: The `formatQuestion` function displays questions in a format that includes the `?` symbol and the result (`= 10`).
+- **Answer Verification**: For inverse problems, the `verifyAnswer` function uses the `answer` field (the value of the unknown) from the question object to determine correctness. Unlike regular arithmetic problems, the correct answer is the value of the unknown, not the calculation result.
+
+**Data Structure:**
+
+```typescript
+type Question = {
+  a: number;
+  b: number;
+  op: '+' | '-' | '×';
+  answer: number; // For inverse problems, the value of the unknown
+  isInverse?: boolean; // Inverse problem flag
+  inverseSide?: 'left' | 'right'; // Position of the unknown
+};
+```
 
 ## 6. Technology Stack
 

@@ -366,7 +366,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
       <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg lg:col-span-2">
         <div id="preset-selector" class="space-y-4">
           <h2 class="text-lg font-semibold text-[var(--mq-ink)]">
-            プリセット選択
+            プリセットをえらぶ
           </h2>
           <div class="grid gap-3 sm:grid-cols-2">
             <button

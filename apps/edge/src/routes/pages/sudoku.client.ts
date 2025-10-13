@@ -516,6 +516,11 @@ const MODULE_SOURCE = `
         showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error', true);
       } else {
         showFeedback('🎉 正解です！おめでとう！', 'success', true);
+        // すべてのセルを編集不可にする
+        cells.forEach(cell => {
+          cell.classList.add('completed');
+          cell.readOnly = true;
+        });
       }
     }
 

@@ -21,3 +21,44 @@ export const quizResults = sqliteTable('quiz_results', {
 
 export type QuizResult = typeof quizResults.$inferSelect;
 export type NewQuizResult = typeof quizResults.$inferInsert;
+
+export const authUsers = sqliteTable('auth_users', {
+  id: text('id', { length: 32 }).primaryKey(),
+  email: text('email', { length: 255 }).notNull().unique(),
+  displayName: text('display_name', { length: 120 }).notNull(),
+  grade: text('grade', { length: 4 }).notNull(),
+  avatarColor: text('avatar_color', { length: 16 }).notNull(),
+  badgesJson: text('badges_json').notNull().default('[]'),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const authSessions = sqliteTable('auth_sessions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  tokenHash: text('token_hash', { length: 128 }).notNull().unique(),
+  userId: text('user_id', { length: 32 })
+    .notNull()
+    .references(() => authUsers.id),
+  expiresAt: text('expires_at').notNull(),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const authLoginTokens = sqliteTable('auth_login_tokens', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  email: text('email', { length: 255 }).notNull(),
+  tokenHash: text('token_hash', { length: 128 }).notNull().unique(),
+  redirectTo: text('redirect_to'),
+  expiresAt: text('expires_at').notNull(),
+  consumedAt: text('consumed_at'),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
+
+export type AuthUser = typeof authUsers.$inferSelect;
+export type NewAuthUser = typeof authUsers.$inferInsert;
+export type AuthSession = typeof authSessions.$inferSelect;
+export type AuthLoginToken = typeof authLoginTokens.$inferSelect;

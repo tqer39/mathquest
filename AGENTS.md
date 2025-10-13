@@ -4,6 +4,24 @@
 
 MathQuestは小学生向けの算数学習プラットフォームで、Cloudflare Workers上で動作するHonoベースのSSRアプリケーションです。monorepoアーキテクチャを採用し、Edge Runtime、API/フロントエンドパッケージ、Terraform管理のインフラストラクチャを一つのリポジトリで管理しています。
 
+## 現在の主要機能
+
+- **スタート画面（`/start`）**
+  - 学年（小1〜小6）、計算種類（たし算・ひき算・かけ算・四則演算）、テーマプリセット（例: 「たし算 20 まで」「ひき算 50 まで」）を選択。
+  - 効果音・途中式表示のトグル、問題数（本番: 10/20/30、開発モード: 1 問のデバッグオプション）を切り替え。
+  - `mathquest:progress:v1`（解答数/正解数/最後の学年）、`mathquest:sound-enabled`、`mathquest:show-working`、`mathquest:question-count-default` に設定を保存。
+  - 選択内容は `mathquest:pending-session` として `sessionStorage` に退避し、プレイ画面へシームレスに引き継ぎ。
+- **プレイ画面（`/play`）**
+  - 3 秒カウントダウン後に問題を表示。テンキー UI、ストリーク表示、途中式のトグル、サウンド再生を実装。
+  - `/apis/quiz/generate` で新しい問題を取得し、`/apis/quiz/verify` で採点。正解時は進捗をローカルストレージへ反映。
+  - ラウンド完了時は結果カードで正答数・経過時間を提示し、スタート画面への導線を表示。
+- **ユースケース / API**
+  - `generateQuizQuestion` は学年・テーマに応じて `generateGradeOneQuestion` や複数項目の加減算ロジックを選択。
+  - `verifyAnswer` はクライアントから渡された途中式 (`extras`) を含む問題を評価し、正解値と正誤を返却。
+- **共有ロジック**
+  - `@mathquest/domain` が全ての問題生成・採点ロジックを提供。学年別テーマや複数ステップ計算を純関数として実装。
+  - `@mathquest/app` が出題回数や正解数のカウントを担当し、UI から副作用を切り離してテストしやすい構造にしている。
+
 ## システムアーキテクチャ
 
 ### 全体構成図
@@ -352,27 +370,45 @@ pnpm deploy
 
 ## データフロー
 
-### 問題生成フロー
+### スタート設定フロー
 
 ```mermaid
 sequenceDiagram
     participant User
     participant Browser
     participant EdgeApp
+    participant LocalStorage
+
+    User->>Browser: GET /start
+    Browser->>EdgeApp: HTTP Request
+    EdgeApp-->>Browser: SSR Start page + preset JSON
+    Browser->>LocalStorage: load progress/settings
+    User->>Browser: 学年・テーマ・設定を選択
+    Browser->>LocalStorage: save progress & defaults
+    Browser->>Browser: sessionStorage.setItem('mathquest:pending-session')
+    User->>Browser: れんしゅうをはじめる
+    Browser->>EdgeApp: Navigate to /play
+```
+
+### 問題生成フロー
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant SessionStorage
     participant QuizAPI
     participant UseCase
     participant Domain
 
-    User->>Browser: 設定選択（/start）
-    Browser->>EdgeApp: GET /start
-    EdgeApp-->>Browser: SSR: Start page
-    User->>Browser: 問題開始
+    Browser->>SessionStorage: read mathquest:pending-session
+    SessionStorage-->>Browser: 設定（mode/max/grade/theme）
     Browser->>QuizAPI: POST /apis/quiz/generate
-    QuizAPI->>UseCase: generateQuizQuestion(input)
-    UseCase->>Domain: generateQuestion(config)
+    QuizAPI->>UseCase: generateQuizQuestion(mode, max, gradeId, themeId)
+    UseCase->>Domain: generateQuestion/configure extras
     Domain-->>UseCase: Question
     UseCase-->>QuizAPI: Question
     QuizAPI-->>Browser: JSON response
+    Browser-->>Browser: UI を更新（途中式/サウンド設定反映）
     Browser-->>User: 問題表示
 ```
 
@@ -385,6 +421,7 @@ sequenceDiagram
     participant QuizAPI
     participant UseCase
     participant Domain
+    participant LocalStorage
 
     User->>Browser: 回答入力
     Browser->>QuizAPI: POST /apis/quiz/verify
@@ -395,6 +432,7 @@ sequenceDiagram
     Domain-->>UseCase: ok: boolean
     UseCase-->>QuizAPI: {ok, correctAnswer}
     QuizAPI-->>Browser: JSON response
+    Browser->>LocalStorage: update progress if ok
     Browser-->>User: 正誤フィードバック
 ```
 

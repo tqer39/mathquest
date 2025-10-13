@@ -1,70 +1,69 @@
-# boilerplate-base
+# MathQuest ドキュメント概要
 
-事前設定された開発ツールとワークフローを備えたプロジェクト用のベースボイラープレートテンプレートです。
+MathQuest は小学生向けの算数練習プラットフォームです。Cloudflare Workers 上で動作する Hono ベースの SSR アプリと、共有ドメインロジックを pnpm ワークスペースで管理するモノレポ構成になっています。
+
+スタート画面では学年・計算分野・テーマプリセット（例: 「たし算 20 まで」や「ひき算 50 まで」）を選択し、問題数や効果音・途中式の表示を切り替えられます。プレイ画面はテンキー付き UI とカウントダウン演出、ストリーク表示、ローカルストレージによる進捗保存を備えています。問題生成と採点は `@mathquest/domain` が担当し、API 層（`/apis/quiz`）からも再利用されます。
 
 ## クイックスタート
 
 ### 前提条件
 
-このプロジェクトでは、異なる目的に対して異なるツールを使用します：
+リポジトリでは以下のツールを利用します。
 
-- **Homebrew**: システムレベルの開発ツール
-- **mise**: プログラミング言語のバージョン管理
-- **just**: タスク自動化とコマンドランナー
+- **Homebrew**: macOS/Linux 向けのシステムレベル開発ツール管理
+- **mise**: Node.js・pnpm・Wrangler など実行環境のバージョン管理
+- **just**: セットアップや lint をまとめたタスクランナー
+- **pnpm**: JavaScript/TypeScript ワークスペース管理
 
 ### セットアップ
 
 ```bash
-# 1. Homebrew をインストール（まだインストールされていない場合）
+# 1. Homebrew の導入（macOS/Linux）
 make bootstrap
 
-# 2. すべての開発ツールをインストール
-brew bundle install
-
-# 3. 開発環境をセットアップ
+# 2. 依存ツールと npm パッケージをまとめてセットアップ
 just setup
 ```
 
-**ワンコマンドセットアップ**（Homebrewが既にインストールされている場合）:
+Homebrew が既に入っている場合は `brew bundle install` を挟んでから `just setup` を実行します。
+
+### よく使うコマンド
 
 ```bash
-just setup
-```
-
-### 利用可能なコマンド
-
-```bash
-# すべての利用可能なタスクを表示
+# 利用可能な just タスクを一覧表示
 just help
 
-# コード品質チェックを実行
+# コード品質チェック（biome, cspell, vitest 等）
 just lint
 
-# よくあるフォーマット問題を修正
+# 自動整形を適用
 just fix
 
-# pre-commitキャッシュをクリア
+# pre-commit キャッシュを削除
 just clean
 
-# 開発ツールを更新
-just update-brew  # Homebrewパッケージを更新
-just update       # mise管理のツールを更新
-just update-hooks # pre-commitフックを更新
+# ランタイム・CLI のアップデート
+just update-brew
+just update
+just update-hooks
 
-# miseの状態を表示
+# mise の状態確認
 just status
 ```
 
-## ツールの責任範囲
+## リポジトリ構成
 
-このセットアップでは、ツールの責任範囲を明確に分離しています：
+- `apps/edge`: Cloudflare Workers で動作する Hono SSR アプリ。`routes/pages` にスタート・プレイ画面、`routes/apis/quiz.ts` に問題生成・採点 API を持ちます。
+- `apps/api` / `apps/web`: ローカル開発向けの Node サーバーと Web フロント。Workers を使わない検証で利用します。
+- `packages/domain`: 問題生成・採点ロジック。学年別の複合ステップ問題（たし算→ひき算など）もここで定義します。
+- `packages/app`: ドメインロジックを利用したクイズ進行管理（出題順・正解数カウントなど）。
+- `docs/`: 設計・運用ドキュメント。
+- `infra/`: Terraform と D1 マイグレーション。
+- `games/math-quiz`: 旧ブラウザ版ゲーム（静的 HTML/JS）。
 
-- **brew**: システムレベルの開発ツール（git、pre-commit、mise、just、uv）
-- **mise**: Node.js と Cloudflare Wrangler CLI のバージョン管理
-- **uv**: Pythonパッケージ・プロジェクト管理
-- **pre-commit**: すべてのリンティングツールを自動処理（個別インストール不要）
+## 関連ドキュメント
 
-## 追加ツール: rulesync（任意導入）
-
-- 共通設定ファイルを外部リポジトリから同期するための CLI。
-- 導入と使い方は `docs/RULESYNC.ja.md` を参照。
+- `AGENTS.md`: 全体設計とモジュール依存関係
+- `docs/local-dev.md`: ローカル検証環境の構築手順
+- `docs/mathquest アーキテクチャ設計とプロジェクト構造.md`: 詳細なアーキテクチャ設計
+- `docs/math-quiz.md`: 旧スタンドアロン版ミニゲームの仕様

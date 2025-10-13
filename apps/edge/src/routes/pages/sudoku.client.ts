@@ -317,6 +317,15 @@ const MODULE_SOURCE = `
             const col = Number(e.target.dataset.col);
             checkDuplicates(row, col, value);
             setTimeout(() => checkCompletion(row, col), 100);
+
+            // すべてのマスが埋まったら自動的に答え合わせ
+            setTimeout(() => {
+              const allCells = Array.from(document.querySelectorAll('.sudoku-cell'));
+              const allFilled = allCells.every(cell => cell.value !== '');
+              if (allFilled) {
+                performAnswerCheck();
+              }
+            }, 150);
           }
         });
 
@@ -419,6 +428,15 @@ const MODULE_SOURCE = `
         const col = Number(selectedCell.dataset.col);
         checkDuplicates(row, col, number);
         setTimeout(() => checkCompletion(row, col), 100);
+
+        // すべてのマスが埋まったら自動的に答え合わせ
+        setTimeout(() => {
+          const allCells = Array.from(document.querySelectorAll('.sudoku-cell'));
+          const allFilled = allCells.every(cell => cell.value !== '');
+          if (allFilled) {
+            performAnswerCheck();
+          }
+        }, 150);
       });
     });
 
@@ -433,74 +451,77 @@ const MODULE_SOURCE = `
       });
     }
 
+    // 答え合わせ関数（再利用可能）
+    function performAnswerCheck() {
+      const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
+      const config = GRID_CONFIGS[currentGridSize];
+
+      // 空のマスがあるかチェック
+      const hasEmpty = cells.some(cell => cell.value === '');
+      if (hasEmpty) {
+        showFeedback('まだ空いているマスがあります', 'info');
+        return;
+      }
+
+      // 数独のルールに基づいて検証
+      let isValid = true;
+      const errorCells = [];
+
+      // 各行をチェック
+      for (let row = 0; row < currentGridSize; row++) {
+        const rowCells = cells.filter(cell => Number(cell.dataset.row) === row);
+        const rowValues = rowCells.map(cell => Number(cell.value));
+        if (new Set(rowValues).size !== currentGridSize) {
+          isValid = false;
+          errorCells.push(...rowCells);
+        }
+      }
+
+      // 各列をチェック
+      for (let col = 0; col < currentGridSize; col++) {
+        const colCells = cells.filter(cell => Number(cell.dataset.col) === col);
+        const colValues = colCells.map(cell => Number(cell.value));
+        if (new Set(colValues).size !== currentGridSize) {
+          isValid = false;
+          errorCells.push(...colCells);
+        }
+      }
+
+      // 各ブロックをチェック
+      for (let blockRow = 0; blockRow < currentGridSize; blockRow += config.boxRows) {
+        for (let blockCol = 0; blockCol < currentGridSize; blockCol += config.boxCols) {
+          const blockCells = [];
+          for (let i = 0; i < config.boxRows; i++) {
+            for (let j = 0; j < config.boxCols; j++) {
+              const cell = cells.find(
+                c => Number(c.dataset.row) === blockRow + i &&
+                     Number(c.dataset.col) === blockCol + j
+              );
+              if (cell) blockCells.push(cell);
+            }
+          }
+          const blockValues = blockCells.map(cell => Number(cell.value));
+          if (new Set(blockValues).size !== blockCells.length) {
+            isValid = false;
+            errorCells.push(...blockCells);
+          }
+        }
+      }
+
+      // エラー表示を更新
+      cells.forEach(cell => cell.classList.remove('sudoku-cell--error'));
+      if (!isValid) {
+        const uniqueErrorCells = [...new Set(errorCells)];
+        uniqueErrorCells.forEach(cell => cell.classList.add('sudoku-cell--error'));
+        showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error');
+      } else {
+        showFeedback('🎉 正解です！おめでとう！', 'success');
+      }
+    }
+
     // 答え合わせボタン
     if (checkButton) {
-      checkButton.addEventListener('click', () => {
-        const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
-        const config = GRID_CONFIGS[currentGridSize];
-
-        // 空のマスがあるかチェック
-        const hasEmpty = cells.some(cell => cell.value === '');
-        if (hasEmpty) {
-          showFeedback('まだ空いているマスがあります', 'info');
-          return;
-        }
-
-        // 数独のルールに基づいて検証
-        let isValid = true;
-        const errorCells = [];
-
-        // 各行をチェック
-        for (let row = 0; row < currentGridSize; row++) {
-          const rowCells = cells.filter(cell => Number(cell.dataset.row) === row);
-          const rowValues = rowCells.map(cell => Number(cell.value));
-          if (new Set(rowValues).size !== currentGridSize) {
-            isValid = false;
-            errorCells.push(...rowCells);
-          }
-        }
-
-        // 各列をチェック
-        for (let col = 0; col < currentGridSize; col++) {
-          const colCells = cells.filter(cell => Number(cell.dataset.col) === col);
-          const colValues = colCells.map(cell => Number(cell.value));
-          if (new Set(colValues).size !== currentGridSize) {
-            isValid = false;
-            errorCells.push(...colCells);
-          }
-        }
-
-        // 各ブロックをチェック
-        for (let blockRow = 0; blockRow < currentGridSize; blockRow += config.boxRows) {
-          for (let blockCol = 0; blockCol < currentGridSize; blockCol += config.boxCols) {
-            const blockCells = [];
-            for (let i = 0; i < config.boxRows; i++) {
-              for (let j = 0; j < config.boxCols; j++) {
-                const cell = cells.find(
-                  c => Number(c.dataset.row) === blockRow + i &&
-                       Number(c.dataset.col) === blockCol + j
-                );
-                if (cell) blockCells.push(cell);
-              }
-            }
-            const blockValues = blockCells.map(cell => Number(cell.value));
-            if (new Set(blockValues).size !== blockCells.length) {
-              isValid = false;
-              errorCells.push(...blockCells);
-            }
-          }
-        }
-
-        // エラー表示を更新
-        cells.forEach(cell => cell.classList.remove('sudoku-cell--error'));
-        if (!isValid) {
-          const uniqueErrorCells = [...new Set(errorCells)];
-          uniqueErrorCells.forEach(cell => cell.classList.add('sudoku-cell--error'));
-          showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error');
-        } else {
-          showFeedback('🎉 正解です！おめでとう！', 'success');
-        }
-      });
+      checkButton.addEventListener('click', performAnswerCheck);
     }
 
     // 新しいゲームボタン
@@ -537,6 +558,15 @@ const MODULE_SOURCE = `
 
         // 完成チェック
         setTimeout(() => checkCompletion(row, col), 100);
+
+        // すべてのマスが埋まったら自動的に答え合わせ
+        setTimeout(() => {
+          const allCells = Array.from(document.querySelectorAll('.sudoku-cell'));
+          const allFilled = allCells.every(cell => cell.value !== '');
+          if (allFilled) {
+            performAnswerCheck();
+          }
+        }, 150);
       });
     }
 

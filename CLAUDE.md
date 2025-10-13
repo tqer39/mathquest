@@ -1,46 +1,121 @@
 # Claude Project Instructions
 
-## AI アシスタント共通ルール（日本語）
+## 1. Overview
 
-本リポジトリで Cursor / GitHub Copilot / Codex CLI / Gemini / Claude Code 等のアシスタントが一貫した挙動になるよう、プロジェクト固有の指示をまとめます。
+This document provides a comprehensive guide for AI assistants (like Gemini, Claude, Copilot) to understand and contribute to the **MathQuest** project.
 
-## 基本方針
+**MathQuest** is an educational platform for elementary school students to practice arithmetic. It's a monorepo project built with a modern web stack, running on the Cloudflare edge network.
 
-- すべての回答は日本語で行う。
-- 変更は最小限・フォーカスして行い、無関係な修正は避ける。
-- リポジトリのガイドラインに従う（`AGENTS.md` 参照）。
-- ツールやワークフローを変更した場合は、関連ドキュメント（`docs/`）を更新する。
-- 機密情報（API キー等）はコミットしない。検出系フックが有効。
+### Core Mission
 
-## 作業ルール
+- To provide a fun, engaging, and effective learning experience.
+- To build a scalable, maintainable, and high-performance application using a server-side rendering (SSR) architecture with Hono on Cloudflare Workers.
 
-- コード変更時は周辺スタイルに合わせる。余計なリファクタはしない。
-- ルートの設定に従う：`.editorconfig`、`.prettierrc`、`.pre-commit-config.yaml`。
-- `just lint` が通る状態で変更を提案・適用する。
-- ファイル参照はパスをインラインコードで示す（例: `src/app.ts:42`）。
-- 大きな説明は簡潔に。必要に応じて箇条書きと短い見出しで要点を整理する。
+## 2. Key Documentation
 
-## 実行コマンドの指針
+This file is the central hub. For detailed information, please refer to the specific documents below.
 
-- ローカル検証が可能な場合は、必要最小限のコマンドで動作確認する。
-- プロジェクトのコマンドは以下を優先的に使う：
-  - セットアップ: `brew bundle install` → `just setup`
-  - Lint 全実行: `just lint`
-  - 自動修正: `just fix`
-  - ルール同期（任意導入）: `just rulesync -- --check` / `just rulesync -- apply`
+- **[Project Overview](./docs/README.md):** Quick start, repository structure, and frequently used commands.
+- **[Architecture Design](./docs/mathquest-architecture.md):** In-depth explanation of the layered architecture, module configuration, data flow, and technology stack.
+- **[UI/UX Design Concept](./docs/ux-design-concept.md):** The design philosophy, target users, visual theme, color palette, and gamification strategy.
+- **[Wireframes](./docs/mathquest-wireframe.md):** Structural blueprints for the main application screens (Home, Stage Select, Game, Results, etc.).
+- **[Local Development](./docs/local-dev.md):** Guide for setting up and running the project locally.
+- **[AI Assistant Rules](./docs/AI_RULES.md):** Common rules and guidelines for AI assistants contributing to this repository.
+- **[Claude-specific Instructions](./docs/CLAUDE.md):** Specific guidance for the Claude Code assistant.
+- **[rulesync Guide](./docs/RULESYNC.md):** How to use the `rulesync` tool to keep configuration files up-to-date.
 
-## rulesync による設定ファイル生成
+## 3. System Architecture
 
-- `just rulesync -- generate` で AI アシスタント向け設定ファイルを生成できる。
-- 生成対象（初期値）:
-  - `.cursorrules`（Cursor）
-  - `.github/copilot-instructions.md`（GitHub Copilot Chat）
-  - `CLAUDE.md`（Claude Code/Dev）
-  - `docs/AI_RULES.ja.md`（本ファイル: 単一ソース）
-- 生成物は本ファイルの内容をベースにし、各ツールに合わせたヘッダーを付す。
+### 3.1. High-Level Diagram
 
-## 参考: ガイドラインの要点（抜粋）
+```mermaid
+graph TB
+    subgraph "User Interface"
+        Browser
+    end
 
-- コミットは短く命令形。必要に応じて `#123` で issue を参照。
-- 既存 CI は prek を実行。ワークフロー改変時は注意。
-- Node は `mise`、Python は `uv` で管理。固定バージョンに合わせる。
+    subgraph "Cloudflare Edge"
+        EdgeApp[Edge App<br/>Hono SSR]
+        KV_Session[KV: Auth Session]
+        KV_Trial[KV: Free Trial]
+        KV_Rate[KV: Rate Limit]
+        KV_Idempotency[KV: Idempotency]
+        D1[D1 Database]
+    end
+
+    subgraph "Application Layer"
+        UseCases[Application UseCases<br/>quiz.ts]
+        Session[Session Management<br/>current-user.ts]
+    end
+
+    subgraph "Domain Layer"
+        DomainLogic[Domain Logic<br/>@mathquest/domain]
+        AppLogic[App Logic<br/>@mathquest/app]
+    end
+
+    subgraph "Infrastructure"
+        Database[Database Client<br/>Drizzle ORM]
+        Schema[Database Schema]
+    end
+
+    subgraph "Routes"
+        Pages[Pages<br/>home, start, play]
+        APIs[APIs<br/>/apis/quiz]
+    end
+
+    Browser --> EdgeApp
+    EdgeApp --> Pages
+    EdgeApp --> APIs
+    EdgeApp --> UseCases
+    UseCases --> AppLogic
+    UseCases --> Session
+    AppLogic --> DomainLogic
+    EdgeApp --> KV_Session
+    EdgeApp --> KV_Trial
+    EdgeApp --> KV_Rate
+    EdgeApp --> KV_Idempotency
+    EdgeApp --> Database
+    Database --> D1
+    Database --> Schema
+```
+
+### 3.2. Monorepo Structure (pnpm workspaces)
+
+The project is a monorepo managed with pnpm workspaces.
+
+- **`apps/`**: Executable applications.
+  - `@mathquest/edge`: The main application (SSR + BFF API) running on Cloudflare Workers.
+  - `@mathquest/api`: A Node.js server for local API development.
+  - `@mathquest/web`: A Hono server for local web development.
+- **`packages/`**: Shared libraries.
+  - `@mathquest/domain`: The core domain logic (problem generation, calculation rules). This is the heart of the application.
+  - `@mathquest/app`: Application logic that uses the domain layer (quiz session management, answer verification).
+- **`infra/`**: Infrastructure as Code.
+  - `terraform/`: Terraform configurations for Cloudflare resources.
+  - `migrations/`: Database schemas and migration scripts for D1.
+- **`docs/`**: All project documentation.
+
+## 4. Development Workflow
+
+### 4.1. Core Principles
+
+- **Convention over Configuration:** Adhere to the established project conventions.
+- **Linting is Law:** All code must pass linting checks (`just lint`) before submission.
+- **Minimal Changes:** Make small, focused commits. Avoid unrelated refactoring.
+
+### 4.2. Key Commands
+
+- `just setup`: Installs all dependencies and sets up the environment.
+- `just lint`: Runs all code quality checks.
+- `just fix`: Applies automatic formatting and fixes.
+- `pnpm dev:edge`: Starts the main application for local development.
+
+## 5. How to Contribute
+
+1.  **Understand the Goal:** Read the user's request carefully.
+2.  **Consult the Docs:** Refer to the documents linked above to understand the relevant parts of the project. Start with the architecture and domain logic.
+3.  **Locate the Code:** Use `glob` or `search_file_content` to find the relevant files. The directory structure is logical and should be your first guide.
+4.  **Analyze, Don't Assume:** Read the existing code and its context before making changes.
+5.  **Implement Changes:** Modify the code, adhering strictly to the project's style and conventions.
+6.  **Verify:** Run `just lint` and any relevant tests to ensure your changes are correct and don't break anything.
+7.  **Update Documentation:** If you change any behavior, tool, or workflow, update the corresponding documentation.

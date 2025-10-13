@@ -172,6 +172,15 @@ const MODULE_SOURCE = `
         // すべての後続ステップを非表示
         hideAllStepsAfter(2);
 
+        // 途中式トグルの表示/非表示を制御
+        if (stepsToggle) {
+          if (activity === 'math') {
+            stepsToggle.style.display = '';
+          } else {
+            stepsToggle.style.display = 'none';
+          }
+        }
+
         if (state.filterType === 'activity') {
           // なにをするかえらぶ → 計算なら計算種類選択、ゲームならゲーム選択
           if (activity === 'math') {
@@ -370,6 +379,11 @@ const MODULE_SOURCE = `
         // 全てのステップを非表示
         hideAllStepsAfter(0);
         showStep(step1);
+
+        // 途中式トグルを表示に戻す（デフォルト状態）
+        if (stepsToggle) {
+          stepsToggle.style.display = '';
+        }
 
         // 全ての選択を解除
         filterTypeBtns.forEach(btn => btn.classList.remove('selection-card--selected'));

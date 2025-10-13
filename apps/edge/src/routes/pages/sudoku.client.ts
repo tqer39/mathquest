@@ -267,11 +267,10 @@ const MODULE_SOURCE = `
         duplicateCells.push(...blockCells);
       }
 
-      // 重複セルにエラーエフェクトを適用
+      // 重複セルにエラーエフェクトを適用（削除しない）
       const uniqueDuplicates = [...new Set(duplicateCells)];
       uniqueDuplicates.forEach(cell => {
         cell.classList.add('sudoku-cell--duplicate-error');
-        setTimeout(() => cell.classList.remove('sudoku-cell--duplicate-error'), 800);
       });
     }
 
@@ -309,6 +308,7 @@ const MODULE_SOURCE = `
           }
 
           e.target.classList.remove('sudoku-cell--error');
+          e.target.classList.remove('sudoku-cell--duplicate-error');
           updateRemainingCount();
 
           // 値が入力された場合、完成チェックと重複チェック
@@ -421,6 +421,7 @@ const MODULE_SOURCE = `
         const number = button.dataset.number;
         selectedCell.value = number;
         selectedCell.classList.remove('sudoku-cell--error');
+        selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
 
         // 完成チェックと重複チェック
@@ -447,6 +448,7 @@ const MODULE_SOURCE = `
 
         selectedCell.value = '';
         selectedCell.classList.remove('sudoku-cell--error');
+        selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
       });
     }
@@ -558,6 +560,7 @@ const MODULE_SOURCE = `
 
         randomCell.value = currentSolution[row][col];
         randomCell.classList.remove('sudoku-cell--error');
+        randomCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
         showFeedback('ヒント: 1つのマスを埋めました', 'success');
 

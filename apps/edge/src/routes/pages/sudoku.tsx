@@ -46,7 +46,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         .sudoku-cell[readonly] {
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
           color: var(--mq-ink);
           font-weight: 800;
           cursor: default;
@@ -61,44 +61,44 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
           pointer-events: none;
         }
 
+        .sudoku-cell[readonly].sudoku-cell--complete {
+          animation: cellCompleteReadonly 1.2s ease-out;
+        }
+
         .sudoku-cell[readonly].sudoku-cell--duplicate-error {
           animation: duplicateErrorReadonly 0.8s ease-out;
         }
 
-        @keyframes duplicateErrorReadonly {
+        @keyframes cellCompleteReadonly {
           0% {
-            background: linear-gradient(
-              135deg,
-              rgba(254, 202, 202, 0.6) 0%,
-              rgba(252, 165, 165, 0.5) 100%
-            );
-            border-color: rgba(239, 68, 68, 0.7);
-            transform: translateX(0);
-          }
-          10% {
-            transform: translateX(-3px);
-          }
-          20% {
-            transform: translateX(3px);
+            background: linear-gradient(135deg, #c1e7d4 0%, #a8ddc0 100%);
+            box-shadow: inset 0 0 0 3px rgba(134, 239, 172, 0.6);
           }
           30% {
-            transform: translateX(-3px);
+            background: linear-gradient(135deg, #b0e0c7 0%, #9dd9b8 100%);
+            box-shadow: inset 0 0 0 5px rgba(134, 239, 172, 0.8);
           }
-          40% {
-            transform: translateX(3px);
-          }
-          50% {
-            background: linear-gradient(
-              135deg,
-              rgba(254, 202, 202, 0.4) 0%,
-              rgba(252, 165, 165, 0.3) 100%
-            );
-            border-color: rgba(239, 68, 68, 0.5);
-            transform: translateX(0);
+          60% {
+            background: linear-gradient(135deg, #cfe9db 0%, #bce3cd 100%);
+            box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.4);
           }
           100% {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-color: rgba(148, 163, 184, 0.3);
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            box-shadow: none;
+          }
+        }
+
+        @keyframes duplicateErrorReadonly {
+          0%,
+          100% {
+            background: repeating-linear-gradient(
+              45deg,
+              #f0cdd1,
+              #f0cdd1 10px,
+              #e8bcc1 10px,
+              #e8bcc1 20px
+            );
+            border-color: rgba(239, 68, 68, 0.6);
           }
         }
 
@@ -299,21 +299,26 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
               rgba(167, 243, 208, 0.8) 0%,
               rgba(134, 239, 172, 0.7) 100%
             );
-            transform: scale(1.05);
-            box-shadow: 0 0 12px rgba(134, 239, 172, 0.6);
+            box-shadow: inset 0 0 0 3px rgba(134, 239, 172, 0.8);
           }
           30% {
+            background: linear-gradient(
+              135deg,
+              rgba(167, 243, 208, 0.9) 0%,
+              rgba(134, 239, 172, 0.8) 100%
+            );
+            box-shadow: inset 0 0 0 5px rgba(134, 239, 172, 1);
+          }
+          60% {
             background: linear-gradient(
               135deg,
               rgba(167, 243, 208, 0.6) 0%,
               rgba(134, 239, 172, 0.5) 100%
             );
-            transform: scale(1.08);
-            box-shadow: 0 0 8px rgba(134, 239, 172, 0.4);
+            box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.5);
           }
           100% {
             background: white;
-            transform: scale(1);
             box-shadow: none;
           }
         }
@@ -323,31 +328,16 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         @keyframes duplicateError {
-          0% {
-            background: rgba(254, 202, 202, 0.5);
-            border-color: rgba(239, 68, 68, 0.7);
-            transform: translateX(0);
-          }
-          10% {
-            transform: translateX(-3px);
-          }
-          20% {
-            transform: translateX(3px);
-          }
-          30% {
-            transform: translateX(-3px);
-          }
-          40% {
-            transform: translateX(3px);
-          }
-          50% {
-            background: rgba(254, 202, 202, 0.4);
-            border-color: rgba(239, 68, 68, 0.5);
-            transform: translateX(0);
-          }
+          0%,
           100% {
-            background: white;
-            border-color: rgba(148, 163, 184, 0.3);
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(254, 202, 202, 0.7),
+              rgba(254, 202, 202, 0.7) 10px,
+              rgba(252, 165, 165, 0.6) 10px,
+              rgba(252, 165, 165, 0.6) 20px
+            );
+            border-color: rgba(239, 68, 68, 0.7);
           }
         }
       </style>

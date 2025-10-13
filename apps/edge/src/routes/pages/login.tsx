@@ -47,7 +47,9 @@ export const Login: FC<LoginPageProps> = ({
         class="space-y-4"
       >
         <label class="block space-y-2">
-          <span class="text-sm font-semibold text-[var(--mq-ink)]">メールアドレス</span>
+          <span class="text-sm font-semibold text-[var(--mq-ink)]">
+            メールアドレス
+          </span>
           <input
             type="email"
             name="email"
@@ -66,7 +68,8 @@ export const Login: FC<LoginPageProps> = ({
       </form>
 
       <p class="text-center text-xs text-[#5e718a]">
-        学習記録はログインするとクラウドに同期されます。<br />
+        学習記録はログインするとクラウドに同期されます。
+        <br />
         <a
           class="text-[var(--mq-primary)] hover:text-[var(--mq-primary-strong)]"
           href="/"

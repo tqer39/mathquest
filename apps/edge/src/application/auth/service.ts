@@ -51,7 +51,8 @@ const hashToken = async (token: string): Promise<string> => {
 };
 
 const pickAvatar = (seed: string): string => {
-  const index = Math.abs([...seed].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)) %
+  const index =
+    Math.abs([...seed].reduce((acc, ch) => acc + ch.charCodeAt(0), 0)) %
     avatarPalette.length;
   return avatarPalette[index] ?? avatarPalette[0] ?? '#4fa2b1';
 };
@@ -69,11 +70,16 @@ const parseCookieHeader = (header: string | null): Map<string, string> => {
   return map;
 };
 
-const parseBadges = (badgesJson: string | null | undefined): readonly string[] => {
+const parseBadges = (
+  badgesJson: string | null | undefined
+): readonly string[] => {
   if (!badgesJson) return badgeFallback;
   try {
     const parsed = JSON.parse(badgesJson);
-    if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
+    if (
+      Array.isArray(parsed) &&
+      parsed.every((item) => typeof item === 'string')
+    ) {
       return parsed as readonly string[];
     }
     return badgeFallback;

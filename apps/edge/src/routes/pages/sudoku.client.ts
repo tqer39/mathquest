@@ -173,6 +173,7 @@ const MODULE_SOURCE = `
     let selectedCell = null;
     let currentSize = 9;
     let currentDifficulty = 'easy';
+    let isProgrammaticInput = false; // プログラムによる入力かどうかのフラグ
 
     // 効果音再生関数
     const playSound = (variant) => {
@@ -276,9 +277,10 @@ const MODULE_SOURCE = `
         const cellBlockRow = Math.floor(cellRow / config.boxRows) * config.boxRows;
         const cellBlockCol = Math.floor(cellCol / config.boxCols) * config.boxCols;
 
-        // 同じ行、列、ブロックのセルのエラーをクリア
+        // 同じ行、列、ブロックのセルのエラーをクリア（答え合わせのエラーも含む）
         if (cellRow === row || cellCol === col || (cellBlockRow === startRow && cellBlockCol === startCol)) {
           cell.classList.remove('sudoku-cell--duplicate-error');
+          cell.classList.remove('sudoku-cell--error');
         }
       });
 
@@ -396,7 +398,15 @@ const MODULE_SOURCE = `
           e.target.classList.remove('sudoku-cell--error');
           e.target.classList.remove('sudoku-cell--duplicate-error');
           updateRemainingCount();
+
+          // 値が変更されたら、全体の重複チェックを再実行
+          // （答え合わせのエラー状態もクリアされる）
           checkDuplicates(row, col, value);
+
+          // プログラムによる入力でない場合のみ効果音を再生（キーボード入力時）
+          if (!isProgrammaticInput && value) {
+            playSound('keypad');
+          }
 
           // 値が入力された場合、完成チェック
           if (value) {
@@ -523,7 +533,18 @@ const MODULE_SOURCE = `
         if (!selectedCell || selectedCell.readOnly) return;
 
         const number = button.dataset.number;
+        const row = Number(selectedCell.dataset.row);
+        const col = Number(selectedCell.dataset.col);
+
+        // プログラムによる入力フラグを立てる
+        isProgrammaticInput = true;
         selectedCell.value = number;
+
+        // inputイベントが処理された後にフラグをリセット
+        setTimeout(() => {
+          isProgrammaticInput = false;
+        }, 0);
+
         selectedCell.classList.remove('sudoku-cell--error');
         selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
@@ -531,9 +552,7 @@ const MODULE_SOURCE = `
         // 効果音を再生
         playSound('keypad');
 
-        // 完成チェックと重複チェック
-        const row = Number(selectedCell.dataset.row);
-        const col = Number(selectedCell.dataset.col);
+        // 完成チェックと重複チェック（エラー状態もクリアされる）
         checkDuplicates(row, col, number);
         setTimeout(() => checkCompletion(row, col), 100);
 
@@ -560,6 +579,7 @@ const MODULE_SOURCE = `
         selectedCell.classList.remove('sudoku-cell--error');
         selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
+        // 値が削除されたら、全体の重複チェックを再実行（エラー状態もクリアされる）
         checkDuplicates(row, col, '');
       });
     }
@@ -628,10 +648,11 @@ const MODULE_SOURCE = `
         uniqueErrorCells.forEach(cell => cell.classList.add('sudoku-cell--error'));
         showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error', true);
         playSound('error');
+        // 不正解時はセルを編集可能なままにする（ボタンも有効なまま）
       } else {
         showFeedback('🎉 正解です！おめでとう！', 'success', true);
         playSound('success');
-        // すべてのセルを編集不可にする
+        // 正解時のみすべてのセルを編集不可にする
         cells.forEach(cell => {
           cell.classList.add('completed');
           // 元々デフォルトだったセルにマークを付ける
@@ -692,7 +713,15 @@ const MODULE_SOURCE = `
         const row = Math.floor(index / currentGridSize);
         const col = index % currentGridSize;
 
+        // プログラムによる入力フラグを立てる
+        isProgrammaticInput = true;
         randomCell.value = currentSolution[row][col];
+
+        // inputイベントが処理された後にフラグをリセット
+        setTimeout(() => {
+          isProgrammaticInput = false;
+        }, 0);
+
         randomCell.classList.remove('sudoku-cell--error');
         randomCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();

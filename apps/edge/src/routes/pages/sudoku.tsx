@@ -82,20 +82,34 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
         @keyframes cellCompleteReadonly {
           0% {
-            background: linear-gradient(135deg, #c1e7d4 0%, #a8ddc0 100%);
-            box-shadow: inset 0 0 0 3px rgba(134, 239, 172, 0.6);
+            background: repeating-linear-gradient(
+              45deg,
+              #c1e7d4,
+              #c1e7d4 10px,
+              #a8ddc0 10px,
+              #a8ddc0 20px
+            );
           }
           30% {
-            background: linear-gradient(135deg, #b0e0c7 0%, #9dd9b8 100%);
-            box-shadow: inset 0 0 0 5px rgba(134, 239, 172, 0.8);
+            background: repeating-linear-gradient(
+              45deg,
+              #b0e0c7,
+              #b0e0c7 10px,
+              #9dd9b8 10px,
+              #9dd9b8 20px
+            );
           }
           60% {
-            background: linear-gradient(135deg, #cfe9db 0%, #bce3cd 100%);
-            box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.4);
+            background: repeating-linear-gradient(
+              45deg,
+              #cfe9db,
+              #cfe9db 10px,
+              #bce3cd 10px,
+              #bce3cd 20px
+            );
           }
           100% {
             background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-            box-shadow: none;
           }
         }
 
@@ -290,32 +304,34 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
         @keyframes cellComplete {
           0% {
-            background: linear-gradient(
-              135deg,
-              rgba(167, 243, 208, 0.8) 0%,
-              rgba(134, 239, 172, 0.7) 100%
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(167, 243, 208, 0.9),
+              rgba(167, 243, 208, 0.9) 10px,
+              rgba(134, 239, 172, 0.8) 10px,
+              rgba(134, 239, 172, 0.8) 20px
             );
-            box-shadow: inset 0 0 0 3px rgba(134, 239, 172, 0.8);
           }
           30% {
-            background: linear-gradient(
-              135deg,
-              rgba(167, 243, 208, 0.9) 0%,
-              rgba(134, 239, 172, 0.8) 100%
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(167, 243, 208, 1),
+              rgba(167, 243, 208, 1) 10px,
+              rgba(134, 239, 172, 0.9) 10px,
+              rgba(134, 239, 172, 0.9) 20px
             );
-            box-shadow: inset 0 0 0 5px rgba(134, 239, 172, 1);
           }
           60% {
-            background: linear-gradient(
-              135deg,
-              rgba(167, 243, 208, 0.6) 0%,
-              rgba(134, 239, 172, 0.5) 100%
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(167, 243, 208, 0.7),
+              rgba(167, 243, 208, 0.7) 10px,
+              rgba(134, 239, 172, 0.6) 10px,
+              rgba(134, 239, 172, 0.6) 20px
             );
-            box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.5);
           }
           100% {
             background: white;
-            box-shadow: none;
           }
         }
 

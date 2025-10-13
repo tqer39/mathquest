@@ -30,3 +30,6 @@ migrations_dir = "../../infra/migrations"
 
 [vars]
 DEFAULT_LANG = "ja"
+AUTH_BASE_URL = "https://mathquest.local"
+AUTH_EMAIL_FROM = "MathQuest <no-reply@mathquest.local>"
+RESEND_API_KEY = "test_resend_key"

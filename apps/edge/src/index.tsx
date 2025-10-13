@@ -9,6 +9,8 @@ import { quiz } from './routes/apis/quiz';
 import { Home } from './routes/pages/home';
 import { Start } from './routes/pages/start';
 import { Play } from './routes/pages/play';
+import { Login } from './routes/pages/login';
+import { BetterAuthService } from './application/auth/service';
 import { resolveCurrentUser } from './application/session/current-user';
 import { Document } from './views/layouts/document';
 
@@ -39,24 +41,24 @@ app.use(
 );
 
 // Public top
-app.get('/', (c) =>
-  c.render(<Home currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
+app.get('/', async (c) =>
+  c.render(<Home currentUser={await resolveCurrentUser(c.env, c.req.raw)} />, {
     title: 'MathQuest | じぶんのペースで楽しく算数練習',
     description:
       '学年別の単元から選んで算数を練習。匿名で始めて、記録を残したくなったら会員登録できる学習アプリです。',
   })
 );
 
-app.get('/start', (c) =>
-  c.render(<Start currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
+app.get('/start', async (c) =>
+  c.render(<Start currentUser={await resolveCurrentUser(c.env, c.req.raw)} />, {
     title: 'MathQuest | 設定ウィザード',
     description:
       '学年・単元とプレイ設定をまとめて選択し、集中モードで算数ミッションを始めましょう。',
   })
 );
 
-app.get('/play', (c) =>
-  c.render(<Play currentUser={resolveCurrentUser(c.env, c.req.raw)} />, {
+app.get('/play', async (c) =>
+  c.render(<Play currentUser={await resolveCurrentUser(c.env, c.req.raw)} />, {
     title: 'MathQuest | 練習セッション',
     description:
       '選択した学年の問題に挑戦します。カウントダウン後にテンキーで解答し、途中式を確認できます。',
@@ -81,21 +83,124 @@ app.get('/auth/guest-login', (c) => {
   return response;
 });
 
-app.get('/auth/logout', (c) => {
-  const response = c.redirect('/', 302);
-  response.headers.append(
-    'Set-Cookie',
-    'mq_guest=; Path=/; Max-Age=0; SameSite=Lax'
+app.get('/auth/login', (c) => {
+  const sent = c.req.query('sent');
+  const error = c.req.query('error');
+  const email = c.req.query('email') ?? undefined;
+  const redirect = c.req.query('redirect') ?? undefined;
+
+  const status: 'idle' | 'sent' | 'error' = error
+    ? 'error'
+    : sent === '1'
+      ? 'sent'
+      : 'idle';
+  const message = error
+    ? error
+    : sent === '1'
+      ? 'ログインリンクをメールで送信しました。届いたメールのリンクからログインを完了してください。'
+      : undefined;
+
+  return c.render(
+    <Login
+      status={status}
+      message={message}
+      email={email}
+      redirect={redirect}
+    />,
+    {
+      title: 'MathQuest | ログイン',
+      description:
+        'メールアドレス宛にログインリンクを送信して、学習記録をクラウドに同期できます。',
+    }
   );
-  response.headers.append(
-    'Set-Cookie',
-    'mq_guest_profile=; Path=/; Max-Age=0; SameSite=Lax'
-  );
-  return response;
 });
 
-// Dummy signin page for non-local redirect target
-app.get('/auth/signin', (c) => c.text('サインイン（ダミー）'));
+app.post('/auth/login/email', async (c) => {
+  const authService = new BetterAuthService(c.env);
+  const body = await c.req.parseBody();
+  const emailValue = body.email;
+  const email = typeof emailValue === 'string' ? emailValue : '';
+  const redirect = c.req.query('redirect');
+
+  try {
+    await authService.requestMagicLink({
+      email,
+      redirectTo: redirect ?? null,
+    });
+    const redirectUrl = new URL('/auth/login', c.req.url);
+    redirectUrl.searchParams.set('sent', '1');
+    redirectUrl.searchParams.set('email', email);
+    if (redirect) redirectUrl.searchParams.set('redirect', redirect);
+    return c.redirect(redirectUrl.toString(), 303);
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'ログインリンクの送信に失敗しました';
+    const redirectUrl = new URL('/auth/login', c.req.url);
+    redirectUrl.searchParams.set('error', message);
+    redirectUrl.searchParams.set('email', email);
+    if (redirect) redirectUrl.searchParams.set('redirect', redirect);
+    return c.redirect(redirectUrl.toString(), 303);
+  }
+});
+
+app.get('/auth/callback', async (c) => {
+  const token = c.req.query('token');
+  const email = c.req.query('email');
+  const redirect = c.req.query('redirect');
+
+  if (!token || !email) {
+    return c.redirect(
+      `/auth/login?error=${encodeURIComponent('ログインリンクが無効です')}`,
+      302
+    );
+  }
+
+  const authService = new BetterAuthService(c.env);
+  try {
+    const result = await authService.verifyMagicLink(token, email);
+    if (!result) {
+      return c.redirect(
+        `/auth/login?error=${encodeURIComponent(
+          'ログインリンクの有効期限が切れているか、すでに使用されています'
+        )}`,
+        302
+      );
+    }
+
+    const target = redirect ?? result.redirectTo ?? '/';
+    const response = c.redirect(target, 302);
+    response.headers.append(
+      'Set-Cookie',
+      authService.createSessionCookie(result.sessionToken)
+    );
+    for (const cookie of authService.clearGuestCookies()) {
+      response.headers.append('Set-Cookie', cookie);
+    }
+    return response;
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : 'ログイン処理中にエラーが発生しました';
+    return c.redirect(`/auth/login?error=${encodeURIComponent(message)}`, 302);
+  }
+});
+
+app.get('/auth/logout', async (c) => {
+  const authService = new BetterAuthService(c.env);
+  const sessionToken = authService.extractSessionFromRequest(c.req.raw);
+  if (sessionToken) {
+    await authService.invalidateSession(sessionToken);
+  }
+  const response = c.redirect('/', 302);
+  response.headers.append('Set-Cookie', authService.clearSessionCookie());
+  for (const cookie of authService.clearGuestCookies()) {
+    response.headers.append('Set-Cookie', cookie);
+  }
+  return response;
+});
 
 // BFF API
 app.route('/apis/quiz', quiz);

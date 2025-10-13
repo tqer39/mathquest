@@ -15,5 +15,5 @@ output "registration_state" {
 
 output "dev_subdomain_record_id" {
   description = "dev サブドメインの DNS レコード ID"
-  value       = cloudflare_record.dev.id
+  value       = cloudflare_dns_record.dev.id
 }

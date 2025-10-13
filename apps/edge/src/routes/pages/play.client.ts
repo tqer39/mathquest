@@ -480,7 +480,9 @@ const MODULE_SOURCE = `
     const expression = question.expression
       ? question.expression
       : String(question.a) + ' ' + question.op + ' ' + String(question.b);
-    questionEl.textContent = expression + ' = ?';
+    // 逆算問題の場合はexpressionにすでに = result が含まれているのでそのまま表示
+    const isInverseQuestion = question.isInverse || (expression && expression.includes('?') && expression.includes('='));
+    questionEl.textContent = isInverseQuestion ? expression : expression + ' = ?';
   };
 
   const renderWorkingSteps = (question, correctAnswer) => {
@@ -941,10 +943,15 @@ const MODULE_SOURCE = `
     renderWorkingSteps(null);
     renderProgress();
     try {
+      // テーマが選択されている場合はテーマの設定を使用、なければcalculationTypeのmodeを使用
+      const mode = state.theme?.mode || state.calculationType?.mode || state.grade.mode;
+      const max = state.theme?.max || state.grade.max;
+      const gradeId = state.theme?.id || state.grade.id;
+
       const { question } = await statefulFetch('/apis/quiz/questions/next', {
-        gradeId: state.grade.id,
-        mode: state.grade.mode,
-        max: state.grade.max,
+        gradeId,
+        mode,
+        max,
       });
       state.currentQuestion = question;
       state.answerBuffer = '';
@@ -978,6 +985,11 @@ const MODULE_SOURCE = `
       return;
     }
     try {
+      // テーマが選択されている場合はテーマの設定を使用、なければcalculationTypeのmodeを使用
+      const mode = state.theme?.mode || state.calculationType?.mode || state.grade.mode;
+      const max = state.theme?.max || state.grade.max;
+      const gradeId = state.theme?.id || state.grade.id;
+
       const { ok, correctAnswer } = await statefulFetch('/apis/quiz/answers/check', {
         question: {
           a: state.currentQuestion.a,
@@ -986,11 +998,14 @@ const MODULE_SOURCE = `
           extras: Array.isArray(state.currentQuestion.extras)
             ? state.currentQuestion.extras
             : [],
+          isInverse: state.currentQuestion.isInverse,
+          inverseSide: state.currentQuestion.inverseSide,
+          answer: state.currentQuestion.answer,
         },
         value,
-        gradeId: state.grade.id,
-        mode: state.grade.mode,
-        max: state.grade.max,
+        gradeId,
+        mode,
+        max,
       });
 
       state.progress.totalAnswered += 1;

@@ -140,12 +140,21 @@ export const generateQuizQuestion = (input: GenerateQuizInput = {}) => {
 export type VerifyAnswerInput = {
   question: Pick<Question, 'a' | 'b' | 'op'> & {
     extras?: readonly ExtraStep[];
+    isInverse?: boolean;
+    inverseSide?: 'left' | 'right';
+    answer?: number;
   };
   value: number;
 };
 
 export const verifyAnswer = ({ question, value }: VerifyAnswerInput) => {
-  const correctAnswer = evaluateQuestion(question);
+  // 逆算問題の場合は、questionに含まれるanswerを使用
+  let correctAnswer: number;
+  if (question.isInverse && typeof question.answer === 'number') {
+    correctAnswer = question.answer;
+  } else {
+    correctAnswer = evaluateQuestion(question);
+  }
   const ok = checkAnswer({ ...question, answer: correctAnswer }, value);
   return { ok, correctAnswer };
 };

@@ -32,6 +32,9 @@ quiz.post('/answers/check', async (c) => {
       b: number;
       op: '+' | '-' | '×';
       extras?: ExtraStep[];
+      isInverse?: boolean;
+      inverseSide?: 'left' | 'right';
+      answer?: number;
     };
     a?: number;
     b?: number;
@@ -75,6 +78,9 @@ quiz.post('/answers/check', async (c) => {
     b: baseQuestion.b,
     op: baseQuestion.op,
     extras,
+    isInverse: baseQuestion.isInverse,
+    inverseSide: baseQuestion.inverseSide,
+    answer: baseQuestion.answer,
   } as const;
 
   const { ok, correctAnswer } = verifyAnswer({

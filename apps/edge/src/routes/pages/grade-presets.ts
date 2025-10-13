@@ -51,6 +51,12 @@ export const calculationTypes = [
     mode: 'add-sub-mix',
   },
   {
+    id: 'calc-add-inverse',
+    label: 'ぎゃくさん（たし算）',
+    description: '1 + ? = 10のような逆算練習',
+    mode: 'add-inverse',
+  },
+  {
     id: 'calc-mul',
     label: 'かけ算',
     description: 'かけ算の練習',
@@ -72,13 +78,20 @@ export const calculationTypes = [
 
 // 学年ごとの利用可能な計算種類
 export const gradeCalculationTypes = {
-  'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
-  'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
-  'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul'],
+  'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
+  'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
+  'grade-3': [
+    'calc-add',
+    'calc-sub',
+    'calc-add-sub-mix',
+    'calc-add-inverse',
+    'calc-mul',
+  ],
   'grade-4': [
     'calc-add',
     'calc-sub',
     'calc-add-sub-mix',
+    'calc-add-inverse',
     'calc-mul',
     'calc-div',
   ],
@@ -86,6 +99,7 @@ export const gradeCalculationTypes = {
     'calc-add',
     'calc-sub',
     'calc-add-sub-mix',
+    'calc-add-inverse',
     'calc-mul',
     'calc-div',
     'calc-mix',
@@ -94,6 +108,7 @@ export const gradeCalculationTypes = {
     'calc-add',
     'calc-sub',
     'calc-add-sub-mix',
+    'calc-add-inverse',
     'calc-mul',
     'calc-div',
     'calc-mix',
@@ -283,6 +298,24 @@ export const practiceThemes = [
     minGrade: 'grade-4',
     isDecimal: true,
   },
+  // 小1向け - 逆算（10まで）
+  {
+    id: 'practice-add-inverse-10',
+    label: 'ぎゃくさん（10まで）',
+    description: '1 + ? = 10のような逆算',
+    mode: 'add-inverse',
+    max: 10,
+    minGrade: 'grade-1',
+  },
+  // 小1向け - 逆算（20まで）
+  {
+    id: 'practice-add-inverse-20',
+    label: 'ぎゃくさん（20まで）',
+    description: '答えが20以下の逆算',
+    mode: 'add-inverse',
+    max: 20,
+    minGrade: 'grade-1',
+  },
   // 小1向け - たし算・ひき算ミックス（10まで）
   {
     id: 'practice-add-sub-mix-10',
@@ -300,6 +333,24 @@ export const practiceThemes = [
     mode: 'add-sub-mix',
     max: 20,
     minGrade: 'grade-1',
+  },
+  // 小2向け - 逆算（50まで）
+  {
+    id: 'practice-add-inverse-50',
+    label: 'ぎゃくさん（50まで）',
+    description: '答えが50以下の逆算',
+    mode: 'add-inverse',
+    max: 50,
+    minGrade: 'grade-2',
+  },
+  // 小2向け - 逆算（100まで）
+  {
+    id: 'practice-add-inverse-100',
+    label: 'ぎゃくさん（100まで）',
+    description: '答えが100以下の逆算',
+    mode: 'add-inverse',
+    max: 100,
+    minGrade: 'grade-2',
   },
   // 小2向け - たし算・ひき算ミックス（50まで）
   {
@@ -423,12 +474,60 @@ export const createPracticeSession = (
 
   // 学年と計算種類の組み合わせから基本設定を生成
   const maxValues = {
-    'grade-1': { add: 10, sub: 10, mul: 10, div: 10, mix: 10 },
-    'grade-2': { add: 100, sub: 100, mul: 50, div: 50, mix: 100 },
-    'grade-3': { add: 200, sub: 200, mul: 81, div: 81, mix: 200 },
-    'grade-4': { add: 500, sub: 500, mul: 144, div: 144, mix: 500 },
-    'grade-5': { add: 1000, sub: 1000, mul: 200, div: 200, mix: 1000 },
-    'grade-6': { add: 2000, sub: 2000, mul: 300, div: 300, mix: 2000 },
+    'grade-1': {
+      add: 10,
+      sub: 10,
+      mul: 10,
+      div: 10,
+      mix: 10,
+      'add-inverse': 10,
+      'add-sub-mix': 10,
+    },
+    'grade-2': {
+      add: 100,
+      sub: 100,
+      mul: 50,
+      div: 50,
+      mix: 100,
+      'add-inverse': 100,
+      'add-sub-mix': 100,
+    },
+    'grade-3': {
+      add: 200,
+      sub: 200,
+      mul: 81,
+      div: 81,
+      mix: 200,
+      'add-inverse': 200,
+      'add-sub-mix': 200,
+    },
+    'grade-4': {
+      add: 500,
+      sub: 500,
+      mul: 144,
+      div: 144,
+      mix: 500,
+      'add-inverse': 500,
+      'add-sub-mix': 500,
+    },
+    'grade-5': {
+      add: 1000,
+      sub: 1000,
+      mul: 200,
+      div: 200,
+      mix: 1000,
+      'add-inverse': 1000,
+      'add-sub-mix': 1000,
+    },
+    'grade-6': {
+      add: 2000,
+      sub: 2000,
+      mul: 300,
+      div: 300,
+      mix: 2000,
+      'add-inverse': 2000,
+      'add-sub-mix': 2000,
+    },
   };
 
   const max =

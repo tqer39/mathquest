@@ -149,6 +149,11 @@ const MODULE_SOURCE = `
         state.selectedActivity = activity;
         selectButton(activityBtns, btn);
 
+        // 後続ステップの選択状態をリセット
+        state.selectedCalculationType = null;
+        state.selectedTheme = null;
+        state.selectedGame = null;
+
         // すべての後続ステップを非表示
         hideAllStepsAfter(2);
 
@@ -185,16 +190,16 @@ const MODULE_SOURCE = `
       if (!calcTypeGrid) return;
 
       const gradeCalculationTypes = {
-        'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
-        'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
-        'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul'],
-        'grade-4': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div'],
-        'grade-5': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
-        'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
+        'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
+        'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
+        'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul'],
+        'grade-4': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul', 'calc-div'],
+        'grade-5': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul', 'calc-div', 'calc-mix'],
+        'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul', 'calc-div', 'calc-mix'],
       };
 
       // 学年が選択されている場合はその学年の計算種類、未選択の場合は小1の計算種類
-      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix'];
+      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'];
       const availableCalcTypes = state.selectedGrade
         ? gradeCalculationTypes[state.selectedGrade] || defaultCalcTypes
         : defaultCalcTypes;

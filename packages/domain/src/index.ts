@@ -1,4 +1,10 @@
-export type Mode = 'add' | 'sub' | 'mul' | 'add-sub-mix' | 'mix';
+export type Mode =
+  | 'add'
+  | 'sub'
+  | 'mul'
+  | 'add-sub-mix'
+  | 'mix'
+  | 'add-inverse';
 
 export type QuizConfig = {
   mode: Mode;
@@ -16,6 +22,8 @@ export type Question = {
   op: '+' | '-' | '×';
   extras?: readonly ExtraStep[];
   answer: number;
+  isInverse?: boolean;
+  inverseSide?: 'left' | 'right';
 };
 
 const pick = <T>(arr: readonly T[]): T =>
@@ -41,6 +49,11 @@ export const generateQuestion = (config: QuizConfig): Question => {
   // add-sub-mix モードの場合は、複数ステップの問題を生成
   if (config.mode === 'add-sub-mix') {
     return generateGradeOneQuestion(config.max);
+  }
+
+  // add-inverse モードの場合は、逆算問題を生成
+  if (config.mode === 'add-inverse') {
+    return generateInverseQuestion(config.max);
   }
 
   const op = pickOp(config.mode);
@@ -194,7 +207,14 @@ export const generateGradeOneQuestion = (max: number): Question => {
   return question;
 };
 
-export const checkAnswer = (q: Question, input: number) => input === q.answer;
+export const checkAnswer = (q: Question, input: number) => {
+  // 逆算問題の場合は、answerフィールドが正解
+  if (q.isInverse) {
+    return input === q.answer;
+  }
+  // 通常の問題の場合も、answerフィールドが正解
+  return input === q.answer;
+};
 
 export const evaluateQuestion = (
   input: Pick<Question, 'a' | 'b' | 'op'> & { extras?: readonly ExtraStep[] }
@@ -216,8 +236,33 @@ export const evaluateQuestion = (
 };
 
 export const formatQuestion = (
-  input: Pick<Question, 'a' | 'b' | 'op'> & { extras?: readonly ExtraStep[] }
+  input: Pick<Question, 'a' | 'b' | 'op' | 'answer'> & {
+    extras?: readonly ExtraStep[];
+    isInverse?: boolean;
+    inverseSide?: 'left' | 'right';
+  }
 ) => {
+  if (input.isInverse && input.inverseSide) {
+    const parts = [];
+    if (input.inverseSide === 'left') {
+      parts.push('?', input.op === '×' ? '×' : input.op, `${input.b}`);
+    } else {
+      parts.push(`${input.a}`, input.op === '×' ? '×' : input.op, '?');
+    }
+    if (input.extras && input.extras.length > 0) {
+      input.extras.forEach((step) => {
+        parts.push(step.op, String(step.value));
+      });
+    }
+    // 逆算問題では結果も表示
+    const result =
+      input.inverseSide === 'left'
+        ? input.answer + input.b
+        : input.a + input.answer;
+    parts.push('=', `${result}`);
+    return parts.join(' ');
+  }
+
   const parts = [`${input.a}`, input.op === '×' ? '×' : input.op, `${input.b}`];
   if (input.extras && input.extras.length > 0) {
     input.extras.forEach((step) => {
@@ -225,4 +270,37 @@ export const formatQuestion = (
     });
   }
   return parts.join(' ');
+};
+
+export const generateInverseQuestion = (max: number): Question => {
+  // たし算の逆算問題を生成
+  // 例: ? + 5 = 10 → 答えは 5
+  const result = randIntInclusive(1, max);
+  const inverseSide = pick(['left', 'right'] as const);
+
+  if (inverseSide === 'left') {
+    // ? + b = result → 答えは result - b
+    const b = randIntInclusive(0, result);
+    const answer = result - b;
+    return {
+      a: answer,
+      b: b,
+      op: '+',
+      answer: answer,
+      isInverse: true,
+      inverseSide: 'left',
+    };
+  } else {
+    // a + ? = result → 答えは result - a
+    const a = randIntInclusive(0, result);
+    const answer = result - a;
+    return {
+      a: a,
+      b: answer,
+      op: '+',
+      answer: answer,
+      isInverse: true,
+      inverseSide: 'right',
+    };
+  }
 };

@@ -33,7 +33,6 @@ const MODULE_SOURCE = `
 
     // 状態管理
     const state = {
-      filterType: null, // 'grade' or 'activity'
       selectedGrade: null,
       selectedActivity: null, // 'math' or 'game'
       selectedCalculationType: null,
@@ -42,14 +41,12 @@ const MODULE_SOURCE = `
     };
 
     // DOM要素
-    const step1 = document.getElementById('step-1');
-    const step2Grade = document.getElementById('step-2-grade');
+    const step1Grade = document.getElementById('step-1-grade');
     const step2Activity = document.getElementById('step-2-activity');
     const step3CalcType = document.getElementById('step-3-calc-type');
     const step4Theme = document.getElementById('step-4-theme');
     const step4Game = document.getElementById('step-4-game');
 
-    const filterTypeBtns = document.querySelectorAll('.filter-type-btn');
     const gradeBtns = document.querySelectorAll('.grade-btn');
     const activityBtns = document.querySelectorAll('.activity-btn');
     const calcTypeGrid = document.getElementById('calculation-type-grid');
@@ -80,7 +77,7 @@ const MODULE_SOURCE = `
 
     // ステップ番号を更新
     function updateStepNumbers() {
-      const allSteps = [step1, step2Grade, step2Activity, step3CalcType, step4Theme, step4Game];
+      const allSteps = [step1Grade, step2Activity, step3CalcType, step4Theme, step4Game];
       let currentStep = 0;
 
       allSteps.forEach(stepElement => {
@@ -96,7 +93,6 @@ const MODULE_SOURCE = `
 
     function hideAllStepsAfter(stepNumber) {
       if (stepNumber < 2) {
-        hideStep(step2Grade);
         hideStep(step2Activity);
       }
       if (stepNumber < 3) {
@@ -119,51 +115,32 @@ const MODULE_SOURCE = `
       }
     }
 
-    // STEP 1: フィルタータイプ選択
-    filterTypeBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const filterType = btn.dataset.filterType;
-        state.filterType = filterType;
-        selectButton(filterTypeBtns, btn);
-
-        // STEP 2を表示
-        hideAllStepsAfter(1);
-        if (filterType === 'grade') {
-          showStep(step2Grade);
-        } else if (filterType === 'activity') {
-          showStep(step2Activity);
-        }
-
-        updateStartButtonState();
-      });
-    });
-
-    // STEP 2A: 学年選択
+    // STEP 1: 学年選択（任意・トグル可能）
     gradeBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.disabled) return;
 
         const gradeId = btn.dataset.gradeId;
-        state.selectedGrade = gradeId;
-        selectButton(gradeBtns, btn);
 
-        // すべての後続ステップを非表示
-        hideAllStepsAfter(2);
+        // トグル機能: 選択中のボタンを押すと未選択に
+        if (state.selectedGrade === gradeId) {
+          state.selectedGrade = null;
+          btn.classList.remove('selection-card--selected');
+        } else {
+          state.selectedGrade = gradeId;
+          selectButton(gradeBtns, btn);
+        }
 
-        if (state.filterType === 'grade') {
-          // 学年でえらぶ → 次は活動選択
-          showStep(step2Activity);
-        } else if (state.filterType === 'activity') {
-          // なにをするかえらぶ → 計算モード → 次は計算種類選択
-          showStep(step3CalcType);
-          renderCalculationTypes();
+        // テーマフィルタリングを更新（計算種類が選択されている場合）
+        if (state.selectedCalculationType) {
+          filterThemesByCalculationType(state.selectedCalculationType.mode);
         }
 
         updateStartButtonState();
       });
     });
 
-    // STEP 2B: 活動選択
+    // STEP 2: 活動選択
     activityBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const activity = btn.dataset.activity;
@@ -189,31 +166,21 @@ const MODULE_SOURCE = `
           }
         }
 
-        if (state.filterType === 'activity') {
-          // なにをするかえらぶ → 計算なら計算種類選択、ゲームならゲーム選択
-          if (activity === 'math') {
-            showStep(step3CalcType);
-            renderCalculationTypesWithoutGrade();
-          } else if (activity === 'game') {
-            showStep(step4Game);
-          }
-        } else if (state.filterType === 'grade') {
-          // 学年でえらぶ → 次は計算種類 or ゲーム選択
-          if (activity === 'math') {
-            showStep(step3CalcType);
-            renderCalculationTypes();
-          } else if (activity === 'game') {
-            showStep(step4Game);
-          }
+        // STEP 3を表示
+        if (activity === 'math') {
+          showStep(step3CalcType);
+          renderCalculationTypes();
+        } else if (activity === 'game') {
+          showStep(step4Game);
         }
 
         updateStartButtonState();
       });
     });
 
-    // 計算の種類をレンダリング（学年制約あり）
+    // 計算の種類をレンダリング
     function renderCalculationTypes() {
-      if (!calcTypeGrid || !state.selectedGrade) return;
+      if (!calcTypeGrid) return;
 
       const gradeCalculationTypes = {
         'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix'],
@@ -224,22 +191,14 @@ const MODULE_SOURCE = `
         'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-mul', 'calc-div', 'calc-mix'],
       };
 
-      const availableCalcTypes = gradeCalculationTypes[state.selectedGrade] || [];
+      // 学年が選択されている場合はその学年の計算種類、未選択の場合は小1の計算種類
+      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix'];
+      const availableCalcTypes = state.selectedGrade
+        ? gradeCalculationTypes[state.selectedGrade] || defaultCalcTypes
+        : defaultCalcTypes;
+
       const availableTypes = calculationTypes.filter(calcType =>
         availableCalcTypes.includes(calcType.id)
-      );
-
-      renderCalculationTypeButtons(availableTypes);
-    }
-
-    // 計算の種類をレンダリング（学年制約なし）
-    function renderCalculationTypesWithoutGrade() {
-      if (!calcTypeGrid) return;
-
-      // 学年が選択されていない場合、小1の計算種類のみ表示
-      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix'];
-      const availableTypes = calculationTypes.filter(calcType =>
-        defaultCalcTypes.includes(calcType.id)
       );
 
       renderCalculationTypeButtons(availableTypes);
@@ -269,14 +228,8 @@ const MODULE_SOURCE = `
 
           hideAllStepsAfter(3);
           showStep(step4Theme);
-          if (state.selectedGrade) {
-            filterThemesByCalculationType(calcType.mode);
-          } else {
-            // 学年が選択されていない場合は全テーマを表示
-            themeBtns.forEach(btn => {
-              btn.style.display = '';
-            });
-          }
+          // 学年選択の有無に関わらず、計算種類に応じてテーマをフィルタリング
+          filterThemesByCalculationType(calcType.mode);
 
           updateStartButtonState();
         });
@@ -296,7 +249,8 @@ const MODULE_SOURCE = `
         const themeMinGradeOrder = gradeLevels.findIndex(g => g.id === themeMinGrade);
 
         const matchesCalculationType = !calculationMode || themeMode === calculationMode;
-        const matchesGradeRequirement = currentGradeOrder >= themeMinGradeOrder;
+        // 学年が未選択の場合は学年制限をチェックしない
+        const matchesGradeRequirement = currentGradeOrder === -1 || currentGradeOrder >= themeMinGradeOrder;
 
         if (matchesCalculationType && matchesGradeRequirement) {
           btn.style.display = '';
@@ -377,16 +331,14 @@ const MODULE_SOURCE = `
     if (clearButton) {
       clearButton.addEventListener('click', () => {
         // 状態をリセット
-        state.filterType = null;
         state.selectedGrade = null;
         state.selectedActivity = null;
         state.selectedCalculationType = null;
         state.selectedTheme = null;
         state.selectedGame = null;
 
-        // 全てのステップを非表示
-        hideAllStepsAfter(0);
-        showStep(step1);
+        // 全てのステップを非表示（STEP 1とSTEP 2は常に表示）
+        hideAllStepsAfter(2);
 
         // 途中式トグルと問題数を表示に戻す（デフォルト状態）
         if (stepsToggle) {
@@ -397,7 +349,6 @@ const MODULE_SOURCE = `
         }
 
         // 全ての選択を解除
-        filterTypeBtns.forEach(btn => btn.classList.remove('selection-card--selected'));
         gradeBtns.forEach(btn => btn.classList.remove('selection-card--selected'));
         activityBtns.forEach(btn => btn.classList.remove('selection-card--selected'));
         themeBtns.forEach(btn => btn.classList.remove('selection-card--selected'));
@@ -490,8 +441,9 @@ const MODULE_SOURCE = `
       });
     }
 
-    // 初期化
-    showStep(step1);
+    // 初期化: STEP 1とSTEP 2は常に表示
+    if (step1Grade) step1Grade.classList.remove('step-hidden');
+    if (step2Activity) step2Activity.classList.remove('step-hidden');
     updateStartButtonState();
 
     // ローカルストレージから設定を復元

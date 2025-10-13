@@ -60,53 +60,18 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
 
     <div class="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <section id="main-steps" class="space-y-8">
-        {/* STEP 1: 学年でえらぶ or なにをするかえらぶ */}
-        <div id="step-1" class="space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
-                STEP 1
-              </p>
-              <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
-                えらびかたを決めよう
-              </h2>
-            </div>
-          </div>
-          <div class="grid gap-4 sm:grid-cols-2">
-            <button
-              type="button"
-              data-filter-type="grade"
-              class="filter-type-btn rounded-3xl border-2 border-[var(--mq-outline)] bg-white p-6 text-left shadow-md transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
-            >
-              <p class="text-lg font-bold text-[var(--mq-primary-strong)]">
-                📚 学年でえらぶ
-              </p>
-              <p class="mt-2 text-sm text-[var(--mq-ink)]">
-                学年を選んでから内容を決める
-              </p>
-            </button>
-            <button
-              type="button"
-              data-filter-type="activity"
-              class="filter-type-btn rounded-3xl border-2 border-[var(--mq-outline)] bg-white p-6 text-left shadow-md transition hover:-translate-y-1 hover:border-[var(--mq-primary)] hover:shadow-lg"
-            >
-              <p class="text-lg font-bold text-[var(--mq-primary-strong)]">
-                🎯 なにをするかえらぶ
-              </p>
-              <p class="mt-2 text-sm text-[var(--mq-ink)]">
-                計算かゲームを選んでから学年を決める
-              </p>
-            </button>
-          </div>
-        </div>
-
-        {/* 学年選択 */}
-        <div id="step-2-grade" class="step-hidden space-y-4">
+        {/* STEP 1: 学年をえらぼう（任意） */}
+        <div id="step-1-grade" class="space-y-4">
           <div>
-            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
+              STEP 1
+            </p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
-              学年をえらぼう
+              学年をえらぼう（任意）
             </h2>
+            <p class="mt-1 text-sm text-[#5e718a]">
+              学年を選ぶとテーマが絞られます。選択しなくても進めます。
+            </p>
           </div>
           <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
             {gradeLevels.map((preset, index) => {
@@ -146,10 +111,12 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
-        {/* 活動選択 */}
-        <div id="step-2-activity" class="step-hidden space-y-4">
+        {/* STEP 2: 活動選択 */}
+        <div id="step-2-activity" class="space-y-4">
           <div>
-            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
+            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]">
+              STEP 2
+            </p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
               なにをするか えらぼう
             </h2>

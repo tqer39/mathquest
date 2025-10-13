@@ -85,7 +85,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               STEP 1
             </p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
-              学年をえらぼう（任意）
+              学年をえらぼう（えらばなくてもOK）
             </h2>
             <p class="mt-1 text-sm text-[#5e718a]">
               学年を選ぶとテーマが絞られます。選択しなくても進めます。
@@ -186,7 +186,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           <div>
             <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
-              テーマをえらぼう（任意）
+              テーマをえらぼう（えらばなくてもOK）
             </h2>
             <p class="text-sm text-[#5e718a]">
               集中して取り組みたいテーマがあれば選択してください

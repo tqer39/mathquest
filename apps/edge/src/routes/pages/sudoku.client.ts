@@ -223,53 +223,98 @@ const MODULE_SOURCE = `
 
     // 重複チェック関数
     function checkDuplicates(row, col, value) {
-      if (!effectsEnabled || !value) return;
+      if (!effectsEnabled) return;
 
       const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
       const config = GRID_CONFIGS[currentGridSize];
-      const duplicateCells = [];
 
-      // 行の重複チェック（readOnlyも含める）
-      const rowCells = cells.filter(cell =>
-        Number(cell.dataset.row) === row &&
-        cell.value === value
-      );
-      if (rowCells.length > 1) {
-        duplicateCells.push(...rowCells);
-      }
-
-      // 列の重複チェック（readOnlyも含める）
-      const colCells = cells.filter(cell =>
-        Number(cell.dataset.col) === col &&
-        cell.value === value
-      );
-      if (colCells.length > 1) {
-        duplicateCells.push(...colCells);
-      }
-
-      // ブロックの重複チェック（readOnlyも含める）
+      // 影響を受ける可能性のあるすべてのセルのエラー状態をクリア
       const startRow = Math.floor(row / config.boxRows) * config.boxRows;
       const startCol = Math.floor(col / config.boxCols) * config.boxCols;
-      const blockCells = [];
-      for (let i = 0; i < config.boxRows; i++) {
-        for (let j = 0; j < config.boxCols; j++) {
-          const blockRow = startRow + i;
-          const blockCol = startCol + j;
-          const cell = cells.find(
-            c => Number(c.dataset.row) === blockRow &&
-                 Number(c.dataset.col) === blockCol &&
-                 c.value === value
-          );
-          if (cell) blockCells.push(cell);
+
+      cells.forEach(cell => {
+        const cellRow = Number(cell.dataset.row);
+        const cellCol = Number(cell.dataset.col);
+        const cellBlockRow = Math.floor(cellRow / config.boxRows) * config.boxRows;
+        const cellBlockCol = Math.floor(cellCol / config.boxCols) * config.boxCols;
+
+        // 同じ行、列、ブロックのセルのエラーをクリア
+        if (cellRow === row || cellCol === col || (cellBlockRow === startRow && cellBlockCol === startCol)) {
+          cell.classList.remove('sudoku-cell--duplicate-error');
         }
-      }
-      if (blockCells.length > 1) {
-        duplicateCells.push(...blockCells);
+      });
+
+      // すべてのセルの重複を再チェック
+      const duplicateCells = new Set();
+
+      // 各行をチェック
+      for (let r = 0; r < currentGridSize; r++) {
+        const rowCells = cells.filter(c => Number(c.dataset.row) === r && c.value !== '');
+        const values = new Map();
+        rowCells.forEach(cell => {
+          const val = cell.value;
+          if (!values.has(val)) {
+            values.set(val, []);
+          }
+          values.get(val).push(cell);
+        });
+        values.forEach(cellsWithValue => {
+          if (cellsWithValue.length > 1) {
+            cellsWithValue.forEach(c => duplicateCells.add(c));
+          }
+        });
       }
 
-      // 重複セルにエラーエフェクトを適用（削除しない）
-      const uniqueDuplicates = [...new Set(duplicateCells)];
-      uniqueDuplicates.forEach(cell => {
+      // 各列をチェック
+      for (let c = 0; c < currentGridSize; c++) {
+        const colCells = cells.filter(cell => Number(cell.dataset.col) === c && cell.value !== '');
+        const values = new Map();
+        colCells.forEach(cell => {
+          const val = cell.value;
+          if (!values.has(val)) {
+            values.set(val, []);
+          }
+          values.get(val).push(cell);
+        });
+        values.forEach(cellsWithValue => {
+          if (cellsWithValue.length > 1) {
+            cellsWithValue.forEach(c => duplicateCells.add(c));
+          }
+        });
+      }
+
+      // 各ブロックをチェック
+      for (let br = 0; br < currentGridSize; br += config.boxRows) {
+        for (let bc = 0; bc < currentGridSize; bc += config.boxCols) {
+          const blockCells = [];
+          for (let i = 0; i < config.boxRows; i++) {
+            for (let j = 0; j < config.boxCols; j++) {
+              const cell = cells.find(
+                c => Number(c.dataset.row) === br + i &&
+                     Number(c.dataset.col) === bc + j &&
+                     c.value !== ''
+              );
+              if (cell) blockCells.push(cell);
+            }
+          }
+          const values = new Map();
+          blockCells.forEach(cell => {
+            const val = cell.value;
+            if (!values.has(val)) {
+              values.set(val, []);
+            }
+            values.get(val).push(cell);
+          });
+          values.forEach(cellsWithValue => {
+            if (cellsWithValue.length > 1) {
+              cellsWithValue.forEach(c => duplicateCells.add(c));
+            }
+          });
+        }
+      }
+
+      // 重複があるセルにエラー表示を適用
+      duplicateCells.forEach(cell => {
         cell.classList.add('sudoku-cell--duplicate-error');
       });
     }

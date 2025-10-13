@@ -66,7 +66,14 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         .sudoku-cell[readonly].sudoku-cell--duplicate-error {
-          animation: duplicateErrorReadonly 0.8s ease-out;
+          background: repeating-linear-gradient(
+            45deg,
+            #f0cdd1,
+            #f0cdd1 10px,
+            #e8bcc1 10px,
+            #e8bcc1 20px
+          ) !important;
+          border-color: rgba(239, 68, 68, 0.6) !important;
         }
 
         @keyframes cellCompleteReadonly {
@@ -85,20 +92,6 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
           100% {
             background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
             box-shadow: none;
-          }
-        }
-
-        @keyframes duplicateErrorReadonly {
-          0%,
-          100% {
-            background: repeating-linear-gradient(
-              45deg,
-              #f0cdd1,
-              #f0cdd1 10px,
-              #e8bcc1 10px,
-              #e8bcc1 20px
-            );
-            border-color: rgba(239, 68, 68, 0.6);
           }
         }
 
@@ -324,21 +317,14 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         .sudoku-cell--duplicate-error {
-          animation: duplicateError 0.8s ease-out;
-        }
-
-        @keyframes duplicateError {
-          0%,
-          100% {
-            background: repeating-linear-gradient(
-              45deg,
-              rgba(254, 202, 202, 0.7),
-              rgba(254, 202, 202, 0.7) 10px,
-              rgba(252, 165, 165, 0.6) 10px,
-              rgba(252, 165, 165, 0.6) 20px
-            );
-            border-color: rgba(239, 68, 68, 0.7);
-          }
+          background: repeating-linear-gradient(
+            45deg,
+            rgba(254, 202, 202, 0.7),
+            rgba(254, 202, 202, 0.7) 10px,
+            rgba(252, 165, 165, 0.6) 10px,
+            rgba(252, 165, 165, 0.6) 20px
+          ) !important;
+          border-color: rgba(239, 68, 68, 0.7) !important;
         }
       </style>
     `}

@@ -46,97 +46,6 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
           cursor: default;
           opacity: 0.65;
         }
-
-        #countdown-overlay {
-          background: radial-gradient(
-              circle at 20% 20%,
-              rgba(148, 163, 184, 0.25),
-              transparent 60%
-            ),
-            linear-gradient(
-              135deg,
-              rgba(15, 23, 42, 0.94),
-              rgba(10, 14, 26, 0.9)
-            );
-          backdrop-filter: blur(18px);
-          color: #f8fafc;
-        }
-
-        #countdown-overlay .countdown-card {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          width: clamp(12rem, 32vw, 16rem);
-          aspect-ratio: 1;
-          border-radius: 9999px;
-          background: radial-gradient(
-              circle at 50% 25%,
-              rgba(241, 245, 249, 0.2),
-              rgba(148, 163, 184, 0.05)
-            ),
-            rgba(15, 23, 42, 0.55);
-          border: 1px solid rgba(148, 163, 184, 0.35);
-          box-shadow:
-            0 22px 55px rgba(15, 23, 42, 0.45),
-            inset 0 0 25px rgba(148, 163, 184, 0.12);
-          overflow: hidden;
-        }
-
-        #countdown-overlay .countdown-card::after {
-          content: '';
-          position: absolute;
-          inset: 12%;
-          border-radius: inherit;
-          border: 1px solid rgba(148, 163, 184, 0.4);
-          filter: blur(0.4px);
-          opacity: 0.8;
-        }
-
-        #countdown-overlay .countdown-ring {
-          position: absolute;
-          inset: 4%;
-          border-radius: inherit;
-          border: 2px solid rgba(59, 130, 246, 0.25);
-          animation: countdown-ring-pulse 1.8s ease-in-out infinite;
-        }
-
-        @keyframes countdown-ring-pulse {
-          0% {
-            transform: scale(0.92);
-            opacity: 0.75;
-          }
-          60% {
-            transform: scale(1.05);
-            opacity: 0.2;
-          }
-          100% {
-            transform: scale(1.08);
-            opacity: 0;
-          }
-        }
-
-        #countdown-overlay .countdown-label {
-          font-size: 0.75rem;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-          color: rgba(203, 213, 225, 0.85);
-        }
-
-        #countdown-overlay .countdown-number {
-          font-size: clamp(3.5rem, 12vw, 5rem);
-          font-weight: 800;
-          letter-spacing: 0.18em;
-          line-height: 1;
-          text-shadow: 0 12px 30px rgba(15, 23, 42, 0.65);
-        }
-
-        #countdown-overlay .countdown-caption {
-          margin-top: 0.65rem;
-          font-size: 0.85rem;
-          color: rgba(226, 232, 240, 0.8);
-        }
       </style>
     `}
     <nav class="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--mq-outline)] bg-[var(--mq-surface)] px-4 py-4 shadow-sm sm:px-8 lg:px-16 xl:px-24">
@@ -158,17 +67,16 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
       </button>
     </nav>
 
+    {/* カウントダウンオーバーレイ */}
     <div
       id="countdown-overlay"
-      class="pointer-events-none fixed inset-0 z-20 hidden flex items-center justify-center"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[var(--mq-surface-strong)] bg-opacity-95"
     >
-      <div class="countdown-card">
-        <div class="countdown-ring" aria-hidden="true"></div>
-        <span class="countdown-label">まもなく開始</span>
-        <span id="countdown-number" class="countdown-number">
-          3
-        </span>
-        <span class="countdown-caption">0になると問題が表示されます</span>
+      <div
+        id="countdown-number"
+        class="text-9xl font-extrabold text-[var(--mq-primary-strong)] animate-pulse"
+      >
+        3
       </div>
     </div>
 

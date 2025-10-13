@@ -16,9 +16,11 @@ const MODULE_SOURCE = `
       9: { size: 9, boxRows: 3, boxCols: 3 }
     };
 
-    const EFFECTS_STORAGE_KEY = 'mathquest:sudoku-effects-enabled';
+    const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
+    const COUNTDOWN_STORAGE_KEY = 'mathquest:countdown-enabled';
     let currentGridSize = 9;
-    let effectsEnabled = true;
+    let soundEnabled = true;
+    let countdownEnabled = true;
 
     // 数独ソルバー - バックトラッキングアルゴリズム
     function solveSudoku(grid, size) {
@@ -160,17 +162,52 @@ const MODULE_SOURCE = `
     const sizeLabelEl = document.getElementById('size-label');
     const presetSelector = document.getElementById('preset-selector');
     const gameContainer = document.getElementById('game-container');
+    const controlsPanel = document.getElementById('controls-panel');
+    const mainSection = document.querySelector('section');
     const presetButtons = Array.from(document.querySelectorAll('.preset-button'));
+    const countdownOverlay = document.getElementById('countdown-overlay');
+    const countdownNumber = document.getElementById('countdown-number');
 
     let currentPuzzle = null;
     let currentSolution = null;
     let selectedCell = null;
     let currentSize = 9;
     let currentDifficulty = 'easy';
+    let isProgrammaticInput = false; // プログラムによる入力かどうかのフラグ
+
+    // 効果音再生関数
+    const playSound = (variant) => {
+      if (!soundEnabled) return;
+      const sources = {
+        keypad: 'data:audio/mp3;base64,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',
+        success: 'data:audio/mp3;base64,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',
+        error: 'data:audio/mp3;base64,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'
+      };
+      const src = sources[variant] || sources.keypad;
+      try {
+        const audio = new Audio(src);
+        audio.volume = variant === 'success' ? 0.85 : 0.6;
+        audio.play().catch(() => audio.remove());
+        audio.addEventListener('ended', () => audio.remove(), { once: true });
+      } catch (e) {
+        console.warn('sound playback failed', e);
+      }
+    };
+
+    // カウントダウン関数
+    const runCountdown = async () => {
+      if (!countdownEnabled || !countdownOverlay || !countdownNumber) return;
+      countdownOverlay.classList.remove('hidden');
+      const ticks = ['3', '2', '1', 'Go!'];
+      for (const value of ticks) {
+        countdownNumber.textContent = value;
+        await new Promise((resolve) => setTimeout(resolve, value === 'Go!' ? 600 : 900));
+      }
+      countdownOverlay.classList.add('hidden');
+    };
 
     // 完成チェック関数
     function checkCompletion(row, col) {
-      if (!effectsEnabled) return;
 
       const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
       const config = GRID_CONFIGS[currentGridSize];
@@ -226,7 +263,6 @@ const MODULE_SOURCE = `
 
     // 重複チェック関数
     function checkDuplicates(row, col, value) {
-      if (!effectsEnabled) return;
 
       const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
       const config = GRID_CONFIGS[currentGridSize];
@@ -241,9 +277,10 @@ const MODULE_SOURCE = `
         const cellBlockRow = Math.floor(cellRow / config.boxRows) * config.boxRows;
         const cellBlockCol = Math.floor(cellCol / config.boxCols) * config.boxCols;
 
-        // 同じ行、列、ブロックのセルのエラーをクリア
+        // 同じ行、列、ブロックのセルのエラーをクリア（答え合わせのエラーも含む）
         if (cellRow === row || cellCol === col || (cellBlockRow === startRow && cellBlockCol === startCol)) {
           cell.classList.remove('sudoku-cell--duplicate-error');
+          cell.classList.remove('sudoku-cell--error');
         }
       });
 
@@ -355,15 +392,24 @@ const MODULE_SOURCE = `
             return;
           }
 
+          const row = Number(e.target.dataset.row);
+          const col = Number(e.target.dataset.col);
+
           e.target.classList.remove('sudoku-cell--error');
           e.target.classList.remove('sudoku-cell--duplicate-error');
           updateRemainingCount();
 
-          // 値が入力された場合、完成チェックと重複チェック
+          // 値が変更されたら、全体の重複チェックを再実行
+          // （答え合わせのエラー状態もクリアされる）
+          checkDuplicates(row, col, value);
+
+          // プログラムによる入力でない場合のみ効果音を再生（キーボード入力時）
+          if (!isProgrammaticInput && value) {
+            playSound('keypad');
+          }
+
+          // 値が入力された場合、完成チェック
           if (value) {
-            const row = Number(e.target.dataset.row);
-            const col = Number(e.target.dataset.col);
-            checkDuplicates(row, col, value);
             setTimeout(() => checkCompletion(row, col), 100);
 
             // すべてのマスが埋まったら自動的に答え合わせ
@@ -454,9 +500,11 @@ const MODULE_SOURCE = `
       if (clearButton) clearButton.disabled = false;
       if (retryButton) retryButton.classList.add('hidden');
 
-      // プリセット選択を非表示、ゲームを表示
+      // プリセット選択を非表示、ゲームとコントロールパネルを表示
       if (presetSelector) presetSelector.classList.add('hidden');
       if (gameContainer) gameContainer.classList.remove('hidden');
+      if (controlsPanel) controlsPanel.classList.remove('hidden');
+      if (mainSection) mainSection.classList.remove('lg:col-span-2');
     }
 
     // 残りのマス数を更新
@@ -470,9 +518,11 @@ const MODULE_SOURCE = `
 
     // プリセットボタン
     presetButtons.forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         const size = Number(button.dataset.size);
         const difficulty = button.dataset.difficulty;
+        // カウントダウンを実行してからゲーム開始
+        await runCountdown();
         startNewGame(size, difficulty);
       });
     });
@@ -483,14 +533,26 @@ const MODULE_SOURCE = `
         if (!selectedCell || selectedCell.readOnly) return;
 
         const number = button.dataset.number;
+        const row = Number(selectedCell.dataset.row);
+        const col = Number(selectedCell.dataset.col);
+
+        // プログラムによる入力フラグを立てる
+        isProgrammaticInput = true;
         selectedCell.value = number;
+
+        // inputイベントが処理された後にフラグをリセット
+        setTimeout(() => {
+          isProgrammaticInput = false;
+        }, 0);
+
         selectedCell.classList.remove('sudoku-cell--error');
         selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
 
-        // 完成チェックと重複チェック
-        const row = Number(selectedCell.dataset.row);
-        const col = Number(selectedCell.dataset.col);
+        // 効果音を再生
+        playSound('keypad');
+
+        // 完成チェックと重複チェック（エラー状態もクリアされる）
         checkDuplicates(row, col, number);
         setTimeout(() => checkCompletion(row, col), 100);
 
@@ -510,10 +572,15 @@ const MODULE_SOURCE = `
       clearButton.addEventListener('click', () => {
         if (!selectedCell || selectedCell.readOnly) return;
 
+        const row = Number(selectedCell.dataset.row);
+        const col = Number(selectedCell.dataset.col);
+
         selectedCell.value = '';
         selectedCell.classList.remove('sudoku-cell--error');
         selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
+        // 値が削除されたら、全体の重複チェックを再実行（エラー状態もクリアされる）
+        checkDuplicates(row, col, '');
       });
     }
 
@@ -580,9 +647,12 @@ const MODULE_SOURCE = `
         const uniqueErrorCells = [...new Set(errorCells)];
         uniqueErrorCells.forEach(cell => cell.classList.add('sudoku-cell--error'));
         showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error', true);
+        playSound('error');
+        // 不正解時はセルを編集可能なままにする（ボタンも有効なまま）
       } else {
         showFeedback('🎉 正解です！おめでとう！', 'success', true);
-        // すべてのセルを編集不可にする
+        playSound('success');
+        // 正解時のみすべてのセルを編集不可にする
         cells.forEach(cell => {
           cell.classList.add('completed');
           // 元々デフォルトだったセルにマークを付ける
@@ -609,9 +679,11 @@ const MODULE_SOURCE = `
     // 新しいゲームボタン
     if (newGameButton) {
       newGameButton.addEventListener('click', () => {
-        // プリセット選択画面に戻る
+        // プリセット選択画面に戻る、ゲームとコントロールパネルを非表示
         if (presetSelector) presetSelector.classList.remove('hidden');
         if (gameContainer) gameContainer.classList.add('hidden');
+        if (controlsPanel) controlsPanel.classList.add('hidden');
+        if (mainSection) mainSection.classList.add('lg:col-span-2');
       });
     }
 
@@ -641,7 +713,15 @@ const MODULE_SOURCE = `
         const row = Math.floor(index / currentGridSize);
         const col = index % currentGridSize;
 
+        // プログラムによる入力フラグを立てる
+        isProgrammaticInput = true;
         randomCell.value = currentSolution[row][col];
+
+        // inputイベントが処理された後にフラグをリセット
+        setTimeout(() => {
+          isProgrammaticInput = false;
+        }, 0);
+
         randomCell.classList.remove('sudoku-cell--error');
         randomCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
@@ -689,16 +769,20 @@ const MODULE_SOURCE = `
       feedbackEl.className = 'flex min-h-[64px] items-center justify-center rounded-2xl text-center text-base font-bold px-4 py-3';
     }
 
-    // 初期化: プリセット選択画面を表示
+    // 初期化: プリセット選択画面を表示、ゲームとコントロールパネルは非表示
     if (presetSelector) presetSelector.classList.remove('hidden');
     if (gameContainer) gameContainer.classList.add('hidden');
+    if (controlsPanel) controlsPanel.classList.add('hidden');
 
-    // LocalStorageから画面効果の設定を読み込む
+    // LocalStorageから設定を読み込む
     try {
-      const storedEffects = localStorage.getItem(EFFECTS_STORAGE_KEY);
-      effectsEnabled = storedEffects !== 'false'; // デフォルトはtrue
+      const storedSound = localStorage.getItem(SOUND_STORAGE_KEY);
+      soundEnabled = storedSound === null ? true : storedSound === 'true'; // デフォルトはtrue
+
+      const storedCountdown = localStorage.getItem(COUNTDOWN_STORAGE_KEY);
+      countdownEnabled = storedCountdown === null ? true : storedCountdown === 'true'; // デフォルトはtrue
     } catch (e) {
-      console.warn('failed to load effects setting', e);
+      console.warn('failed to load settings', e);
     }
   }
 })();

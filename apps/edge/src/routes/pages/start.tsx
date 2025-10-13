@@ -85,7 +85,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               STEP 1
             </p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
-              学年をえらぼう（任意）
+              学年をえらぼう（えらばなくてもOK）
             </h2>
             <p class="mt-1 text-sm text-[#5e718a]">
               学年を選ぶとテーマが絞られます。選択しなくても進めます。
@@ -186,7 +186,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           <div>
             <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
             <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
-              テーマをえらぼう（任意）
+              テーマをえらぼう（えらばなくてもOK）
             </h2>
             <p class="text-sm text-[#5e718a]">
               集中して取り組みたいテーマがあれば選択してください
@@ -244,7 +244,11 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
       >
         <h2 class="text-xl font-semibold text-[var(--mq-ink)]">プレイ設定</h2>
 
-        <fieldset class="space-y-3">
+        <fieldset
+          id="question-count-fieldset"
+          class="space-y-3"
+          style="display: none;"
+        >
           <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             問題数
           </legend>
@@ -284,10 +288,22 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               </span>
             </button>
             <button
+              id="toggle-countdown"
+              type="button"
+              data-state="on"
+              class="setting-toggle setting-toggle--on inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold transition hover:bg-[var(--mq-primary-soft)]"
+            >
+              <span>⏱️ カウントダウン</span>
+              <span class="text-xs text-[#5e718a]">
+                ゲーム開始前のカウントダウン
+              </span>
+            </button>
+            <button
               id="toggle-steps"
               type="button"
               data-state="off"
               class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold transition hover:bg-[var(--mq-primary-soft)]"
+              style="display: none;"
             >
               <span>🧮 途中式</span>
               <span class="text-xs text-[#5e718a]">計算の流れを自動で表示</span>

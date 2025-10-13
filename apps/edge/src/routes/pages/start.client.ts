@@ -13,6 +13,7 @@ const MODULE_SOURCE = `
     const STORAGE_KEY = 'mathquest:progress:v1';
     const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
     const WORKING_STORAGE_KEY = 'mathquest:show-working';
+    const COUNTDOWN_STORAGE_KEY = 'mathquest:countdown-enabled';
     const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
     const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -55,10 +56,11 @@ const MODULE_SOURCE = `
 
     const soundToggle = document.getElementById('toggle-sound');
     const stepsToggle = document.getElementById('toggle-steps');
+    const countdownToggle = document.getElementById('toggle-countdown');
     const startButton = document.getElementById('start-session');
     const clearButton = document.getElementById('clear-selections');
     const questionCountRadios = document.querySelectorAll('input[name="question-count"]');
-    const questionCountFieldset = document.querySelector('fieldset:has(input[name="question-count"])');
+    const questionCountFieldset = document.getElementById('question-count-fieldset');
 
     // ステップ表示制御
     function showStep(stepElement) {
@@ -150,19 +152,19 @@ const MODULE_SOURCE = `
         // すべての後続ステップを非表示
         hideAllStepsAfter(2);
 
-        // 途中式トグルと問題数の表示/非表示を制御
-        if (stepsToggle) {
-          if (activity === 'math') {
-            stepsToggle.style.display = '';
-          } else {
-            stepsToggle.style.display = 'none';
-          }
-        }
+        // 問題数と途中式の表示/非表示を制御
         if (questionCountFieldset) {
           if (activity === 'math') {
             questionCountFieldset.style.display = '';
           } else {
             questionCountFieldset.style.display = 'none';
+          }
+        }
+        if (stepsToggle) {
+          if (activity === 'math') {
+            stepsToggle.style.display = '';
+          } else {
+            stepsToggle.style.display = 'none';
           }
         }
 
@@ -326,6 +328,9 @@ const MODULE_SOURCE = `
     if (stepsToggle) {
       stepsToggle.addEventListener('click', () => toggleButton(stepsToggle));
     }
+    if (countdownToggle) {
+      countdownToggle.addEventListener('click', () => toggleButton(countdownToggle));
+    }
 
     // リセットボタン
     if (clearButton) {
@@ -340,12 +345,12 @@ const MODULE_SOURCE = `
         // 全てのステップを非表示（STEP 1とSTEP 2は常に表示）
         hideAllStepsAfter(2);
 
-        // 途中式トグルと問題数を表示に戻す（デフォルト状態）
-        if (stepsToggle) {
-          stepsToggle.style.display = '';
-        }
+        // 問題数と途中式を非表示に戻す（初期状態）
         if (questionCountFieldset) {
-          questionCountFieldset.style.display = '';
+          questionCountFieldset.style.display = 'none';
+        }
+        if (stepsToggle) {
+          stepsToggle.style.display = 'none';
         }
 
         // 全ての選択を解除
@@ -378,6 +383,7 @@ const MODULE_SOURCE = `
         if (state.selectedActivity === 'math' && state.selectedCalculationType) {
           const soundEnabled = soundToggle?.dataset.state === 'on';
           const workingEnabled = stepsToggle?.dataset.state === 'on';
+          const countdownEnabled = countdownToggle?.dataset.state === 'on';
           const questionCount = Number(
             Array.from(questionCountRadios).find(r => r.checked)?.value || 10
           );
@@ -385,6 +391,7 @@ const MODULE_SOURCE = `
           try {
             localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
             localStorage.setItem(WORKING_STORAGE_KEY, String(workingEnabled));
+            localStorage.setItem(COUNTDOWN_STORAGE_KEY, String(countdownEnabled));
             localStorage.setItem(QUESTION_COUNT_STORAGE_KEY, String(questionCount));
           } catch (e) {
             console.warn('failed to persist settings', e);
@@ -450,6 +457,9 @@ const MODULE_SOURCE = `
     try {
       const soundEnabled = localStorage.getItem(SOUND_STORAGE_KEY) === 'true';
       const workingEnabled = localStorage.getItem(WORKING_STORAGE_KEY) === 'true';
+      const countdownEnabledStored = localStorage.getItem(COUNTDOWN_STORAGE_KEY);
+      // カウントダウンはデフォルトでON（初回はnullなのでtrue）
+      const countdownEnabled = countdownEnabledStored === null ? true : countdownEnabledStored === 'true';
 
       if (soundToggle) {
         soundToggle.dataset.state = soundEnabled ? 'on' : 'off';
@@ -458,6 +468,14 @@ const MODULE_SOURCE = `
       if (stepsToggle) {
         stepsToggle.dataset.state = workingEnabled ? 'on' : 'off';
         if (workingEnabled) stepsToggle.classList.add('setting-toggle--on');
+      }
+      if (countdownToggle) {
+        countdownToggle.dataset.state = countdownEnabled ? 'on' : 'off';
+        if (countdownEnabled) {
+          countdownToggle.classList.add('setting-toggle--on');
+        } else {
+          countdownToggle.classList.remove('setting-toggle--on');
+        }
       }
     } catch (e) {
       console.warn('failed to load settings', e);

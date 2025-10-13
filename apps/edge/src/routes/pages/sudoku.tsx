@@ -82,20 +82,34 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
         @keyframes cellCompleteReadonly {
           0% {
-            background: linear-gradient(135deg, #c1e7d4 0%, #a8ddc0 100%);
-            box-shadow: inset 0 0 0 3px rgba(134, 239, 172, 0.6);
+            background: repeating-linear-gradient(
+              45deg,
+              #c1e7d4,
+              #c1e7d4 10px,
+              #a8ddc0 10px,
+              #a8ddc0 20px
+            );
           }
           30% {
-            background: linear-gradient(135deg, #b0e0c7 0%, #9dd9b8 100%);
-            box-shadow: inset 0 0 0 5px rgba(134, 239, 172, 0.8);
+            background: repeating-linear-gradient(
+              45deg,
+              #b0e0c7,
+              #b0e0c7 10px,
+              #9dd9b8 10px,
+              #9dd9b8 20px
+            );
           }
           60% {
-            background: linear-gradient(135deg, #cfe9db 0%, #bce3cd 100%);
-            box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.4);
+            background: repeating-linear-gradient(
+              45deg,
+              #cfe9db,
+              #cfe9db 10px,
+              #bce3cd 10px,
+              #bce3cd 20px
+            );
           }
           100% {
             background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-            box-shadow: none;
           }
         }
 
@@ -163,7 +177,9 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         .sudoku-grid[data-size='6']
-          .sudoku-cell:nth-child(n + 13):nth-child(-n + 18) {
+          .sudoku-cell:nth-child(n + 7):nth-child(-n + 12),
+        .sudoku-grid[data-size='6']
+          .sudoku-cell:nth-child(n + 19):nth-child(-n + 24) {
           border-bottom: 2.5px solid rgba(148, 163, 184, 0.5);
         }
 
@@ -288,32 +304,34 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
         @keyframes cellComplete {
           0% {
-            background: linear-gradient(
-              135deg,
-              rgba(167, 243, 208, 0.8) 0%,
-              rgba(134, 239, 172, 0.7) 100%
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(167, 243, 208, 0.9),
+              rgba(167, 243, 208, 0.9) 10px,
+              rgba(134, 239, 172, 0.8) 10px,
+              rgba(134, 239, 172, 0.8) 20px
             );
-            box-shadow: inset 0 0 0 3px rgba(134, 239, 172, 0.8);
           }
           30% {
-            background: linear-gradient(
-              135deg,
-              rgba(167, 243, 208, 0.9) 0%,
-              rgba(134, 239, 172, 0.8) 100%
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(167, 243, 208, 1),
+              rgba(167, 243, 208, 1) 10px,
+              rgba(134, 239, 172, 0.9) 10px,
+              rgba(134, 239, 172, 0.9) 20px
             );
-            box-shadow: inset 0 0 0 5px rgba(134, 239, 172, 1);
           }
           60% {
-            background: linear-gradient(
-              135deg,
-              rgba(167, 243, 208, 0.6) 0%,
-              rgba(134, 239, 172, 0.5) 100%
+            background: repeating-linear-gradient(
+              45deg,
+              rgba(167, 243, 208, 0.7),
+              rgba(167, 243, 208, 0.7) 10px,
+              rgba(134, 239, 172, 0.6) 10px,
+              rgba(134, 239, 172, 0.6) 20px
             );
-            box-shadow: inset 0 0 0 2px rgba(134, 239, 172, 0.5);
           }
           100% {
             background: white;
-            box-shadow: none;
           }
         }
 
@@ -340,15 +358,15 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         href="/start"
         class="inline-flex items-center gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-2 text-sm font-semibold text-[var(--mq-ink)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--mq-primary-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--mq-primary)]"
       >
-        ← 戻る
+        やめる
       </a>
     </nav>
 
     <main class="grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:px-16 xl:px-24">
-      <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
+      <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg lg:col-span-2">
         <div id="preset-selector" class="space-y-4">
           <h2 class="text-lg font-semibold text-[var(--mq-ink)]">
-            プリセット選択
+            プリセットをえらぶ
           </h2>
           <div class="grid gap-3 sm:grid-cols-2">
             <button
@@ -543,7 +561,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         </div>
       </section>
 
-      <aside class="flex flex-col gap-6">
+      <aside id="controls-panel" class="hidden space-y-6">
         <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
           <p class="mb-4 text-sm font-semibold text-[#5e718a]">数字パッド</p>
           <div class="grid grid-cols-3 gap-3">
@@ -600,7 +618,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
             >
               <span class="flex items-center justify-center gap-2">
                 <span class="text-xl">🎲</span>
-                あたらしいゲーム
+                プリセットをえらぶ
               </span>
             </button>
             <button
@@ -617,6 +635,19 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         </div>
       </aside>
     </main>
+
+    {/* カウントダウンオーバーレイ */}
+    <div
+      id="countdown-overlay"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[var(--mq-surface-strong)] bg-opacity-95"
+    >
+      <div
+        id="countdown-number"
+        class="text-9xl font-extrabold text-[var(--mq-primary-strong)] animate-pulse"
+      >
+        3
+      </div>
+    </div>
 
     {renderSudokuClientScript()}
   </div>

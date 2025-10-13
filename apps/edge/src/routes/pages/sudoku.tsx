@@ -53,12 +53,16 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         .sudoku-cell.completed {
-          background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
-          color: var(--mq-ink);
-          font-weight: 800;
           cursor: not-allowed;
-          opacity: 0.85;
           pointer-events: none;
+        }
+
+        .sudoku-cell.completed:not(.was-preset) {
+          background: linear-gradient(
+            135deg,
+            rgba(167, 243, 208, 0.3) 0%,
+            rgba(134, 239, 172, 0.25) 100%
+          );
         }
 
         .sudoku-cell[readonly].sudoku-cell--complete {
@@ -560,11 +564,11 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
           <button
             id="clear-button"
             type="button"
-            class="action-button mt-3 w-full rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-white px-4 py-3 text-sm font-bold text-red-700 shadow-md transition hover:-translate-y-1 hover:border-red-300 hover:shadow-lg"
+            class="action-button mt-3 w-full rounded-2xl border-2 border-red-200 bg-gradient-to-br from-red-50 to-white px-4 py-3 text-sm font-bold text-red-700 shadow-md transition hover:-translate-y-1 hover:border-red-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             <span class="flex items-center justify-center gap-2">
-              <span class="text-lg">🗑️</span>
-              消去
+              <span class="text-lg">✏️</span>
+              けす
             </span>
           </button>
         </div>
@@ -575,11 +579,21 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
             <button
               id="check-button"
               type="button"
-              class="action-button w-full rounded-2xl bg-gradient-to-r from-[var(--mq-primary)] to-[var(--mq-primary-strong)] px-4 py-3 text-base font-bold text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
+              class="action-button w-full rounded-2xl bg-gradient-to-r from-[var(--mq-primary)] to-[var(--mq-primary-strong)] px-4 py-3 text-base font-bold text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span class="flex items-center justify-center gap-2">
                 <span class="text-xl">✅</span>
                 答え合わせ
+              </span>
+            </button>
+            <button
+              id="retry-button"
+              type="button"
+              class="action-button hidden w-full rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-3 text-base font-bold text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
+            >
+              <span class="flex items-center justify-center gap-2">
+                <span class="text-xl">🔄</span>
+                もういちど
               </span>
             </button>
             <button
@@ -595,7 +609,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
             <button
               id="hint-button"
               type="button"
-              class="action-button w-full rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white px-4 py-3 text-base font-bold text-amber-700 shadow-md transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg"
+              class="action-button w-full rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white px-4 py-3 text-base font-bold text-amber-700 shadow-md transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               <span class="flex items-center justify-center gap-2">
                 <span class="text-xl">💡</span>

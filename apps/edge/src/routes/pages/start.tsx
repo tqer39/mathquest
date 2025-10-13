@@ -37,6 +37,24 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
         .setting-toggle--on {
           background: var(--mq-primary-soft) !important;
           border-color: var(--mq-primary) !important;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        .setting-toggle {
+          position: relative;
+        }
+        .setting-toggle::after {
+          content: 'OFF';
+          position: absolute;
+          top: 0.75rem;
+          right: 1rem;
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: #94a3b8;
+          transition: all 0.2s;
+        }
+        .setting-toggle--on::after {
+          content: 'ON';
+          color: var(--mq-primary-strong);
         }
       </style>
     `}

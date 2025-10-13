@@ -153,6 +153,7 @@ const MODULE_SOURCE = `
     const checkButton = document.getElementById('check-button');
     const newGameButton = document.getElementById('new-game-button');
     const hintButton = document.getElementById('hint-button');
+    const retryButton = document.getElementById('retry-button');
     const feedbackEl = document.getElementById('feedback');
     const remainingCountEl = document.getElementById('remaining-count');
     const difficultyLabelEl = document.getElementById('difficulty-label');
@@ -164,6 +165,8 @@ const MODULE_SOURCE = `
     let currentPuzzle = null;
     let currentSolution = null;
     let selectedCell = null;
+    let currentSize = 9;
+    let currentDifficulty = 'easy';
 
     // 完成チェック関数
     function checkCompletion(row, col) {
@@ -396,6 +399,10 @@ const MODULE_SOURCE = `
 
     // 新しいゲームを開始
     function startNewGame(size, difficulty = 'easy') {
+      // 現在の設定を保存
+      currentSize = size;
+      currentDifficulty = difficulty;
+
       createGrid(size);
 
       const { puzzle, solution } = generateSudoku(size, difficulty);
@@ -412,11 +419,17 @@ const MODULE_SOURCE = `
         if (value !== 0) {
           cell.value = value;
           cell.readOnly = true;
+          cell.dataset.wasPreset = 'true';
           cell.classList.remove('sudoku-cell--error');
+          cell.classList.remove('completed');
+          cell.classList.remove('was-preset');
         } else {
           cell.value = '';
           cell.readOnly = false;
+          cell.dataset.wasPreset = 'false';
           cell.classList.remove('sudoku-cell--error');
+          cell.classList.remove('completed');
+          cell.classList.remove('was-preset');
         }
       });
 
@@ -434,6 +447,12 @@ const MODULE_SOURCE = `
       if (sizeLabelEl) {
         sizeLabelEl.textContent = size + '×' + size;
       }
+
+      // ボタンの状態をリセット
+      if (checkButton) checkButton.disabled = false;
+      if (hintButton) hintButton.disabled = false;
+      if (clearButton) clearButton.disabled = false;
+      if (retryButton) retryButton.classList.add('hidden');
 
       // プリセット選択を非表示、ゲームを表示
       if (presetSelector) presetSelector.classList.add('hidden');
@@ -566,8 +585,19 @@ const MODULE_SOURCE = `
         // すべてのセルを編集不可にする
         cells.forEach(cell => {
           cell.classList.add('completed');
+          // 元々デフォルトだったセルにマークを付ける
+          if (cell.dataset.wasPreset === 'true') {
+            cell.classList.add('was-preset');
+          }
           cell.readOnly = true;
         });
+        // ボタンの状態を更新
+        if (checkButton) checkButton.disabled = true;
+        if (hintButton) hintButton.disabled = true;
+        if (clearButton) clearButton.disabled = true;
+        if (retryButton) {
+          retryButton.classList.remove('hidden');
+        }
       }
     }
 
@@ -582,6 +612,14 @@ const MODULE_SOURCE = `
         // プリセット選択画面に戻る
         if (presetSelector) presetSelector.classList.remove('hidden');
         if (gameContainer) gameContainer.classList.add('hidden');
+      });
+    }
+
+    // もういちどボタン
+    if (retryButton) {
+      retryButton.addEventListener('click', () => {
+        // 同じプリセットで新しいゲームを開始
+        startNewGame(currentSize, currentDifficulty);
       });
     }
 

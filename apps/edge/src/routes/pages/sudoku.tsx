@@ -583,7 +583,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
             >
               <span class="flex items-center justify-center gap-2">
                 <span class="text-xl">✅</span>
-                答え合わせ
+                こたえあわせ
               </span>
             </button>
             <button
@@ -603,7 +603,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
             >
               <span class="flex items-center justify-center gap-2">
                 <span class="text-xl">🎲</span>
-                新しいゲーム
+                あたらしいゲーム
               </span>
             </button>
             <button

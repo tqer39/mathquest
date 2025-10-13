@@ -16,7 +16,9 @@ const MODULE_SOURCE = `
       9: { size: 9, boxRows: 3, boxCols: 3 }
     };
 
+    const EFFECTS_STORAGE_KEY = 'mathquest:sudoku-effects-enabled';
     let currentGridSize = 9;
+    let effectsEnabled = true;
 
     // 数独ソルバー - バックトラッキングアルゴリズム
     function solveSudoku(grid, size) {
@@ -163,6 +165,116 @@ const MODULE_SOURCE = `
     let currentSolution = null;
     let selectedCell = null;
 
+    // 完成チェック関数
+    function checkCompletion(row, col) {
+      if (!effectsEnabled) return;
+
+      const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
+      const config = GRID_CONFIGS[currentGridSize];
+
+      // 行のチェック
+      const rowCells = cells.filter(cell => Number(cell.dataset.row) === row);
+      if (rowCells.every(cell => cell.value !== '')) {
+        const rowValues = rowCells.map(cell => Number(cell.value));
+        if (new Set(rowValues).size === currentGridSize) {
+          rowCells.forEach(cell => {
+            cell.classList.add('sudoku-cell--complete');
+            setTimeout(() => cell.classList.remove('sudoku-cell--complete'), 1200);
+          });
+        }
+      }
+
+      // 列のチェック
+      const colCells = cells.filter(cell => Number(cell.dataset.col) === col);
+      if (colCells.every(cell => cell.value !== '')) {
+        const colValues = colCells.map(cell => Number(cell.value));
+        if (new Set(colValues).size === currentGridSize) {
+          colCells.forEach(cell => {
+            cell.classList.add('sudoku-cell--complete');
+            setTimeout(() => cell.classList.remove('sudoku-cell--complete'), 1200);
+          });
+        }
+      }
+
+      // ブロックのチェック
+      const startRow = Math.floor(row / config.boxRows) * config.boxRows;
+      const startCol = Math.floor(col / config.boxCols) * config.boxCols;
+      const blockCells = [];
+      for (let i = 0; i < config.boxRows; i++) {
+        for (let j = 0; j < config.boxCols; j++) {
+          const blockRow = startRow + i;
+          const blockCol = startCol + j;
+          const cell = cells.find(
+            c => Number(c.dataset.row) === blockRow && Number(c.dataset.col) === blockCol
+          );
+          if (cell) blockCells.push(cell);
+        }
+      }
+      if (blockCells.every(cell => cell.value !== '')) {
+        const blockValues = blockCells.map(cell => Number(cell.value));
+        if (new Set(blockValues).size === blockCells.length) {
+          blockCells.forEach(cell => {
+            cell.classList.add('sudoku-cell--complete');
+            setTimeout(() => cell.classList.remove('sudoku-cell--complete'), 1200);
+          });
+        }
+      }
+    }
+
+    // 重複チェック関数
+    function checkDuplicates(row, col, value) {
+      if (!effectsEnabled || !value) return;
+
+      const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
+      const config = GRID_CONFIGS[currentGridSize];
+      const duplicateCells = [];
+
+      // 行の重複チェック（readOnlyも含める）
+      const rowCells = cells.filter(cell =>
+        Number(cell.dataset.row) === row &&
+        cell.value === value
+      );
+      if (rowCells.length > 1) {
+        duplicateCells.push(...rowCells);
+      }
+
+      // 列の重複チェック（readOnlyも含める）
+      const colCells = cells.filter(cell =>
+        Number(cell.dataset.col) === col &&
+        cell.value === value
+      );
+      if (colCells.length > 1) {
+        duplicateCells.push(...colCells);
+      }
+
+      // ブロックの重複チェック（readOnlyも含める）
+      const startRow = Math.floor(row / config.boxRows) * config.boxRows;
+      const startCol = Math.floor(col / config.boxCols) * config.boxCols;
+      const blockCells = [];
+      for (let i = 0; i < config.boxRows; i++) {
+        for (let j = 0; j < config.boxCols; j++) {
+          const blockRow = startRow + i;
+          const blockCol = startCol + j;
+          const cell = cells.find(
+            c => Number(c.dataset.row) === blockRow &&
+                 Number(c.dataset.col) === blockCol &&
+                 c.value === value
+          );
+          if (cell) blockCells.push(cell);
+        }
+      }
+      if (blockCells.length > 1) {
+        duplicateCells.push(...blockCells);
+      }
+
+      // 重複セルにエラーエフェクトを適用
+      const uniqueDuplicates = [...new Set(duplicateCells)];
+      uniqueDuplicates.forEach(cell => {
+        cell.classList.add('sudoku-cell--duplicate-error');
+        setTimeout(() => cell.classList.remove('sudoku-cell--duplicate-error'), 800);
+      });
+    }
+
     // グリッドを動的に生成
     function createGrid(size) {
       if (!sudokuGrid) return;
@@ -198,6 +310,14 @@ const MODULE_SOURCE = `
 
           e.target.classList.remove('sudoku-cell--error');
           updateRemainingCount();
+
+          // 値が入力された場合、完成チェックと重複チェック
+          if (value) {
+            const row = Number(e.target.dataset.row);
+            const col = Number(e.target.dataset.col);
+            checkDuplicates(row, col, value);
+            setTimeout(() => checkCompletion(row, col), 100);
+          }
         });
 
         sudokuGrid.appendChild(input);
@@ -293,6 +413,12 @@ const MODULE_SOURCE = `
         selectedCell.value = number;
         selectedCell.classList.remove('sudoku-cell--error');
         updateRemainingCount();
+
+        // 完成チェックと重複チェック
+        const row = Number(selectedCell.dataset.row);
+        const col = Number(selectedCell.dataset.col);
+        checkDuplicates(row, col, number);
+        setTimeout(() => checkCompletion(row, col), 100);
       });
     });
 
@@ -310,35 +436,69 @@ const MODULE_SOURCE = `
     // 答え合わせボタン
     if (checkButton) {
       checkButton.addEventListener('click', () => {
-        if (!currentSolution) return;
-
         const cells = Array.from(document.querySelectorAll('.sudoku-cell'));
-        let isCorrect = true;
-        let hasEmpty = false;
+        const config = GRID_CONFIGS[currentGridSize];
 
-        cells.forEach((cell, index) => {
-          const row = Math.floor(index / currentGridSize);
-          const col = index % currentGridSize;
-          const expectedValue = currentSolution[row][col];
-
-          if (!cell.readOnly) {
-            if (cell.value === '') {
-              hasEmpty = true;
-            } else if (Number(cell.value) !== expectedValue) {
-              isCorrect = false;
-              cell.classList.add('sudoku-cell--error');
-            } else {
-              cell.classList.remove('sudoku-cell--error');
-            }
-          }
-        });
-
+        // 空のマスがあるかチェック
+        const hasEmpty = cells.some(cell => cell.value === '');
         if (hasEmpty) {
           showFeedback('まだ空いているマスがあります', 'info');
-        } else if (isCorrect) {
-          showFeedback('🎉 正解です！おめでとう！', 'success');
-        } else {
+          return;
+        }
+
+        // 数独のルールに基づいて検証
+        let isValid = true;
+        const errorCells = [];
+
+        // 各行をチェック
+        for (let row = 0; row < currentGridSize; row++) {
+          const rowCells = cells.filter(cell => Number(cell.dataset.row) === row);
+          const rowValues = rowCells.map(cell => Number(cell.value));
+          if (new Set(rowValues).size !== currentGridSize) {
+            isValid = false;
+            errorCells.push(...rowCells);
+          }
+        }
+
+        // 各列をチェック
+        for (let col = 0; col < currentGridSize; col++) {
+          const colCells = cells.filter(cell => Number(cell.dataset.col) === col);
+          const colValues = colCells.map(cell => Number(cell.value));
+          if (new Set(colValues).size !== currentGridSize) {
+            isValid = false;
+            errorCells.push(...colCells);
+          }
+        }
+
+        // 各ブロックをチェック
+        for (let blockRow = 0; blockRow < currentGridSize; blockRow += config.boxRows) {
+          for (let blockCol = 0; blockCol < currentGridSize; blockCol += config.boxCols) {
+            const blockCells = [];
+            for (let i = 0; i < config.boxRows; i++) {
+              for (let j = 0; j < config.boxCols; j++) {
+                const cell = cells.find(
+                  c => Number(c.dataset.row) === blockRow + i &&
+                       Number(c.dataset.col) === blockCol + j
+                );
+                if (cell) blockCells.push(cell);
+              }
+            }
+            const blockValues = blockCells.map(cell => Number(cell.value));
+            if (new Set(blockValues).size !== blockCells.length) {
+              isValid = false;
+              errorCells.push(...blockCells);
+            }
+          }
+        }
+
+        // エラー表示を更新
+        cells.forEach(cell => cell.classList.remove('sudoku-cell--error'));
+        if (!isValid) {
+          const uniqueErrorCells = [...new Set(errorCells)];
+          uniqueErrorCells.forEach(cell => cell.classList.add('sudoku-cell--error'));
           showFeedback('❌ まちがいがあります。赤いマスをかくにんしてね', 'error');
+        } else {
+          showFeedback('🎉 正解です！おめでとう！', 'success');
         }
       });
     }
@@ -374,6 +534,9 @@ const MODULE_SOURCE = `
         randomCell.classList.remove('sudoku-cell--error');
         updateRemainingCount();
         showFeedback('ヒント: 1つのマスを埋めました', 'success');
+
+        // 完成チェック
+        setTimeout(() => checkCompletion(row, col), 100);
       });
     }
 
@@ -405,6 +568,14 @@ const MODULE_SOURCE = `
     // 初期化: プリセット選択画面を表示
     if (presetSelector) presetSelector.classList.remove('hidden');
     if (gameContainer) gameContainer.classList.add('hidden');
+
+    // LocalStorageから画面効果の設定を読み込む
+    try {
+      const storedEffects = localStorage.getItem(EFFECTS_STORAGE_KEY);
+      effectsEnabled = storedEffects !== 'false'; // デフォルトはtrue
+    } catch (e) {
+      console.warn('failed to load effects setting', e);
+    }
   }
 })();
 `;

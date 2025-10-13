@@ -52,6 +52,47 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
           cursor: default;
         }
 
+        .sudoku-cell[readonly].sudoku-cell--duplicate-error {
+          animation: duplicateErrorReadonly 0.8s ease-out;
+        }
+
+        @keyframes duplicateErrorReadonly {
+          0% {
+            background: linear-gradient(
+              135deg,
+              rgba(254, 202, 202, 0.6) 0%,
+              rgba(252, 165, 165, 0.5) 100%
+            );
+            border-color: rgba(239, 68, 68, 0.7);
+            transform: translateX(0);
+          }
+          10% {
+            transform: translateX(-3px);
+          }
+          20% {
+            transform: translateX(3px);
+          }
+          30% {
+            transform: translateX(-3px);
+          }
+          40% {
+            transform: translateX(3px);
+          }
+          50% {
+            background: linear-gradient(
+              135deg,
+              rgba(254, 202, 202, 0.4) 0%,
+              rgba(252, 165, 165, 0.3) 100%
+            );
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateX(0);
+          }
+          100% {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-color: rgba(148, 163, 184, 0.3);
+          }
+        }
+
         .sudoku-cell--error {
           background: linear-gradient(
             135deg,
@@ -236,6 +277,69 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
 
         .feedback--success {
           animation: celebrate 0.5s ease-in-out;
+        }
+
+        .sudoku-cell--complete {
+          animation: cellComplete 1.2s ease-out;
+        }
+
+        @keyframes cellComplete {
+          0% {
+            background: linear-gradient(
+              135deg,
+              rgba(167, 243, 208, 0.8) 0%,
+              rgba(134, 239, 172, 0.7) 100%
+            );
+            transform: scale(1.05);
+            box-shadow: 0 0 12px rgba(134, 239, 172, 0.6);
+          }
+          30% {
+            background: linear-gradient(
+              135deg,
+              rgba(167, 243, 208, 0.6) 0%,
+              rgba(134, 239, 172, 0.5) 100%
+            );
+            transform: scale(1.08);
+            box-shadow: 0 0 8px rgba(134, 239, 172, 0.4);
+          }
+          100% {
+            background: white;
+            transform: scale(1);
+            box-shadow: none;
+          }
+        }
+
+        .sudoku-cell--duplicate-error {
+          animation: duplicateError 0.8s ease-out;
+        }
+
+        @keyframes duplicateError {
+          0% {
+            background: rgba(254, 202, 202, 0.5);
+            border-color: rgba(239, 68, 68, 0.7);
+            transform: translateX(0);
+          }
+          10% {
+            transform: translateX(-3px);
+          }
+          20% {
+            transform: translateX(3px);
+          }
+          30% {
+            transform: translateX(-3px);
+          }
+          40% {
+            transform: translateX(3px);
+          }
+          50% {
+            background: rgba(254, 202, 202, 0.4);
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateX(0);
+          }
+          100% {
+            background: white;
+            border-color: rgba(148, 163, 184, 0.3);
+          }
         }
       </style>
     `}

@@ -355,15 +355,16 @@ const MODULE_SOURCE = `
             return;
           }
 
+          const row = Number(e.target.dataset.row);
+          const col = Number(e.target.dataset.col);
+
           e.target.classList.remove('sudoku-cell--error');
           e.target.classList.remove('sudoku-cell--duplicate-error');
           updateRemainingCount();
+          checkDuplicates(row, col, value);
 
-          // 値が入力された場合、完成チェックと重複チェック
+          // 値が入力された場合、完成チェック
           if (value) {
-            const row = Number(e.target.dataset.row);
-            const col = Number(e.target.dataset.col);
-            checkDuplicates(row, col, value);
             setTimeout(() => checkCompletion(row, col), 100);
 
             // すべてのマスが埋まったら自動的に答え合わせ
@@ -510,10 +511,14 @@ const MODULE_SOURCE = `
       clearButton.addEventListener('click', () => {
         if (!selectedCell || selectedCell.readOnly) return;
 
+        const row = Number(selectedCell.dataset.row);
+        const col = Number(selectedCell.dataset.col);
+
         selectedCell.value = '';
         selectedCell.classList.remove('sudoku-cell--error');
         selectedCell.classList.remove('sudoku-cell--duplicate-error');
         updateRemainingCount();
+        checkDuplicates(row, col, '');
       });
     }
 

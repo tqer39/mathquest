@@ -163,7 +163,9 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         .sudoku-grid[data-size='6']
-          .sudoku-cell:nth-child(n + 13):nth-child(-n + 18) {
+          .sudoku-cell:nth-child(n + 7):nth-child(-n + 12),
+        .sudoku-grid[data-size='6']
+          .sudoku-cell:nth-child(n + 19):nth-child(-n + 24) {
           border-bottom: 2.5px solid rgba(148, 163, 184, 0.5);
         }
 

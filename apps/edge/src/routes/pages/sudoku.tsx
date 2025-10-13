@@ -158,15 +158,12 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         }
 
         /* 6x6グリッド: 2x3ブロック */
-        .sudoku-grid[data-size='6']
-          .sudoku-cell:nth-child(2n):not(:nth-child(6n)) {
+        .sudoku-grid[data-size='6'] .sudoku-cell:nth-child(6n + 3) {
           border-right: 2.5px solid rgba(148, 163, 184, 0.5);
         }
 
         .sudoku-grid[data-size='6']
-          .sudoku-cell:nth-child(n + 7):nth-child(-n + 12),
-        .sudoku-grid[data-size='6']
-          .sudoku-cell:nth-child(n + 19):nth-child(-n + 24) {
+          .sudoku-cell:nth-child(n + 13):nth-child(-n + 18) {
           border-bottom: 2.5px solid rgba(148, 163, 184, 0.5);
         }
 
@@ -398,7 +395,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
                   <div class="text-base font-bold text-[var(--mq-ink)]">
                     6×6 かんたん
                   </div>
-                  <div class="text-xs text-[#5e718a]">入門</div>
+                  <div class="text-xs text-[#5e718a]">入門（2×3）</div>
                 </div>
               </div>
             </button>
@@ -414,7 +411,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
                   <div class="text-base font-bold text-[var(--mq-ink)]">
                     6×6 ふつう
                   </div>
-                  <div class="text-xs text-[#5e718a]">入門</div>
+                  <div class="text-xs text-[#5e718a]">入門（2×3）</div>
                 </div>
               </div>
             </button>
@@ -430,7 +427,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
                   <div class="text-base font-bold text-[var(--mq-ink)]">
                     6×6 むずかしい
                   </div>
-                  <div class="text-xs text-[#5e718a]">入門</div>
+                  <div class="text-xs text-[#5e718a]">入門（2×3）</div>
                 </div>
               </div>
             </button>

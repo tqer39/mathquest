@@ -545,7 +545,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
         </div>
       </section>
 
-      <aside class="flex flex-col gap-6">
+      <aside id="controls-panel" class="hidden flex-col gap-6">
         <div class="rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
           <p class="mb-4 text-sm font-semibold text-[#5e718a]">数字パッド</p>
           <div class="grid grid-cols-3 gap-3">

@@ -160,6 +160,7 @@ const MODULE_SOURCE = `
     const sizeLabelEl = document.getElementById('size-label');
     const presetSelector = document.getElementById('preset-selector');
     const gameContainer = document.getElementById('game-container');
+    const controlsPanel = document.getElementById('controls-panel');
     const presetButtons = Array.from(document.querySelectorAll('.preset-button'));
 
     let currentPuzzle = null;
@@ -455,9 +456,10 @@ const MODULE_SOURCE = `
       if (clearButton) clearButton.disabled = false;
       if (retryButton) retryButton.classList.add('hidden');
 
-      // プリセット選択を非表示、ゲームを表示
+      // プリセット選択を非表示、ゲームとコントロールパネルを表示
       if (presetSelector) presetSelector.classList.add('hidden');
       if (gameContainer) gameContainer.classList.remove('hidden');
+      if (controlsPanel) controlsPanel.classList.remove('hidden');
     }
 
     // 残りのマス数を更新
@@ -614,9 +616,10 @@ const MODULE_SOURCE = `
     // 新しいゲームボタン
     if (newGameButton) {
       newGameButton.addEventListener('click', () => {
-        // プリセット選択画面に戻る
+        // プリセット選択画面に戻る、ゲームとコントロールパネルを非表示
         if (presetSelector) presetSelector.classList.remove('hidden');
         if (gameContainer) gameContainer.classList.add('hidden');
+        if (controlsPanel) controlsPanel.classList.add('hidden');
       });
     }
 
@@ -694,9 +697,10 @@ const MODULE_SOURCE = `
       feedbackEl.className = 'flex min-h-[64px] items-center justify-center rounded-2xl text-center text-base font-bold px-4 py-3';
     }
 
-    // 初期化: プリセット選択画面を表示
+    // 初期化: プリセット選択画面を表示、ゲームとコントロールパネルは非表示
     if (presetSelector) presetSelector.classList.remove('hidden');
     if (gameContainer) gameContainer.classList.add('hidden');
+    if (controlsPanel) controlsPanel.classList.add('hidden');
 
     // LocalStorageから画面効果の設定を読み込む
     try {

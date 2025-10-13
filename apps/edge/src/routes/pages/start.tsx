@@ -271,11 +271,7 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </fieldset>
 
-        <fieldset
-          id="on-off-settings-fieldset"
-          class="space-y-3"
-          style="display: none;"
-        >
+        <fieldset class="space-y-3">
           <legend class="text-xs font-semibold uppercase tracking-wide text-[#6c7c90]">
             ON / OFF 設定
           </legend>
@@ -292,15 +288,6 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               </span>
             </button>
             <button
-              id="toggle-steps"
-              type="button"
-              data-state="off"
-              class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold transition hover:bg-[var(--mq-primary-soft)]"
-            >
-              <span>🧮 途中式</span>
-              <span class="text-xs text-[#5e718a]">計算の流れを自動で表示</span>
-            </button>
-            <button
               id="toggle-countdown"
               type="button"
               data-state="on"
@@ -310,6 +297,16 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
               <span class="text-xs text-[#5e718a]">
                 ゲーム開始前のカウントダウン
               </span>
+            </button>
+            <button
+              id="toggle-steps"
+              type="button"
+              data-state="off"
+              class="setting-toggle inline-flex flex-col gap-2 rounded-2xl border border-[var(--mq-outline)] bg-white px-4 py-3 text-left text-sm font-semibold transition hover:bg-[var(--mq-primary-soft)]"
+              style="display: none;"
+            >
+              <span>🧮 途中式</span>
+              <span class="text-xs text-[#5e718a]">計算の流れを自動で表示</span>
             </button>
           </div>
         </fieldset>

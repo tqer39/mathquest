@@ -620,6 +620,19 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
       </aside>
     </main>
 
+    {/* カウントダウンオーバーレイ */}
+    <div
+      id="countdown-overlay"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center bg-[var(--mq-surface-strong)] bg-opacity-95"
+    >
+      <div
+        id="countdown-number"
+        class="text-9xl font-extrabold text-[var(--mq-primary-strong)] animate-pulse"
+      >
+        3
+      </div>
+    </div>
+
     {renderSudokuClientScript()}
   </div>
 );

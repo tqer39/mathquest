@@ -61,7 +61,6 @@ const MODULE_SOURCE = `
     const clearButton = document.getElementById('clear-selections');
     const questionCountRadios = document.querySelectorAll('input[name="question-count"]');
     const questionCountFieldset = document.getElementById('question-count-fieldset');
-    const onOffSettingsFieldset = document.getElementById('on-off-settings-fieldset');
 
     // ステップ表示制御
     function showStep(stepElement) {
@@ -153,7 +152,7 @@ const MODULE_SOURCE = `
         // すべての後続ステップを非表示
         hideAllStepsAfter(2);
 
-        // 問題数とON/OFF設定の表示/非表示を制御
+        // 問題数と途中式の表示/非表示を制御
         if (questionCountFieldset) {
           if (activity === 'math') {
             questionCountFieldset.style.display = '';
@@ -161,11 +160,11 @@ const MODULE_SOURCE = `
             questionCountFieldset.style.display = 'none';
           }
         }
-        if (onOffSettingsFieldset) {
+        if (stepsToggle) {
           if (activity === 'math') {
-            onOffSettingsFieldset.style.display = '';
+            stepsToggle.style.display = '';
           } else {
-            onOffSettingsFieldset.style.display = 'none';
+            stepsToggle.style.display = 'none';
           }
         }
 
@@ -346,12 +345,12 @@ const MODULE_SOURCE = `
         // 全てのステップを非表示（STEP 1とSTEP 2は常に表示）
         hideAllStepsAfter(2);
 
-        // 問題数とON/OFF設定を非表示に戻す（初期状態）
+        // 問題数と途中式を非表示に戻す（初期状態）
         if (questionCountFieldset) {
           questionCountFieldset.style.display = 'none';
         }
-        if (onOffSettingsFieldset) {
-          onOffSettingsFieldset.style.display = 'none';
+        if (stepsToggle) {
+          stepsToggle.style.display = 'none';
         }
 
         // 全ての選択を解除

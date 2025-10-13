@@ -161,6 +161,7 @@ const MODULE_SOURCE = `
     const presetSelector = document.getElementById('preset-selector');
     const gameContainer = document.getElementById('game-container');
     const controlsPanel = document.getElementById('controls-panel');
+    const mainSection = document.querySelector('section');
     const presetButtons = Array.from(document.querySelectorAll('.preset-button'));
 
     let currentPuzzle = null;
@@ -460,6 +461,7 @@ const MODULE_SOURCE = `
       if (presetSelector) presetSelector.classList.add('hidden');
       if (gameContainer) gameContainer.classList.remove('hidden');
       if (controlsPanel) controlsPanel.classList.remove('hidden');
+      if (mainSection) mainSection.classList.remove('lg:col-span-2');
     }
 
     // 残りのマス数を更新
@@ -620,6 +622,7 @@ const MODULE_SOURCE = `
         if (presetSelector) presetSelector.classList.remove('hidden');
         if (gameContainer) gameContainer.classList.add('hidden');
         if (controlsPanel) controlsPanel.classList.add('hidden');
+        if (mainSection) mainSection.classList.add('lg:col-span-2');
       });
     }
 

@@ -347,7 +347,7 @@ export const Sudoku: FC<{ currentUser: CurrentUser | null }> = ({
     </nav>
 
     <main class="grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:px-16 xl:px-24">
-      <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg">
+      <section class="flex flex-col gap-6 rounded-3xl border border-[var(--mq-outline)] bg-[var(--mq-surface)] p-6 shadow-lg lg:col-span-2">
         <div id="preset-selector" class="space-y-4">
           <h2 class="text-lg font-semibold text-[var(--mq-ink)]">
             プリセット選択

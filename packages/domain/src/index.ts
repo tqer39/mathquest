@@ -9,6 +9,7 @@ export type Mode =
 export type QuizConfig = {
   mode: Mode;
   max: number;
+  terms?: 2 | 3 | null; // 2: 二項のみ, 3: 三項のみ, null: 混在
 };
 
 export type ExtraStep = {
@@ -48,12 +49,17 @@ export const pickOp = (mode: Mode): Question['op'] => {
 export const generateQuestion = (config: QuizConfig): Question => {
   // add-sub-mix モードの場合は、複数ステップの問題を生成
   if (config.mode === 'add-sub-mix') {
-    return generateGradeOneQuestion(config.max);
+    return generateGradeOneQuestion(config.max, config.terms);
   }
 
   // add-inverse モードの場合は、逆算問題を生成
   if (config.mode === 'add-inverse') {
     return generateInverseQuestion(config.max);
+  }
+
+  // terms が指定されている場合は、それに応じて生成
+  if (config.terms === 2 || config.terms === 3) {
+    return generateGradeOneQuestion(config.max, config.terms);
   }
 
   const op = pickOp(config.mode);
@@ -116,13 +122,26 @@ const finalizeGradeOneQuestion = (params: {
   };
 };
 
-export const generateGradeOneQuestion = (max: number): Question => {
-  const patterns = [
+export const generateGradeOneQuestion = (
+  max: number,
+  terms?: 2 | 3 | null
+): Question => {
+  // 二項演算のパターン
+  const binaryPatterns = [
     () => {
       const a = randInt(max);
       const b = clampIntInclusive(0, max - a);
       return finalizeGradeOneQuestion({ a, b, op: '+' });
     },
+    () => {
+      const a = randInt(max);
+      const b = clampIntInclusive(0, a);
+      return finalizeGradeOneQuestion({ a, b, op: '-' });
+    },
+  ];
+
+  // 三項演算のパターン
+  const ternaryPatterns = [
     () => {
       const a = randInt(max);
       const b = clampIntInclusive(0, max - a);
@@ -161,11 +180,6 @@ export const generateGradeOneQuestion = (max: number): Question => {
     },
     () => {
       const a = randInt(max);
-      const b = clampIntInclusive(0, a);
-      return finalizeGradeOneQuestion({ a, b, op: '-' });
-    },
-    () => {
-      const a = randInt(max);
       const b = clampIntInclusive(0, max - a);
       const sum = a + b;
       const remaining = Math.max(0, max - sum);
@@ -183,6 +197,17 @@ export const generateGradeOneQuestion = (max: number): Question => {
       });
     },
   ];
+
+  // terms に基づいてパターンを選択
+  let patterns: Array<() => Question>;
+  if (terms === 2) {
+    patterns = binaryPatterns;
+  } else if (terms === 3) {
+    patterns = ternaryPatterns;
+  } else {
+    // null または未指定の場合は両方を混在
+    patterns = [...binaryPatterns, ...ternaryPatterns];
+  }
 
   let question: Question | null = null;
   for (let attempt = 0; attempt < 10; attempt += 1) {

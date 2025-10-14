@@ -15,11 +15,13 @@ quiz.post('/questions/next', async (c) => {
     mode?: Mode;
     max?: number;
     gradeId?: string;
+    terms?: 2 | 3 | null;
   };
   const question = generateQuizQuestion({
     mode: body.mode,
     max: body.max,
     gradeId: body.gradeId,
+    terms: body.terms,
   });
   const expression = formatQuestion(question);
   return c.json({ question: { ...question, expression } });
@@ -73,22 +75,38 @@ quiz.post('/answers/check', async (c) => {
       )
     : undefined;
 
+  const isInverse =
+    'isInverse' in baseQuestion ? baseQuestion.isInverse : undefined;
+  const inverseSide =
+    'inverseSide' in baseQuestion ? baseQuestion.inverseSide : undefined;
+  const providedAnswer =
+    'answer' in baseQuestion ? baseQuestion.answer : undefined;
+
   const questionForCheck = {
     a: baseQuestion.a,
     b: baseQuestion.b,
     op: baseQuestion.op,
     extras,
-    isInverse: baseQuestion.isInverse,
-    inverseSide: baseQuestion.inverseSide,
-    answer: baseQuestion.answer,
-  } as const;
+    isInverse,
+    inverseSide,
+    answer: providedAnswer,
+  };
 
   const { ok, correctAnswer } = verifyAnswer({
     question: questionForCheck,
     value: payload.value,
   });
 
-  const expression = formatQuestion(questionForCheck);
+  // formatQuestionはanswerが必須なので、correctAnswerを使用
+  const expression = formatQuestion({
+    a: baseQuestion.a,
+    b: baseQuestion.b,
+    op: baseQuestion.op,
+    extras,
+    isInverse,
+    inverseSide,
+    answer: correctAnswer,
+  });
 
   const db = createDb(c.env);
   try {

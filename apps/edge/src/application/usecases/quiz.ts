@@ -10,6 +10,7 @@ export type GenerateQuizInput = {
   mode?: Mode;
   max?: number;
   gradeId?: string;
+  terms?: 2 | 3 | null;
 };
 
 const randomInt = (min: number, max: number) =>
@@ -115,8 +116,10 @@ const generateAddSubMix = (terms: number, max: number) => {
 export const generateQuizQuestion = (input: GenerateQuizInput = {}) => {
   const mode: Mode = input.mode ?? 'mix';
   const max = typeof input.max === 'number' && input.max > 0 ? input.max : 20;
+  const terms = input.terms;
+
   if (input.gradeId === 'grade-1') {
-    return generateGradeOneQuestion(max);
+    return generateGradeOneQuestion(max, terms);
   }
   switch (input.gradeId) {
     case 'practice-add-three':
@@ -134,7 +137,7 @@ export const generateQuizQuestion = (input: GenerateQuizInput = {}) => {
     default:
       break;
   }
-  return generateQuestion({ mode, max });
+  return generateQuestion({ mode, max, terms });
 };
 
 export type VerifyAnswerInput = {

@@ -958,6 +958,7 @@ const MODULE_SOURCE = `
         gradeId,
         mode,
         max,
+        terms: state.theme?.terms || null,
       });
       state.currentQuestion = question;
       state.answerBuffer = '';

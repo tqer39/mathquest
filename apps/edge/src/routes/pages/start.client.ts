@@ -154,6 +154,15 @@ const MODULE_SOURCE = `
         state.selectedTheme = null;
         state.selectedGame = null;
 
+        // UIの選択状態もリセット
+        themeBtns.forEach(btn => btn.classList.remove('selection-card--selected'));
+        gameBtns.forEach(btn => btn.classList.remove('selection-card--selected'));
+        if (calcTypeGrid) {
+          calcTypeGrid.querySelectorAll('.calc-type-btn').forEach(btn => {
+            btn.classList.remove('selection-card--selected');
+          });
+        }
+
         // すべての後続ステップを非表示
         hideAllStepsAfter(2);
 

@@ -57,8 +57,16 @@ export const generateQuestion = (config: QuizConfig): Question => {
     return generateInverseQuestion(config.max);
   }
 
-  // terms が指定されている場合は、それに応じて生成
+  // terms が指定されている場合（add, subモードのみ）
   if (config.terms === 2 || config.terms === 3) {
+    if (config.mode === 'add' || config.mode === 'sub') {
+      return generateSingleOperationQuestion(
+        config.mode,
+        config.max,
+        config.terms
+      );
+    }
+    // add, sub 以外のモードで terms が指定されている場合は従来通り
     return generateGradeOneQuestion(config.max, config.terms);
   }
 
@@ -84,6 +92,79 @@ export const generateQuestion = (config: QuizConfig): Question => {
 
   const answer = evaluateQuestion({ a, b, op });
   return { a, b, op, answer };
+};
+
+// たし算またはひき算のみの問題を生成（二項または三項）
+export const generateSingleOperationQuestion = (
+  mode: 'add' | 'sub',
+  max: number,
+  terms: 2 | 3
+): Question => {
+  const op = mode === 'add' ? '+' : '-';
+
+  if (terms === 2) {
+    // 二項演算
+    let a: number;
+    let b: number;
+    if (mode === 'add') {
+      a = randInt(max);
+      b = clampIntInclusive(0, max - a);
+    } else {
+      a = randInt(max);
+      b = clampIntInclusive(0, a);
+    }
+    const answer = evaluateQuestion({ a, b, op });
+    return { a, b, op, answer };
+  } else {
+    // 三項演算（terms === 3）- 必ず3つの数を生成
+    if (mode === 'add') {
+      // たし算のみ: a + b + c （必ず3項）
+      for (let attempt = 0; attempt < 20; attempt++) {
+        // maxを3分割することを考慮
+        const avgValue = Math.max(1, Math.floor(max / 3));
+        const a = clampIntInclusive(1, avgValue);
+        const b = clampIntInclusive(1, Math.max(1, max - a - 1));
+        const remaining = max - (a + b);
+        if (remaining >= 1) {
+          const c = clampIntInclusive(1, remaining);
+          const extras = [{ op: '+', value: c }] as const;
+          const answer = evaluateQuestion({ a, b, op: '+', extras });
+          if (answer >= 0 && answer <= max) {
+            return { a, b, op: '+', extras, answer };
+          }
+        }
+      }
+      // フォールバック: 簡単な3項たし算
+      const a = 1;
+      const b = 1;
+      const c = Math.min(1, max - 2);
+      const extras = [{ op: '+', value: c }] as const;
+      const answer = evaluateQuestion({ a, b, op: '+', extras });
+      return { a, b, op: '+', extras, answer };
+    } else {
+      // ひき算のみ: a - b - c （必ず3項）
+      // a >= b + c を保証する必要がある
+      for (let attempt = 0; attempt < 20; attempt++) {
+        const a = clampIntInclusive(3, max); // 最低3以上で2つ引ける
+        const maxB = Math.max(1, Math.floor(a / 2));
+        const b = clampIntInclusive(1, maxB);
+        const afterB = a - b;
+        const c = clampIntInclusive(1, Math.max(1, afterB - 1));
+        const extras = [{ op: '-', value: c }] as const;
+        const answer = evaluateQuestion({ a, b, op: '-', extras });
+        if (answer >= 0 && answer <= max) {
+          return { a, b, op: '-', extras, answer };
+        }
+      }
+      // フォールバック: 簡単な3項ひき算
+      const a = Math.max(3, max);
+      const b = 1;
+      const c = 1;
+      const extras = [{ op: '-', value: c }] as const;
+      const answer = a - b - c;
+      return { a, b, op: '-', extras, answer };
+    }
+  }
 };
 
 const normalizeExtras = (

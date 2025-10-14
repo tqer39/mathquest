@@ -54,7 +54,7 @@ export const generateQuestion = (config: QuizConfig): Question => {
 
   // add-inverse モードの場合は、逆算問題を生成
   if (config.mode === 'add-inverse') {
-    return generateInverseQuestion(config.max);
+    return generateInverseQuestion(config.max, config.terms);
   }
 
   // terms が指定されている場合（add, subモードのみ）
@@ -361,10 +361,19 @@ export const formatQuestion = (
       });
     }
     // 逆算問題では結果も表示
-    const result =
+    // extrasを考慮して正しい結果を計算
+    let result =
       input.inverseSide === 'left'
         ? input.answer + input.b
         : input.a + input.answer;
+
+    // extrasがある場合は、それも計算に含める
+    if (input.extras && input.extras.length > 0) {
+      result = input.extras.reduce((acc, step) => {
+        return step.op === '+' ? acc + step.value : acc - step.value;
+      }, result);
+    }
+
     parts.push('=', `${result}`);
     return parts.join(' ');
   }
@@ -378,32 +387,116 @@ export const formatQuestion = (
   return parts.join(' ');
 };
 
-export const generateInverseQuestion = (max: number): Question => {
+export const generateInverseQuestion = (
+  max: number,
+  terms?: 2 | 3 | null
+): Question => {
   // たし算の逆算問題を生成
-  // 例: ? + 5 = 10 → 答えは 5
   const result = randIntInclusive(1, max);
   const inverseSide = pick(['left', 'right'] as const);
 
+  // 二項演算の逆算（デフォルト）
+  if (!terms || terms === 2) {
+    if (inverseSide === 'left') {
+      // ? + b = result → 答えは result - b
+      const b = randIntInclusive(0, result);
+      const answer = result - b;
+      return {
+        a: answer,
+        b: b,
+        op: '+',
+        answer: answer,
+        isInverse: true,
+        inverseSide: 'left',
+      };
+    } else {
+      // a + ? = result → 答えは result - a
+      const a = randIntInclusive(0, result);
+      const answer = result - a;
+      return {
+        a: a,
+        b: answer,
+        op: '+',
+        answer: answer,
+        isInverse: true,
+        inverseSide: 'right',
+      };
+    }
+  }
+
+  // 三項演算の逆算: ? + b + c = result or a + ? + c = result
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const resultValue = randIntInclusive(3, max);
+    if (inverseSide === 'left') {
+      // ? + b + c = result → 答えは result - b - c
+      const b = randIntInclusive(1, Math.max(1, Math.floor(resultValue / 2)));
+      const remaining = resultValue - b;
+      if (remaining >= 2) {
+        const c = randIntInclusive(1, remaining - 1);
+        const answer = resultValue - b - c;
+        if (answer >= 0 && answer <= max) {
+          const extras = [{ op: '+', value: c }] as const;
+          return {
+            a: answer,
+            b: b,
+            op: '+',
+            extras,
+            answer: answer,
+            isInverse: true,
+            inverseSide: 'left',
+          };
+        }
+      }
+    } else {
+      // a + ? + c = result → 答えは result - a - c
+      const a = randIntInclusive(1, Math.max(1, Math.floor(resultValue / 2)));
+      const remaining = resultValue - a;
+      if (remaining >= 2) {
+        const c = randIntInclusive(1, remaining - 1);
+        const answer = resultValue - a - c;
+        if (answer >= 0 && answer <= max) {
+          const extras = [{ op: '+', value: c }] as const;
+          return {
+            a: a,
+            b: answer,
+            op: '+',
+            extras,
+            answer: answer,
+            isInverse: true,
+            inverseSide: 'right',
+          };
+        }
+      }
+    }
+  }
+
+  // フォールバック: 簡単な三項逆算
   if (inverseSide === 'left') {
-    // ? + b = result → 答えは result - b
-    const b = randIntInclusive(0, result);
-    const answer = result - b;
+    // ? + 1 + 1 = 3 → 答えは 1
+    const b = 1;
+    const c = 1;
+    const answer = 1;
+    const extras = [{ op: '+', value: c }] as const;
     return {
       a: answer,
       b: b,
       op: '+',
+      extras,
       answer: answer,
       isInverse: true,
       inverseSide: 'left',
     };
   } else {
-    // a + ? = result → 答えは result - a
-    const a = randIntInclusive(0, result);
-    const answer = result - a;
+    // 1 + ? + 1 = 3 → 答えは 1
+    const a = 1;
+    const c = 1;
+    const answer = 1;
+    const extras = [{ op: '+', value: c }] as const;
     return {
       a: a,
       b: answer,
       op: '+',
+      extras,
       answer: answer,
       isInverse: true,
       inverseSide: 'right',

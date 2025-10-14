@@ -434,25 +434,45 @@ export const practiceThemes = [
     isDecimal: true,
     terms: 2 as const,
   },
-  // 小1向け - 逆算（10まで）
+  // 小1向け - 逆算（10まで・二項）
   {
-    id: 'practice-add-inverse-10',
-    label: 'ぎゃくさん（10まで）',
-    description: '1 + ? = 10のような逆算',
+    id: 'practice-add-inverse-10-2',
+    label: 'ぎゃくさん（10まで・2つ）',
+    description: '1 + ? = 10 のような2つの数の逆算',
     mode: 'add-inverse' as const,
     max: 10,
     minGrade: 'grade-1',
     terms: 2 as const,
   },
-  // 小1向け - 逆算（20まで）
+  // 小1向け - 逆算（10まで・三項）
   {
-    id: 'practice-add-inverse-20',
-    label: 'ぎゃくさん（20まで）',
-    description: '答えが20以下の逆算',
+    id: 'practice-add-inverse-10-3',
+    label: 'ぎゃくさん（10まで・3つ）',
+    description: '1 + ? + 2 = 10 のような3つの数の逆算',
+    mode: 'add-inverse' as const,
+    max: 10,
+    minGrade: 'grade-1',
+    terms: 3 as const,
+  },
+  // 小1向け - 逆算（20まで・二項）
+  {
+    id: 'practice-add-inverse-20-2',
+    label: 'ぎゃくさん（20まで・2つ）',
+    description: '5 + ? = 20 のような2つの数の逆算',
     mode: 'add-inverse' as const,
     max: 20,
     minGrade: 'grade-1',
     terms: 2 as const,
+  },
+  // 小1向け - 逆算（20まで・三項）
+  {
+    id: 'practice-add-inverse-20-3',
+    label: 'ぎゃくさん（20まで・3つ）',
+    description: '5 + ? + 3 = 20 のような3つの数の逆算',
+    mode: 'add-inverse' as const,
+    max: 20,
+    minGrade: 'grade-1',
+    terms: 3 as const,
   },
   // 小1向け - たし算・ひき算ミックス（10まで・二項）
   {
@@ -494,25 +514,45 @@ export const practiceThemes = [
     minGrade: 'grade-1',
     terms: 3 as const,
   },
-  // 小2向け - 逆算（50まで）
+  // 小2向け - 逆算（50まで・二項）
   {
-    id: 'practice-add-inverse-50',
-    label: 'ぎゃくさん（50まで）',
-    description: '答えが50以下の逆算',
+    id: 'practice-add-inverse-50-2',
+    label: 'ぎゃくさん（50まで・2つ）',
+    description: '10 + ? = 50 のような2つの数の逆算',
     mode: 'add-inverse' as const,
     max: 50,
     minGrade: 'grade-2',
     terms: 2 as const,
   },
-  // 小2向け - 逆算（100まで）
+  // 小2向け - 逆算（50まで・三項）
   {
-    id: 'practice-add-inverse-100',
-    label: 'ぎゃくさん（100まで）',
-    description: '答えが100以下の逆算',
+    id: 'practice-add-inverse-50-3',
+    label: 'ぎゃくさん（50まで・3つ）',
+    description: '10 + ? + 5 = 50 のような3つの数の逆算',
+    mode: 'add-inverse' as const,
+    max: 50,
+    minGrade: 'grade-2',
+    terms: 3 as const,
+  },
+  // 小2向け - 逆算（100まで・二項）
+  {
+    id: 'practice-add-inverse-100-2',
+    label: 'ぎゃくさん（100まで・2つ）',
+    description: '25 + ? = 100 のような2つの数の逆算',
     mode: 'add-inverse' as const,
     max: 100,
     minGrade: 'grade-2',
     terms: 2 as const,
+  },
+  // 小2向け - 逆算（100まで・三項）
+  {
+    id: 'practice-add-inverse-100-3',
+    label: 'ぎゃくさん（100まで・3つ）',
+    description: '20 + ? + 10 = 100 のような3つの数の逆算',
+    mode: 'add-inverse' as const,
+    max: 100,
+    minGrade: 'grade-2',
+    terms: 3 as const,
   },
   // 小2向け - たし算・ひき算ミックス（50まで・二項）
   {

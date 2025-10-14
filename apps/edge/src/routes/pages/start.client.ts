@@ -334,6 +334,19 @@ const MODULE_SOURCE = `
       } else {
         button.classList.remove('setting-toggle--on');
       }
+
+      // localStorageに保存
+      try {
+        if (button === soundToggle) {
+          localStorage.setItem(SOUND_STORAGE_KEY, String(nextState));
+        } else if (button === stepsToggle) {
+          localStorage.setItem(WORKING_STORAGE_KEY, String(nextState));
+        } else if (button === countdownToggle) {
+          localStorage.setItem(COUNTDOWN_STORAGE_KEY, String(nextState));
+        }
+      } catch (e) {
+        console.warn('failed to save toggle state', e);
+      }
     }
 
     if (soundToggle) {

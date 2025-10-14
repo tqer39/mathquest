@@ -6,6 +6,7 @@ const MODULE_SOURCE = `
   const STORAGE_KEY = 'mathquest:progress:v1';
   const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
   const WORKING_STORAGE_KEY = 'mathquest:show-working';
+  const COUNTDOWN_STORAGE_KEY = 'mathquest:countdown-enabled';
   const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
   const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -197,6 +198,7 @@ const MODULE_SOURCE = `
         questionCount: loadQuestionCount(),
         soundEnabled: loadBoolean(SOUND_STORAGE_KEY, true),
         workingEnabled: loadBoolean(WORKING_STORAGE_KEY, true),
+        countdownEnabled: loadBoolean(COUNTDOWN_STORAGE_KEY, true),
         baseGrade: baseGradePreset
           ? {
               id: baseGradePreset.id,
@@ -247,6 +249,10 @@ const MODULE_SOURCE = `
       typeof activeSession.workingEnabled === 'boolean'
         ? activeSession.workingEnabled
         : loadBoolean(WORKING_STORAGE_KEY, true),
+    countdownEnabled:
+      typeof activeSession.countdownEnabled === 'boolean'
+        ? activeSession.countdownEnabled
+        : loadBoolean(COUNTDOWN_STORAGE_KEY, true),
     progress: progressSnapshot,
     sessionActive: false,
     sessionAnswered: 0,
@@ -1105,12 +1111,18 @@ const MODULE_SOURCE = `
 
   const restartWithCountdown = async () => {
     refreshKeypadState();
-    await runCountdown();
+    if (state.countdownEnabled) {
+      await runCountdown();
+    }
     await startSession();
   };
 
   refreshKeypadState();
-  runCountdown().then(() => startSession());
+  if (state.countdownEnabled) {
+    runCountdown().then(() => startSession());
+  } else {
+    startSession();
+  }
 
   submitBtn.addEventListener('click', () => {
     handleSubmit();

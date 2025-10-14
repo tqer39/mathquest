@@ -180,6 +180,16 @@ export const practiceThemes = [
     minGrade: 'grade-1',
     terms: 2 as const,
   },
+  // 小1向け - ひき算（10以下・三項）
+  {
+    id: 'practice-sub-10-3',
+    label: 'ひき算（10まで・3つのかず）',
+    description: '10 - 3 - 2 のような3つの数のひき算',
+    mode: 'sub' as const,
+    max: 10,
+    minGrade: 'grade-1',
+    terms: 3 as const,
+  },
   // 小1向け - たし算（20以下・二項）
   {
     id: 'practice-add-20-2',
@@ -209,6 +219,16 @@ export const practiceThemes = [
     max: 20,
     minGrade: 'grade-1',
     terms: 2 as const,
+  },
+  // 小1向け - ひき算（20以下・三項）
+  {
+    id: 'practice-sub-20-3',
+    label: 'ひき算（20まで・3つのかず）',
+    description: '20 - 7 - 5 のような3つの数のひき算',
+    mode: 'sub' as const,
+    max: 20,
+    minGrade: 'grade-1',
+    terms: 3 as const,
   },
   // 小2向け - たし算（50以下・二項）
   {
@@ -240,6 +260,16 @@ export const practiceThemes = [
     minGrade: 'grade-2',
     terms: 2 as const,
   },
+  // 小2向け - ひき算（50以下・三項）
+  {
+    id: 'practice-sub-50-3',
+    label: 'ひき算（50まで・3つのかず）',
+    description: '50 - 20 - 10 のような3つの数のひき算',
+    mode: 'sub' as const,
+    max: 50,
+    minGrade: 'grade-2',
+    terms: 3 as const,
+  },
   // 小2向け - たし算（100以下・二項）
   {
     id: 'practice-add-100-2',
@@ -269,6 +299,16 @@ export const practiceThemes = [
     max: 100,
     minGrade: 'grade-2',
     terms: 2 as const,
+  },
+  // 小2向け - ひき算（100以下・三項）
+  {
+    id: 'practice-sub-100-3',
+    label: 'ひき算（100まで・3つのかず）',
+    description: '100 - 40 - 25 のような3つの数のひき算',
+    mode: 'sub' as const,
+    max: 100,
+    minGrade: 'grade-2',
+    terms: 3 as const,
   },
   // 小3向け - たし算（200以下・二項）
   {
@@ -300,6 +340,16 @@ export const practiceThemes = [
     minGrade: 'grade-3',
     terms: 2 as const,
   },
+  // 小3向け - ひき算（200以下・三項）
+  {
+    id: 'practice-sub-200-3',
+    label: 'ひき算（200まで・3つのかず）',
+    description: '200 - 80 - 50 のような3つの数のひき算',
+    mode: 'sub' as const,
+    max: 200,
+    minGrade: 'grade-3',
+    terms: 3 as const,
+  },
   // 小3向け - たし算（500以下・二項）
   {
     id: 'practice-add-500-2',
@@ -329,6 +379,16 @@ export const practiceThemes = [
     max: 500,
     minGrade: 'grade-3',
     terms: 2 as const,
+  },
+  // 小3向け - ひき算（500以下・三項）
+  {
+    id: 'practice-sub-500-3',
+    label: 'ひき算（500まで・3つのかず）',
+    description: '500 - 200 - 100 のような3つの数のひき算',
+    mode: 'sub' as const,
+    max: 500,
+    minGrade: 'grade-3',
+    terms: 3 as const,
   },
   // 小3向け - 小数のたし算（基礎）
   {

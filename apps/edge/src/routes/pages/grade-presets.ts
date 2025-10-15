@@ -57,6 +57,12 @@ export const calculationTypes = [
     mode: 'add-inverse',
   },
   {
+    id: 'calc-sub-inverse',
+    label: 'ぎゃくさん（ひき算）',
+    description: '10 - ? = 3のような逆算練習',
+    mode: 'sub-inverse',
+  },
+  {
     id: 'calc-mul',
     label: 'かけ算',
     description: 'かけ算の練習',
@@ -78,13 +84,26 @@ export const calculationTypes = [
 
 // 学年ごとの利用可能な計算種類
 export const gradeCalculationTypes = {
-  'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
-  'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
+  'grade-1': [
+    'calc-add',
+    'calc-sub',
+    'calc-add-sub-mix',
+    'calc-add-inverse',
+    'calc-sub-inverse',
+  ],
+  'grade-2': [
+    'calc-add',
+    'calc-sub',
+    'calc-add-sub-mix',
+    'calc-add-inverse',
+    'calc-sub-inverse',
+  ],
   'grade-3': [
     'calc-add',
     'calc-sub',
     'calc-add-sub-mix',
     'calc-add-inverse',
+    'calc-sub-inverse',
     'calc-mul',
   ],
   'grade-4': [
@@ -92,6 +111,7 @@ export const gradeCalculationTypes = {
     'calc-sub',
     'calc-add-sub-mix',
     'calc-add-inverse',
+    'calc-sub-inverse',
     'calc-mul',
     'calc-div',
   ],
@@ -100,6 +120,7 @@ export const gradeCalculationTypes = {
     'calc-sub',
     'calc-add-sub-mix',
     'calc-add-inverse',
+    'calc-sub-inverse',
     'calc-mul',
     'calc-div',
     'calc-mix',
@@ -109,6 +130,7 @@ export const gradeCalculationTypes = {
     'calc-sub',
     'calc-add-sub-mix',
     'calc-add-inverse',
+    'calc-sub-inverse',
     'calc-mul',
     'calc-div',
     'calc-mix',
@@ -474,6 +496,46 @@ export const practiceThemes = [
     minGrade: 'grade-1',
     terms: 3 as const,
   },
+  // 小1向け - ひき算逆算（10まで・二項）
+  {
+    id: 'practice-sub-inverse-10-2',
+    label: 'ぎゃくさん・ひき算（10まで・2つ）',
+    description: '10 - ? = 3 のような2つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 10,
+    minGrade: 'grade-1',
+    terms: 2 as const,
+  },
+  // 小1向け - ひき算逆算（10まで・三項）
+  {
+    id: 'practice-sub-inverse-10-3',
+    label: 'ぎゃくさん・ひき算（10まで・3つ）',
+    description: '10 - ? - 2 = 3 のような3つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 10,
+    minGrade: 'grade-1',
+    terms: 3 as const,
+  },
+  // 小1向け - ひき算逆算（20まで・二項）
+  {
+    id: 'practice-sub-inverse-20-2',
+    label: 'ぎゃくさん・ひき算（20まで・2つ）',
+    description: '20 - ? = 8 のような2つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 20,
+    minGrade: 'grade-1',
+    terms: 2 as const,
+  },
+  // 小1向け - ひき算逆算（20まで・三項）
+  {
+    id: 'practice-sub-inverse-20-3',
+    label: 'ぎゃくさん・ひき算（20まで・3つ）',
+    description: '20 - ? - 5 = 8 のような3つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 20,
+    minGrade: 'grade-1',
+    terms: 3 as const,
+  },
   // 小1向け - たし算・ひき算ミックス（10まで・二項）
   {
     id: 'practice-add-sub-mix-10-2',
@@ -550,6 +612,46 @@ export const practiceThemes = [
     label: 'ぎゃくさん（100まで・3つ）',
     description: '20 + ? + 10 = 100 のような3つの数の逆算',
     mode: 'add-inverse' as const,
+    max: 100,
+    minGrade: 'grade-2',
+    terms: 3 as const,
+  },
+  // 小2向け - ひき算逆算（50まで・二項）
+  {
+    id: 'practice-sub-inverse-50-2',
+    label: 'ぎゃくさん・ひき算（50まで・2つ）',
+    description: '50 - ? = 18 のような2つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 50,
+    minGrade: 'grade-2',
+    terms: 2 as const,
+  },
+  // 小2向け - ひき算逆算（50まで・三項）
+  {
+    id: 'practice-sub-inverse-50-3',
+    label: 'ぎゃくさん・ひき算（50まで・3つ）',
+    description: '50 - ? - 10 = 18 のような3つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 50,
+    minGrade: 'grade-2',
+    terms: 3 as const,
+  },
+  // 小2向け - ひき算逆算（100まで・二項）
+  {
+    id: 'practice-sub-inverse-100-2',
+    label: 'ぎゃくさん・ひき算（100まで・2つ）',
+    description: '100 - ? = 37 のような2つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
+    max: 100,
+    minGrade: 'grade-2',
+    terms: 2 as const,
+  },
+  // 小2向け - ひき算逆算（100まで・三項）
+  {
+    id: 'practice-sub-inverse-100-3',
+    label: 'ぎゃくさん・ひき算（100まで・3つ）',
+    description: '100 - ? - 25 = 37 のような3つの数のひき算逆算',
+    mode: 'sub-inverse' as const,
     max: 100,
     minGrade: 'grade-2',
     terms: 3 as const,
@@ -733,6 +835,7 @@ export const createPracticeSession = (
       div: 10,
       mix: 10,
       'add-inverse': 10,
+      'sub-inverse': 10,
       'add-sub-mix': 10,
     },
     'grade-2': {
@@ -742,6 +845,7 @@ export const createPracticeSession = (
       div: 50,
       mix: 100,
       'add-inverse': 100,
+      'sub-inverse': 100,
       'add-sub-mix': 100,
     },
     'grade-3': {
@@ -751,6 +855,7 @@ export const createPracticeSession = (
       div: 81,
       mix: 200,
       'add-inverse': 200,
+      'sub-inverse': 200,
       'add-sub-mix': 200,
     },
     'grade-4': {
@@ -760,6 +865,7 @@ export const createPracticeSession = (
       div: 144,
       mix: 500,
       'add-inverse': 500,
+      'sub-inverse': 500,
       'add-sub-mix': 500,
     },
     'grade-5': {
@@ -769,6 +875,7 @@ export const createPracticeSession = (
       div: 200,
       mix: 1000,
       'add-inverse': 1000,
+      'sub-inverse': 1000,
       'add-sub-mix': 1000,
     },
     'grade-6': {
@@ -778,6 +885,7 @@ export const createPracticeSession = (
       div: 300,
       mix: 2000,
       'add-inverse': 2000,
+      'sub-inverse': 2000,
       'add-sub-mix': 2000,
     },
   };

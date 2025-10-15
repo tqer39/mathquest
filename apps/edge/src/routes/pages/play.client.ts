@@ -197,7 +197,7 @@ const MODULE_SOURCE = `
         max: preset.max,
         questionCount: loadQuestionCount(),
         soundEnabled: loadBoolean(SOUND_STORAGE_KEY, true),
-        workingEnabled: loadBoolean(WORKING_STORAGE_KEY, true),
+        workingEnabled: loadBoolean(WORKING_STORAGE_KEY, false),
         countdownEnabled: loadBoolean(COUNTDOWN_STORAGE_KEY, true),
         baseGrade: baseGradePreset
           ? {
@@ -248,7 +248,7 @@ const MODULE_SOURCE = `
     workingEnabled:
       typeof activeSession.workingEnabled === 'boolean'
         ? activeSession.workingEnabled
-        : loadBoolean(WORKING_STORAGE_KEY, true),
+        : loadBoolean(WORKING_STORAGE_KEY, false),
     countdownEnabled:
       typeof activeSession.countdownEnabled === 'boolean'
         ? activeSession.countdownEnabled
@@ -417,11 +417,11 @@ const MODULE_SOURCE = `
       answerDisplay.textContent = String(state.userAnswer);
     }
 
-    // 待機状態ではテキストボタンは常に有効、通常は入力がある場合のみ有効
+    // 待機状態、または入力がある場合にボタンを有効化
     const shouldEnableSubmit = state.sessionActive && (isWaiting || hasInput);
     setSubmitButtonEnabled(shouldEnableSubmit);
 
-    // キーパッドの = ボタンは待機状態では有効、通常は入力がある場合のみ有効
+    // キーパッドの = ボタンも同様に有効化
     const shouldEnableKeypad = state.sessionActive && (isWaiting || hasInput);
     setKeypadSubmitButtonState(shouldEnableKeypad, isWaiting);
   };
@@ -447,8 +447,16 @@ const MODULE_SOURCE = `
   const setAnswerBuffer = (value) => {
     isUpdatingAnswerBuffer = true;
     state.answerBuffer = value;
-    if (answerInput) answerInput.value = value;
-    if (answerDisplay) answerDisplay.textContent = value || '？';
+
+    // 入力フォームには常にユーザーの入力値を表示（途中式ONでも上書きしない）
+    if (answerInput) {
+      answerInput.value = value;
+      answerInput.disabled = false;
+    }
+    if (answerDisplay) {
+      answerDisplay.textContent = value || '？';
+    }
+
     refreshSubmitButtonState();
     isUpdatingAnswerBuffer = false;
   };
@@ -480,15 +488,30 @@ const MODULE_SOURCE = `
     }, 5000);
   };
 
-  const renderQuestionExpression = (question) => {
+  const renderQuestionExpression = (question, showAnswer) => {
     if (!questionEl) return;
     // expressionがある場合はそれを使用、なければa op bを構築
-    const expression = question.expression
+    let expression = question.expression
       ? question.expression
       : String(question.a) + ' ' + question.op + ' ' + String(question.b);
-    // 逆算問題の場合はexpressionにすでに = result が含まれているのでそのまま表示
-    const isInverseQuestion = question.isInverse || (expression && expression.includes('?') && expression.includes('='));
-    questionEl.textContent = isInverseQuestion ? expression : expression + ' = ?';
+
+    // 逆算問題の場合はexpressionにすでに = が含まれている
+    const isInverseQuestion = question.isInverse || (question.expression && question.expression.includes('?') && question.expression.includes('='));
+
+    if (isInverseQuestion) {
+      // 逆算問題：途中式ONで答えを表示すべき場合は、?を答えに置き換える
+      if (showAnswer && question.answer !== undefined) {
+        expression = expression.replace('?', String(question.answer));
+      }
+      questionEl.textContent = expression;
+    } else {
+      // 通常の問題：途中式ONで答えを表示すべき場合は = 答え にする
+      if (showAnswer && question.answer !== undefined) {
+        questionEl.textContent = expression + ' = ' + String(question.answer);
+      } else {
+        questionEl.textContent = expression + ' = ?';
+      }
+    }
   };
 
   const renderWorkingSteps = (question, correctAnswer) => {
@@ -962,9 +985,14 @@ const MODULE_SOURCE = `
       });
       state.currentQuestion = question;
       state.answerBuffer = '';
-      renderQuestionExpression(question);
+      renderQuestionExpression(question, false);
       setAnswerBuffer('');
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
+
+      // 入力フォームを有効化
+      if (answerInput) {
+        answerInput.disabled = false;
+      }
 
       // すべての問題で途中式トグルを有効化
       setStepsToggleEnabled(true);
@@ -1032,6 +1060,21 @@ const MODULE_SOURCE = `
         playSound('keypad');
       }
       saveProgress(state.progress);
+
+      // 途中式ONの場合は問題に正解を表示し、入力フォームを無効化
+      if (state.workingEnabled) {
+        // 正解を含めた問題オブジェクトを作成
+        const questionWithAnswer = { ...state.currentQuestion, answer: correctAnswer };
+        renderQuestionExpression(questionWithAnswer, true);
+        // 入力フォームを無効化（ユーザーの入力内容は保持）
+        if (answerInput) {
+          answerInput.disabled = true;
+        }
+        if (answerDisplay) {
+          answerDisplay.textContent = String(value);
+        }
+      }
+
       renderWorkingSteps(state.currentQuestion, correctAnswer);
 
       if (state.sessionAnswered >= state.questionCount) {
@@ -1064,13 +1107,20 @@ const MODULE_SOURCE = `
       await nextQuestion();
       return;
     }
+
+    // 途中式ON/OFFに関わらず、常にユーザーの入力値を送信
     const value = Number(state.answerBuffer);
     if (!Number.isFinite(value)) {
       showFeedback('info', '数字だけを入力してね');
       return;
     }
+
     await handleAnswer(value);
-    setAnswerBuffer('');
+
+    // 途中式OFFの場合のみ入力フォームをクリア
+    if (!state.workingEnabled) {
+      setAnswerBuffer('');
+    }
   };
 
   const handleSkip = async () => {
@@ -1287,6 +1337,14 @@ const MODULE_SOURCE = `
       applyWorkingVisibility();
       updatePreferences();
       updateSessionStorage();
+
+      // 途中式の切り替えに応じて問題表示と入力フォームを更新
+      if (state.currentQuestion) {
+        renderQuestionExpression(state.currentQuestion, false);
+        setAnswerBuffer(state.answerBuffer);
+        refreshKeypadState();
+        refreshSubmitButtonState();
+      }
     });
   }
 

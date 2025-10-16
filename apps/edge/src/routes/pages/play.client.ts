@@ -443,8 +443,21 @@ const MODULE_SOURCE = `
     }
   };
 
+  // 数値として成立しているかチェック
+  const isValidNumberInput = (str) => {
+    if (str === '' || str === '-') return true; // 空文字とマイナスのみは入力中として許可
+    // 数値として解釈できるかチェック
+    const num = Number(str);
+    return Number.isFinite(num);
+  };
+
   let isUpdatingAnswerBuffer = false;
   const setAnswerBuffer = (value) => {
+    // 無効な入力は拒否
+    if (!isValidNumberInput(value)) {
+      return;
+    }
+
     isUpdatingAnswerBuffer = true;
     state.answerBuffer = value;
 

@@ -119,3 +119,82 @@ The project is a monorepo managed with pnpm workspaces.
 5.  **Implement Changes:** Modify the code, adhering strictly to the project's style and conventions.
 6.  **Verify:** Run `just lint` and any relevant tests to ensure your changes are correct and don't break anything.
 7.  **Update Documentation:** If you change any behavior, tool, or workflow, update the corresponding documentation.
+
+## 6. Future Roadmap: EduQuest Migration
+
+**IMPORTANT:** This project is planned to evolve from **MathQuest** (math-focused) to **EduQuest** (multi-subject learning platform).
+
+### 6.1. Vision
+
+Transform the current math-only application into a comprehensive educational platform supporting multiple subjects:
+
+- 算数クエスト (Math Quest) - Current focus
+- 漢字クエスト (Kanji Quest) - Planned
+- ひらがなクエスト (Kana Quest) - Planned
+
+### 6.2. Migration Strategy
+
+**Domain Structure:**
+
+```text
+Current: mathquest.app
+Future:  edu-quest.app (portal)
+         ├── math.edu-quest.app (math app)
+         ├── kanji.edu-quest.app (kanji app)
+         └── kana.edu-quest.app (kana app)
+```
+
+**Key Principles:**
+
+- **Subdomain Isolation:** Each subject app runs on its own subdomain
+- **Shared Portal:** Main domain hosts the subject selection portal
+- **Gradual Migration:** Phased approach to minimize disruption
+- **Code Reusability:** Extract common logic into shared packages
+
+### 6.3. Migration Phases
+
+#### Phase 1: Domain Acquisition & Infrastructure (Now)
+
+- Acquire `edu-quest.app` domain
+- Set up DNS with wildcard SSL
+- Configure Cloudflare Workers routing
+
+#### Phase 2: MathQuest Migration
+
+- Move current app to `math.edu-quest.app`
+- Redirect `mathquest.app` → `math.edu-quest.app` (301)
+- Maintain full backward compatibility
+
+#### Phase 3: Portal Development
+
+- Create simple landing page at `edu-quest.app`
+- Subject selection interface
+- Unified authentication system
+
+#### Phase 4: Architecture Refactoring
+
+- Extract `@eduquest/core` from `@mathquest/domain`
+- Rename packages: `@mathquest/*` → `@eduquest/*`
+- Abstract database schema for multi-subject support
+
+#### Phase 5: New Subject Apps
+
+- Implement `kanji.edu-quest.app`
+- Implement `kana.edu-quest.app`
+
+For detailed migration plan, see **[EduQuest Migration Plan](./docs/eduquest-migration.md)**.
+
+### 6.4. Naming Conventions (Future)
+
+```text
+Brand:       EduQuest
+Domain:      edu-quest.app
+Packages:    @eduquest/*
+Apps:
+  - Portal:  edu-quest.app
+  - Math:    math.edu-quest.app (formerly MathQuest)
+  - Kanji:   kanji.edu-quest.app
+  - Kana:    kana.edu-quest.app
+```
+
+**Note to AI Assistants:** When making architectural decisions, consider the future multi-subject structure. Avoid hardcoding math-specific logic where it can be abstracted.

@@ -220,6 +220,17 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
                 <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
                   <input
                     type="checkbox"
+                    id="custom-op-mix"
+                    value="mix"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">
+                    たし算・ひき算の混合
+                  </span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
                     id="custom-op-mul"
                     value="mul"
                     class="h-4 w-4 accent-[var(--mq-primary-strong)]"

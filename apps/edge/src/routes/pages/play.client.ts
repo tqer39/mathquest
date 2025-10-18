@@ -307,6 +307,7 @@ const MODULE_SOURCE = `
       const opLabels = {
         'add': 'たし算',
         'sub': 'ひき算',
+        'mix': 'たし算・ひき算の混合',
         'mul': 'かけ算',
         'div': 'わり算',
         'add-inverse': 'ぎゃくさん（たし算）',

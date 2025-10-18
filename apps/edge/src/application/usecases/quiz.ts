@@ -158,6 +158,11 @@ const generateCustomQuestion = (
     return { ...base, answer };
   }
 
+  if (selectedOp === 'mix') {
+    // たし算・ひき算の混合
+    return generateAddSubMix(terms, max);
+  }
+
   if (selectedOp === 'mul' || selectedOp === 'div') {
     const mode = selectedOp === 'mul' ? 'mul' : 'div';
     return generateQuestion({ mode: mode as Mode, max, terms });

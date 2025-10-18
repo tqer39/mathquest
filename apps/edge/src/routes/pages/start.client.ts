@@ -274,6 +274,7 @@ const MODULE_SOURCE = `
       const opCheckboxes = [
         document.getElementById('custom-op-add'),
         document.getElementById('custom-op-sub'),
+        document.getElementById('custom-op-mix'),
         document.getElementById('custom-op-mul'),
         document.getElementById('custom-op-div'),
         document.getElementById('custom-op-add-inverse'),
@@ -316,6 +317,7 @@ const MODULE_SOURCE = `
       const checkboxes = [
         { id: 'custom-op-add', value: 'add' },
         { id: 'custom-op-sub', value: 'sub' },
+        { id: 'custom-op-mix', value: 'mix' },
         { id: 'custom-op-mul', value: 'mul' },
         { id: 'custom-op-div', value: 'div' },
         { id: 'custom-op-add-inverse', value: 'add-inverse' },

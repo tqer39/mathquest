@@ -1345,10 +1345,6 @@ const MODULE_SOURCE = `
   if (keypadSubmitButton) {
     keypadSubmitButton.addEventListener('click', () => {
       if (!state.sessionActive) return;
-      // 待機状態でない場合のみ音を鳴らす
-      if (!state.awaitingAdvance) {
-        playSound('success');
-      }
       handleSubmit();
     });
   }

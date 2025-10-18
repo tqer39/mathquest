@@ -6,6 +6,7 @@ const MODULE_SOURCE = `
   const STORAGE_KEY = 'mathquest:progress:v1';
   const SOUND_STORAGE_KEY = 'mathquest:sound-enabled';
   const WORKING_STORAGE_KEY = 'mathquest:show-working';
+  const COUNTDOWN_STORAGE_KEY = 'mathquest:countdown-enabled';
   const QUESTION_COUNT_STORAGE_KEY = 'mathquest:question-count-default';
   const SESSION_STORAGE_KEY = 'mathquest:pending-session';
 
@@ -196,7 +197,8 @@ const MODULE_SOURCE = `
         max: preset.max,
         questionCount: loadQuestionCount(),
         soundEnabled: loadBoolean(SOUND_STORAGE_KEY, true),
-        workingEnabled: loadBoolean(WORKING_STORAGE_KEY, true),
+        workingEnabled: loadBoolean(WORKING_STORAGE_KEY, false),
+        countdownEnabled: loadBoolean(COUNTDOWN_STORAGE_KEY, true),
         baseGrade: baseGradePreset
           ? {
               id: baseGradePreset.id,
@@ -246,7 +248,11 @@ const MODULE_SOURCE = `
     workingEnabled:
       typeof activeSession.workingEnabled === 'boolean'
         ? activeSession.workingEnabled
-        : loadBoolean(WORKING_STORAGE_KEY, true),
+        : loadBoolean(WORKING_STORAGE_KEY, false),
+    countdownEnabled:
+      typeof activeSession.countdownEnabled === 'boolean'
+        ? activeSession.countdownEnabled
+        : loadBoolean(COUNTDOWN_STORAGE_KEY, true),
     progress: progressSnapshot,
     sessionActive: false,
     sessionAnswered: 0,
@@ -294,7 +300,26 @@ const MODULE_SOURCE = `
       : determineModeLabel(state.calculationType?.mode || baseMode);
 
     gradeLabelEl.textContent = baseLabel + ' / ' + modeLabel;
-    contextLabelEl.textContent = state.calculationType?.description ?? baseDescription;
+
+    // カスタム設定の場合は詳細を表示
+    if (state.calculationType?.mode === 'custom' && activeSession?.customConfig) {
+      const config = activeSession.customConfig;
+      const opLabels = {
+        'add': 'たし算',
+        'sub': 'ひき算',
+        'mix': 'たし算・ひき算の混合',
+        'mul': 'かけ算',
+        'div': 'わり算',
+        'add-inverse': 'ぎゃくさん（たし算）',
+        'sub-inverse': 'ぎゃくさん（ひき算）'
+      };
+      const selectedOps = (config.operations || []).map(op => opLabels[op] || op).join('・');
+      const terms = config.terms || 2;
+      const max = config.max || 100;
+      contextLabelEl.textContent = selectedOps + ' / ' + terms + '項 / ' + max + 'まで';
+    } else {
+      contextLabelEl.textContent = state.calculationType?.description ?? baseDescription;
+    }
   };
 
   updateContextLabel();
@@ -411,11 +436,11 @@ const MODULE_SOURCE = `
       answerDisplay.textContent = String(state.userAnswer);
     }
 
-    // 待機状態ではテキストボタンは常に有効、通常は入力がある場合のみ有効
+    // 待機状態、または入力がある場合にボタンを有効化
     const shouldEnableSubmit = state.sessionActive && (isWaiting || hasInput);
     setSubmitButtonEnabled(shouldEnableSubmit);
 
-    // キーパッドの = ボタンは待機状態では有効、通常は入力がある場合のみ有効
+    // キーパッドの = ボタンも同様に有効化
     const shouldEnableKeypad = state.sessionActive && (isWaiting || hasInput);
     setKeypadSubmitButtonState(shouldEnableKeypad, isWaiting);
   };
@@ -437,12 +462,33 @@ const MODULE_SOURCE = `
     }
   };
 
+  // 数値として成立しているかチェック
+  const isValidNumberInput = (str) => {
+    if (str === '' || str === '-') return true; // 空文字とマイナスのみは入力中として許可
+    // 数値として解釈できるかチェック
+    const num = Number(str);
+    return Number.isFinite(num);
+  };
+
   let isUpdatingAnswerBuffer = false;
   const setAnswerBuffer = (value) => {
+    // 無効な入力は拒否
+    if (!isValidNumberInput(value)) {
+      return;
+    }
+
     isUpdatingAnswerBuffer = true;
     state.answerBuffer = value;
-    if (answerInput) answerInput.value = value;
-    if (answerDisplay) answerDisplay.textContent = value || '？';
+
+    // 入力フォームには常にユーザーの入力値を表示（途中式ONでも上書きしない）
+    if (answerInput) {
+      answerInput.value = value;
+      answerInput.disabled = false;
+    }
+    if (answerDisplay) {
+      answerDisplay.textContent = value || '？';
+    }
+
     refreshSubmitButtonState();
     isUpdatingAnswerBuffer = false;
   };
@@ -474,13 +520,35 @@ const MODULE_SOURCE = `
     }, 5000);
   };
 
-  const renderQuestionExpression = (question) => {
+  const renderQuestionExpression = (question, showAnswer) => {
     if (!questionEl) return;
     // expressionがある場合はそれを使用、なければa op bを構築
-    const expression = question.expression
+    let expression = question.expression
       ? question.expression
       : String(question.a) + ' ' + question.op + ' ' + String(question.b);
-    questionEl.textContent = expression + ' = ?';
+
+    // 逆算問題の場合はexpressionにすでに = が含まれている
+    const isInverseQuestion = question.isInverse || (question.expression && question.expression.includes('?') && question.expression.includes('='));
+
+    if (isInverseQuestion) {
+      // 逆算問題：途中式ONで答えを表示すべき場合は、?を答えに置き換える
+      if (showAnswer && question.answer !== undefined) {
+        const answerStr = String(question.answer);
+        const highlighted = '<span style="display: inline-block; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); color: #1e3a8a; padding: 0.5rem 1rem; border-radius: 0.75rem; border: 3px solid #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); font-weight: 700; min-width: 4rem; vertical-align: middle;"><span style="display: block; text-align: center; width: 100%; padding-left: 0.8rem;">' + answerStr + '</span></span>';
+        questionEl.innerHTML = expression.replace('?', highlighted);
+      } else {
+        questionEl.textContent = expression;
+      }
+    } else {
+      // 通常の問題：途中式ONで答えを表示すべき場合は = 答え にする
+      if (showAnswer && question.answer !== undefined) {
+        const answerStr = String(question.answer);
+        const highlighted = '<span style="display: inline-block; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); color: #1e3a8a; padding: 0.5rem 1rem; border-radius: 0.75rem; border: 3px solid #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); font-weight: 700; min-width: 4rem; vertical-align: middle;"><span style="display: block; text-align: center; width: 100%; padding-left: 0.8rem;">' + answerStr + '</span></span>';
+        questionEl.innerHTML = expression + ' = ' + highlighted;
+      } else {
+        questionEl.textContent = expression + ' = ?';
+      }
+    }
   };
 
   const renderWorkingSteps = (question, correctAnswer) => {
@@ -941,16 +1009,31 @@ const MODULE_SOURCE = `
     renderWorkingSteps(null);
     renderProgress();
     try {
+      // テーマが選択されている場合はテーマの設定を使用、なければcalculationTypeのmodeを使用
+      const mode = state.theme?.mode || state.calculationType?.mode || state.grade.mode;
+      const max = state.theme?.max || state.grade.max;
+      const gradeId = state.theme?.id || state.grade.id;
+
+      // カスタム設定の取得
+      const customConfig = activeSession?.customConfig || null;
+
       const { question } = await statefulFetch('/apis/quiz/questions/next', {
-        gradeId: state.grade.id,
-        mode: state.grade.mode,
-        max: state.grade.max,
+        gradeId,
+        mode,
+        max,
+        terms: state.theme?.terms || null,
+        customConfig,
       });
       state.currentQuestion = question;
       state.answerBuffer = '';
-      renderQuestionExpression(question);
+      renderQuestionExpression(question, false);
       setAnswerBuffer('');
       if (qIndexEl) qIndexEl.textContent = String(state.sessionAnswered + 1);
+
+      // 入力フォームを有効化
+      if (answerInput) {
+        answerInput.disabled = false;
+      }
 
       // すべての問題で途中式トグルを有効化
       setStepsToggleEnabled(true);
@@ -978,6 +1061,11 @@ const MODULE_SOURCE = `
       return;
     }
     try {
+      // テーマが選択されている場合はテーマの設定を使用、なければcalculationTypeのmodeを使用
+      const mode = state.theme?.mode || state.calculationType?.mode || state.grade.mode;
+      const max = state.theme?.max || state.grade.max;
+      const gradeId = state.theme?.id || state.grade.id;
+
       const { ok, correctAnswer } = await statefulFetch('/apis/quiz/answers/check', {
         question: {
           a: state.currentQuestion.a,
@@ -986,11 +1074,14 @@ const MODULE_SOURCE = `
           extras: Array.isArray(state.currentQuestion.extras)
             ? state.currentQuestion.extras
             : [],
+          isInverse: state.currentQuestion.isInverse,
+          inverseSide: state.currentQuestion.inverseSide,
+          answer: state.currentQuestion.answer,
         },
         value,
-        gradeId: state.grade.id,
-        mode: state.grade.mode,
-        max: state.grade.max,
+        gradeId,
+        mode,
+        max,
       });
 
       state.progress.totalAnswered += 1;
@@ -1010,6 +1101,21 @@ const MODULE_SOURCE = `
         playSound('keypad');
       }
       saveProgress(state.progress);
+
+      // 途中式ONの場合は問題に正解を表示し、入力フォームを無効化
+      if (state.workingEnabled) {
+        // 正解を含めた問題オブジェクトを作成
+        const questionWithAnswer = { ...state.currentQuestion, answer: correctAnswer };
+        renderQuestionExpression(questionWithAnswer, true);
+        // 入力フォームを無効化（ユーザーの入力内容は保持）
+        if (answerInput) {
+          answerInput.disabled = true;
+        }
+        if (answerDisplay) {
+          answerDisplay.textContent = String(value);
+        }
+      }
+
       renderWorkingSteps(state.currentQuestion, correctAnswer);
 
       if (state.sessionAnswered >= state.questionCount) {
@@ -1042,13 +1148,20 @@ const MODULE_SOURCE = `
       await nextQuestion();
       return;
     }
+
+    // 途中式ON/OFFに関わらず、常にユーザーの入力値を送信
     const value = Number(state.answerBuffer);
     if (!Number.isFinite(value)) {
       showFeedback('info', '数字だけを入力してね');
       return;
     }
+
     await handleAnswer(value);
-    setAnswerBuffer('');
+
+    // 途中式OFFの場合のみ入力フォームをクリア
+    if (!state.workingEnabled) {
+      setAnswerBuffer('');
+    }
   };
 
   const handleSkip = async () => {
@@ -1090,12 +1203,18 @@ const MODULE_SOURCE = `
 
   const restartWithCountdown = async () => {
     refreshKeypadState();
-    await runCountdown();
+    if (state.countdownEnabled) {
+      await runCountdown();
+    }
     await startSession();
   };
 
   refreshKeypadState();
-  runCountdown().then(() => startSession());
+  if (state.countdownEnabled) {
+    runCountdown().then(() => startSession());
+  } else {
+    startSession();
+  }
 
   submitBtn.addEventListener('click', () => {
     handleSubmit();
@@ -1166,14 +1285,19 @@ const MODULE_SOURCE = `
   }
 
   document.addEventListener('keydown', (event) => {
-    if (!state.sessionActive || state.awaitingAdvance) return;
     // answerInputにフォーカスがある場合は、そちらのイベントハンドラに任せる
     if (document.activeElement === answerInput) return;
+
+    // Enterキーは常に処理する（待機状態でも次の問題に進める）
     if (event.key === 'Enter') {
+      if (!state.sessionActive) return;
       event.preventDefault();
       handleSubmit();
       return;
     }
+
+    // それ以外のキーは通常状態でのみ処理
+    if (!state.sessionActive || state.awaitingAdvance) return;
     if (event.key === 'Escape') {
       return;
     }
@@ -1232,10 +1356,6 @@ const MODULE_SOURCE = `
   if (keypadSubmitButton) {
     keypadSubmitButton.addEventListener('click', () => {
       if (!state.sessionActive) return;
-      // 待機状態でない場合のみ音を鳴らす
-      if (!state.awaitingAdvance) {
-        playSound('success');
-      }
       handleSubmit();
     });
   }
@@ -1259,6 +1379,14 @@ const MODULE_SOURCE = `
       applyWorkingVisibility();
       updatePreferences();
       updateSessionStorage();
+
+      // 途中式の切り替えに応じて問題表示と入力フォームを更新
+      if (state.currentQuestion) {
+        renderQuestionExpression(state.currentQuestion, false);
+        setAnswerBuffer(state.answerBuffer);
+        refreshKeypadState();
+        refreshSubmitButtonState();
+      }
     });
   }
 

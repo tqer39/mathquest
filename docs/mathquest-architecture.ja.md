@@ -16,7 +16,7 @@ MathQuest は小学生向けの算数練習体験を提供する学習サービ�
 ### レイヤー構造
 
 - **ドメイン層 (`packages/domain`)**
-  - 出題アルゴリズム、複数ステップ計算（たし算→ひき算など）、回答チェック、表示フォーマット。
+  - 出題アルゴリズム、複数ステップ計算（たし算→ひき算など）、逆算問題（`? + 5 = 10`）、回答チェック、表示フォーマット。
 - **アプリケーション層 (`packages/app`, `apps/edge/src/application`)**
   - クイズの進行状態（問題数・正解数）管理、ユースケース (`generateQuizQuestion`, `verifyAnswer`) やセッションハンドリング。
 - **インフラストラクチャ層 (`apps/edge/src/infrastructure`)**
@@ -51,7 +51,7 @@ graph LR
 - `@mathquest/edge`: 本番用 Cloudflare Workers アプリ。スタート画面でプリセットを JSON 埋め込みし、クライアントスクリプトが動的 UI（テーマ選択、進捗保存、効果音/途中式トグル）を構成します。
 - `@mathquest/api` / `@mathquest/web`: Workers を利用しないローカル検証用の Node + Hono サーバー。ドメイン/API ロジックの動作確認や Storybook 的な用途に活用できます。
 - `@mathquest/app`: クイズ進行オブジェクト（現在の問題番号、正解数など）の計算を担い、UI 側は副作用レスに状態遷移を扱えます。
-- `@mathquest/domain`: 計算問題の生成規則。学年別テーマ指定時は `generateGradeOneQuestion` などの複合ロジックを呼び出します。
+- `@mathquest/domain`: 計算問題の生成規則。学年別テーマ指定時は `generateGradeOneQuestion` などの複合ロジックを呼び出し、逆算問題の場合は `generateInverseQuestion` を使用します。
 
 ## 4. ディレクトリ構造
 
@@ -110,6 +110,29 @@ mathquest/
   - 出力: 正誤判定と正解値
 
 API は `apps/edge/src/application/usecases/quiz.ts` を経由し、`@mathquest/domain` のロジックを利用します。これにより UI 側と API 側で同一仕様の問題が生成され、テストもユースケース単位で記述できます。
+
+### 逆算問題（ぎゃくさん）
+
+逆算問題は、一方のオペランドが未知数となる問題形式です（例: `? + 5 = 10` または `3 + ? = 9`）。
+
+**実装の特徴:**
+
+- **問題生成**: `generateInverseQuestion` 関数が `isInverse: true` と `inverseSide: 'left' | 'right'` を持つ問題を生成します。
+- **表示形式**: `formatQuestion` 関数が `?` 記号と結果（`= 10`）を含む形式で問題を表示します。
+- **回答検証**: `verifyAnswer` 関数が逆算問題の場合、問題オブジェクトの `answer` フィールド（未知数の値）を使用して正誤判定を行います。通常の算数問題とは異なり、計算結果ではなく未知数の値が正解となります。
+
+**データ構造:**
+
+```typescript
+type Question = {
+  a: number;
+  b: number;
+  op: '+' | '-' | '×';
+  answer: number; // 逆算問題では未知数の値
+  isInverse?: boolean; // 逆算問題フラグ
+  inverseSide?: 'left' | 'right'; // 未知数の位置
+};
+```
 
 ## 6. 技術スタック
 

@@ -19,7 +19,7 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.11.0
-        version: 1.19.5(hono@4.9.11)
+        version: 1.19.5(hono@4.10.1)
       '@mathquest/app':
         specifier: workspace:*
         version: link:../../packages/app
@@ -28,7 +28,7 @@ importers:
         version: link:../../packages/domain
       hono:
         specifier: ^4.4.3
-        version: 4.9.11
+        version: 4.10.1
     devDependencies:
       typescript:
         specifier: ^5.5.0
@@ -44,7 +44,7 @@ importers:
         version: 0.44.6(@cloudflare/workers-types@4.20251011.0)
       hono:
         specifier: ^4.4.3
-        version: 4.9.11
+        version: 4.10.1
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250923.0
@@ -66,10 +66,10 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.11.0
-        version: 1.19.5(hono@4.9.11)
+        version: 1.19.5(hono@4.10.1)
       hono:
         specifier: ^4.4.3
-        version: 4.9.11
+        version: 4.10.1
     devDependencies:
       '@types/node':
         specifier: ^22.7.5
@@ -92,13 +92,13 @@ importers:
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^3.0.0
-        version: 3.2.4(vitest@3.2.4(@types/node@22.18.10))
+        version: 3.2.4(vitest@3.2.4(@types/node@22.18.11))
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
       vitest:
         specifier: ^3.0.0
-        version: 3.2.4(@types/node@22.18.10)
+        version: 3.2.4(@types/node@22.18.11)
 
 packages:
 
@@ -1254,8 +1254,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.9.11:
-    resolution: {integrity: sha512-MyJ4xop3boTyXl8bJBh4i20AAZTLM3AXUJphyrUb0CpgTKYb1N703z53XiKUKchGUpcPqiiYkiLOXA3kqK3icA==}
+  hono@4.10.1:
+    resolution: {integrity: sha512-rpGNOfacO4WEPClfkEt1yfl8cbu10uB1lNpiI33AKoiAHwOS8lV748JiLx4b5ozO/u4qLjIvfpFsPXdY5Qjkmg==}
     engines: {node: '>=16.9.0'}
 
   html-escaper@2.0.2:
@@ -1937,9 +1937,9 @@ snapshots:
   '@esbuild/win32-x64@0.25.4':
     optional: true
 
-  '@hono/node-server@1.19.5(hono@4.9.11)':
+  '@hono/node-server@1.19.5(hono@4.10.1)':
     dependencies:
-      hono: 4.9.11
+      hono: 4.10.1
 
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
@@ -2143,7 +2143,7 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/node@22.18.10))':
+  '@vitest/coverage-v8@3.2.4(vitest@3.2.4(@types/node@22.18.11))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 1.0.2
@@ -2158,7 +2158,7 @@ snapshots:
       std-env: 3.9.0
       test-exclude: 7.0.1
       tinyrainbow: 2.0.0
-      vitest: 3.2.4(@types/node@22.18.10)
+      vitest: 3.2.4(@types/node@22.18.11)
     transitivePeerDependencies:
       - supports-color
 
@@ -2430,7 +2430,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.9.11: {}
+  hono@4.10.1: {}
 
   html-escaper@2.0.2: {}
 

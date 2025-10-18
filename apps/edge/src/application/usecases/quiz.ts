@@ -10,7 +10,12 @@ export type GenerateQuizInput = {
   mode?: Mode;
   max?: number;
   gradeId?: string;
-  terms?: 2 | 3 | null;
+  terms?: 2 | 3 | 4 | 5 | null;
+  customConfig?: {
+    operations?: string[];
+    terms?: number;
+    max?: number;
+  };
 };
 
 const randomInt = (min: number, max: number) =>
@@ -113,10 +118,67 @@ const generateAddSubMix = (terms: number, max: number) => {
   return { ...base, answer };
 };
 
+const generateCustomQuestion = (
+  operations: string[],
+  terms: number,
+  max: number
+) => {
+  if (operations.length === 0) {
+    // フォールバック: たし算を使用
+    return generateAdditionMulti(terms, max);
+  }
+
+  // 演算子をランダムに選択
+  const selectedOp = operations[randomInt(0, operations.length - 1)];
+
+  // 逆算問題の場合
+  if (selectedOp === 'add-inverse' || selectedOp === 'sub-inverse') {
+    const mode = selectedOp === 'add-inverse' ? 'add-inverse' : 'sub-inverse';
+    return generateQuestion({ mode: mode as Mode, max, terms });
+  }
+
+  // 通常の四則演算
+  if (selectedOp === 'add') {
+    return generateAdditionMulti(terms, max);
+  }
+
+  if (selectedOp === 'sub') {
+    // ひき算のみ
+    const a = randomInt(Math.floor(max / 2), max);
+    const b = randomInt(1, Math.min(a, Math.floor(max / 2)));
+    let current = a - b;
+    const extras: ExtraStep[] = [];
+    for (let i = 0; i < terms - 2; i += 1) {
+      const value = randomInt(1, Math.max(1, current));
+      extras.push({ op: '-', value });
+      current -= value;
+    }
+    const base = { a, b, op: '-' as const, extras };
+    const answer = evaluateQuestion(base);
+    return { ...base, answer };
+  }
+
+  if (selectedOp === 'mul' || selectedOp === 'div') {
+    const mode = selectedOp === 'mul' ? 'mul' : 'div';
+    return generateQuestion({ mode: mode as Mode, max, terms });
+  }
+
+  // フォールバック: たし算
+  return generateAdditionMulti(terms, max);
+};
+
 export const generateQuizQuestion = (input: GenerateQuizInput = {}) => {
   const mode: Mode = input.mode ?? 'mix';
   const max = typeof input.max === 'number' && input.max > 0 ? input.max : 20;
   const terms = input.terms;
+
+  // カスタム設定の場合
+  if (mode === 'custom' && input.customConfig) {
+    const customOps = input.customConfig.operations ?? [];
+    const customTerms = input.customConfig.terms ?? 2;
+    const customMax = input.customConfig.max ?? max;
+    return generateCustomQuestion(customOps, customTerms, customMax);
+  }
 
   if (input.gradeId === 'grade-1') {
     return generateGradeOneQuestion(max, terms);

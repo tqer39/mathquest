@@ -15,13 +15,19 @@ quiz.post('/questions/next', async (c) => {
     mode?: Mode;
     max?: number;
     gradeId?: string;
-    terms?: 2 | 3 | null;
+    terms?: 2 | 3 | 4 | 5 | null;
+    customConfig?: {
+      operations?: string[];
+      terms?: number;
+      max?: number;
+    };
   };
   const question = generateQuizQuestion({
     mode: body.mode,
     max: body.max,
     gradeId: body.gradeId,
     terms: body.terms,
+    customConfig: body.customConfig,
   });
   const expression = formatQuestion(question);
   return c.json({ question: { ...question, expression } });

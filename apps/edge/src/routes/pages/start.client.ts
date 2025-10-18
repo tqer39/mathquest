@@ -39,12 +39,18 @@ const MODULE_SOURCE = `
       selectedCalculationType: null,
       selectedTheme: null,
       selectedGame: null,
+      customConfig: {
+        operations: [], // ['add', 'sub', 'mul', 'div', 'add-inverse', 'sub-inverse']
+        terms: 2,
+        max: 100,
+      },
     };
 
     // DOM要素
     const step1Grade = document.getElementById('step-1-grade');
     const step2Activity = document.getElementById('step-2-activity');
     const step3CalcType = document.getElementById('step-3-calc-type');
+    const step4Custom = document.getElementById('step-4-custom');
     const step4Theme = document.getElementById('step-4-theme');
     const step4Game = document.getElementById('step-4-game');
 
@@ -79,7 +85,7 @@ const MODULE_SOURCE = `
 
     // ステップ番号を更新
     function updateStepNumbers() {
-      const allSteps = [step1Grade, step2Activity, step3CalcType, step4Theme, step4Game];
+      const allSteps = [step1Grade, step2Activity, step3CalcType, step4Custom, step4Theme, step4Game];
       let currentStep = 0;
 
       allSteps.forEach(stepElement => {
@@ -101,6 +107,7 @@ const MODULE_SOURCE = `
         hideStep(step3CalcType);
       }
       if (stepNumber < 4) {
+        hideStep(step4Custom);
         hideStep(step4Theme);
         hideStep(step4Game);
       }
@@ -199,16 +206,16 @@ const MODULE_SOURCE = `
       if (!calcTypeGrid) return;
 
       const gradeCalculationTypes = {
-        'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
-        'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'],
-        'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul'],
-        'grade-4': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul', 'calc-div'],
-        'grade-5': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul', 'calc-div', 'calc-mix'],
-        'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-mul', 'calc-div', 'calc-mix'],
+        'grade-1': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-custom'],
+        'grade-2': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-custom'],
+        'grade-3': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-mul', 'calc-custom'],
+        'grade-4': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-mul', 'calc-div', 'calc-custom'],
+        'grade-5': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-mul', 'calc-div', 'calc-mix', 'calc-custom'],
+        'grade-6': ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-mul', 'calc-div', 'calc-mix', 'calc-custom'],
       };
 
       // 学年が選択されている場合はその学年の計算種類、未選択の場合は小1の計算種類
-      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse'];
+      const defaultCalcTypes = ['calc-add', 'calc-sub', 'calc-add-sub-mix', 'calc-add-inverse', 'calc-sub-inverse', 'calc-custom'];
       const availableCalcTypes = state.selectedGrade
         ? gradeCalculationTypes[state.selectedGrade] || defaultCalcTypes
         : defaultCalcTypes;
@@ -243,15 +250,86 @@ const MODULE_SOURCE = `
           selectButton(allCalcBtns, button);
 
           hideAllStepsAfter(3);
-          showStep(step4Theme);
-          // 学年選択の有無に関わらず、計算種類に応じてテーマをフィルタリング
-          filterThemesByCalculationType(calcType.mode);
+
+          // カスタム設定の場合はカスタム設定画面を表示
+          if (calcType.mode === 'custom') {
+            showStep(step4Custom);
+            initializeCustomSettings();
+          } else {
+            showStep(step4Theme);
+            // 学年選択の有無に関わらず、計算種類に応じてテーマをフィルタリング
+            filterThemesByCalculationType(calcType.mode);
+          }
 
           updateStartButtonState();
         });
 
         calcTypeGrid.appendChild(button);
       });
+    }
+
+    // カスタム設定の初期化
+    function initializeCustomSettings() {
+      // カスタム設定のチェックボックスとラジオボタンを取得
+      const opCheckboxes = [
+        document.getElementById('custom-op-add'),
+        document.getElementById('custom-op-sub'),
+        document.getElementById('custom-op-mul'),
+        document.getElementById('custom-op-div'),
+        document.getElementById('custom-op-add-inverse'),
+        document.getElementById('custom-op-sub-inverse'),
+      ];
+      const termsRadios = document.querySelectorAll('input[name="custom-terms"]');
+      const maxRadios = document.querySelectorAll('input[name="custom-max"]');
+
+      // チェックボックスの変更を監視
+      opCheckboxes.forEach(checkbox => {
+        if (!checkbox) return;
+        checkbox.addEventListener('change', () => {
+          updateCustomOperations();
+          updateStartButtonState();
+        });
+      });
+
+      // ラジオボタンの変更を監視
+      termsRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          state.customConfig.terms = Number(radio.value);
+          updateStartButtonState();
+        });
+      });
+
+      maxRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          state.customConfig.max = Number(radio.value);
+          updateStartButtonState();
+        });
+      });
+
+      // 初期値を設定
+      updateCustomOperations();
+    }
+
+    // カスタム設定の演算子を更新
+    function updateCustomOperations() {
+      const operations = [];
+      const checkboxes = [
+        { id: 'custom-op-add', value: 'add' },
+        { id: 'custom-op-sub', value: 'sub' },
+        { id: 'custom-op-mul', value: 'mul' },
+        { id: 'custom-op-div', value: 'div' },
+        { id: 'custom-op-add-inverse', value: 'add-inverse' },
+        { id: 'custom-op-sub-inverse', value: 'sub-inverse' },
+      ];
+
+      checkboxes.forEach(({ id, value }) => {
+        const checkbox = document.getElementById(id);
+        if (checkbox && checkbox.checked) {
+          operations.push(value);
+        }
+      });
+
+      state.customConfig.operations = operations;
     }
 
     // テーマをフィルタリング
@@ -318,7 +396,12 @@ const MODULE_SOURCE = `
 
       // 計算モードの場合（学年は任意）
       if (state.selectedActivity === 'math' && state.selectedCalculationType) {
-        canStart = true;
+        // カスタム設定の場合は、少なくとも1つの演算子が選択されている必要がある
+        if (state.selectedCalculationType.mode === 'custom') {
+          canStart = state.customConfig.operations.length > 0;
+        } else {
+          canStart = true;
+        }
       }
 
       startButton.disabled = !canStart;
@@ -436,6 +519,7 @@ const MODULE_SOURCE = `
             questionCount,
             soundEnabled,
             workingEnabled,
+            countdownEnabled,
             createdAt: Date.now(),
             baseGradeId: state.selectedGrade || gradePreset.id,
             baseGradeLabel: gradePreset?.label || '',
@@ -460,6 +544,12 @@ const MODULE_SOURCE = `
               description: state.selectedCalculationType.description,
               mode: state.selectedCalculationType.mode,
             },
+            // カスタム設定の場合は設定値を保存
+            customConfig: state.selectedCalculationType.mode === 'custom' ? {
+              operations: state.customConfig.operations,
+              terms: state.customConfig.terms,
+              max: state.customConfig.max,
+            } : null,
           };
 
           try {

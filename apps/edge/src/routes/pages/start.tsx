@@ -181,6 +181,135 @@ export const Start: FC<{ currentUser: CurrentUser | null }> = ({
           </div>
         </div>
 
+        {/* カスタム設定 */}
+        <div id="step-4-custom" class="step-hidden space-y-4">
+          <div>
+            <p class="step-number text-xs font-semibold uppercase tracking-[0.35em] text-[#6c7c90]"></p>
+            <h2 class="text-2xl font-extrabold text-[var(--mq-ink)]">
+              カスタム設定
+            </h2>
+            <p class="text-sm text-[#5e718a]">
+              計算の種類・項数・答えの上限値を自由に設定できます
+            </p>
+          </div>
+          <div class="space-y-6">
+            {/* 計算の種類 */}
+            <fieldset class="space-y-3">
+              <legend class="text-sm font-semibold text-[var(--mq-ink)]">
+                計算の種類をえらぶ（複数選択OK）
+              </legend>
+              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="custom-op-add"
+                    value="add"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">たし算</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="custom-op-sub"
+                    value="sub"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">ひき算</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="custom-op-mul"
+                    value="mul"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">かけ算</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="custom-op-div"
+                    value="div"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">わり算</span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="custom-op-add-inverse"
+                    value="add-inverse"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">
+                    ぎゃくさん（たし算）
+                  </span>
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="custom-op-sub-inverse"
+                    value="sub-inverse"
+                    class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                  />
+                  <span class="text-sm font-semibold">
+                    ぎゃくさん（ひき算）
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            {/* 項数 */}
+            <fieldset class="space-y-3">
+              <legend class="text-sm font-semibold text-[var(--mq-ink)]">
+                項数（いくつの数を使うか）
+              </legend>
+              <div class="flex flex-wrap gap-3">
+                {[2, 3, 4, 5].map((terms) => (
+                  <label
+                    key={terms}
+                    class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="custom-terms"
+                      value={terms}
+                      defaultChecked={terms === 2}
+                      class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                    />
+                    <span class="text-sm font-semibold">{terms}つ</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {/* 答えの上限値 */}
+            <fieldset class="space-y-3">
+              <legend class="text-sm font-semibold text-[var(--mq-ink)]">
+                答えの上限値
+              </legend>
+              <div class="flex flex-wrap gap-3">
+                {[10, 20, 50, 100, 200, 500, 1000].map((max) => (
+                  <label
+                    key={max}
+                    class="inline-flex items-center gap-2 rounded-xl border border-[var(--mq-outline)] bg-white px-3 py-2 shadow-sm transition hover:border-[var(--mq-primary)] cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="custom-max"
+                      value={max}
+                      defaultChecked={max === 100}
+                      class="h-4 w-4 accent-[var(--mq-primary-strong)]"
+                    />
+                    <span class="text-sm font-semibold">{max}まで</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          </div>
+        </div>
+
         {/* テーマ選択 */}
         <div id="step-4-theme" class="step-hidden space-y-4">
           <div>

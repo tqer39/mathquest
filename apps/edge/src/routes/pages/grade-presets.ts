@@ -80,6 +80,12 @@ export const calculationTypes = [
     description: '複合的な計算練習',
     mode: 'mix',
   },
+  {
+    id: 'calc-custom',
+    label: 'カスタム設定',
+    description: '計算の種類・項数・答えの上限値を自由に設定',
+    mode: 'custom',
+  },
 ] as const;
 
 // 学年ごとの利用可能な計算種類
@@ -90,6 +96,7 @@ export const gradeCalculationTypes = {
     'calc-add-sub-mix',
     'calc-add-inverse',
     'calc-sub-inverse',
+    'calc-custom',
   ],
   'grade-2': [
     'calc-add',
@@ -97,6 +104,7 @@ export const gradeCalculationTypes = {
     'calc-add-sub-mix',
     'calc-add-inverse',
     'calc-sub-inverse',
+    'calc-custom',
   ],
   'grade-3': [
     'calc-add',
@@ -105,6 +113,7 @@ export const gradeCalculationTypes = {
     'calc-add-inverse',
     'calc-sub-inverse',
     'calc-mul',
+    'calc-custom',
   ],
   'grade-4': [
     'calc-add',
@@ -114,6 +123,7 @@ export const gradeCalculationTypes = {
     'calc-sub-inverse',
     'calc-mul',
     'calc-div',
+    'calc-custom',
   ],
   'grade-5': [
     'calc-add',
@@ -124,6 +134,7 @@ export const gradeCalculationTypes = {
     'calc-mul',
     'calc-div',
     'calc-mix',
+    'calc-custom',
   ],
   'grade-6': [
     'calc-add',
@@ -134,6 +145,7 @@ export const gradeCalculationTypes = {
     'calc-mul',
     'calc-div',
     'calc-mix',
+    'calc-custom',
   ],
 } as const;
 

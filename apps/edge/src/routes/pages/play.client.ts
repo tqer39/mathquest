@@ -300,7 +300,25 @@ const MODULE_SOURCE = `
       : determineModeLabel(state.calculationType?.mode || baseMode);
 
     gradeLabelEl.textContent = baseLabel + ' / ' + modeLabel;
-    contextLabelEl.textContent = state.calculationType?.description ?? baseDescription;
+
+    // カスタム設定の場合は詳細を表示
+    if (state.calculationType?.mode === 'custom' && activeSession?.customConfig) {
+      const config = activeSession.customConfig;
+      const opLabels = {
+        'add': 'たし算',
+        'sub': 'ひき算',
+        'mul': 'かけ算',
+        'div': 'わり算',
+        'add-inverse': 'ぎゃくさん（たし算）',
+        'sub-inverse': 'ぎゃくさん（ひき算）'
+      };
+      const selectedOps = (config.operations || []).map(op => opLabels[op] || op).join('・');
+      const terms = config.terms || 2;
+      const max = config.max || 100;
+      contextLabelEl.textContent = selectedOps + ' / ' + terms + '項 / ' + max + 'まで';
+    } else {
+      contextLabelEl.textContent = state.calculationType?.description ?? baseDescription;
+    }
   };
 
   updateContextLabel();
@@ -990,11 +1008,15 @@ const MODULE_SOURCE = `
       const max = state.theme?.max || state.grade.max;
       const gradeId = state.theme?.id || state.grade.id;
 
+      // カスタム設定の取得
+      const customConfig = activeSession?.customConfig || null;
+
       const { question } = await statefulFetch('/apis/quiz/questions/next', {
         gradeId,
         mode,
         max,
         terms: state.theme?.terms || null,
+        customConfig,
       });
       state.currentQuestion = question;
       state.answerBuffer = '';

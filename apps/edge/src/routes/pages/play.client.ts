@@ -1285,14 +1285,19 @@ const MODULE_SOURCE = `
   }
 
   document.addEventListener('keydown', (event) => {
-    if (!state.sessionActive || state.awaitingAdvance) return;
     // answerInputにフォーカスがある場合は、そちらのイベントハンドラに任せる
     if (document.activeElement === answerInput) return;
+
+    // Enterキーは常に処理する（待機状態でも次の問題に進める）
     if (event.key === 'Enter') {
+      if (!state.sessionActive) return;
       event.preventDefault();
       handleSubmit();
       return;
     }
+
+    // それ以外のキーは通常状態でのみ処理
+    if (!state.sessionActive || state.awaitingAdvance) return;
     if (event.key === 'Escape') {
       return;
     }

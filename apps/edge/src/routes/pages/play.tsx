@@ -115,7 +115,8 @@ export const Play: FC<{ currentUser: CurrentUser | null }> = ({
           <p class="text-sm font-semibold text-[#5e718a]">もんだい</p>
           <div
             id="question"
-            class="text-center text-5xl font-extrabold tracking-[0.35em]"
+            class="flex items-center justify-center text-center text-5xl font-extrabold tracking-[0.35em]"
+            style="min-height: 5rem;"
           >
             ？ + ？
           </div>

@@ -533,13 +533,18 @@ const MODULE_SOURCE = `
     if (isInverseQuestion) {
       // 逆算問題：途中式ONで答えを表示すべき場合は、?を答えに置き換える
       if (showAnswer && question.answer !== undefined) {
-        expression = expression.replace('?', String(question.answer));
+        const answerStr = String(question.answer);
+        const highlighted = '<span style="display: inline-block; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); color: #1e3a8a; padding: 0.5rem 1rem; border-radius: 0.75rem; border: 3px solid #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); font-weight: 700; min-width: 4rem; vertical-align: middle;"><span style="display: block; text-align: center; width: 100%; padding-left: 0.8rem;">' + answerStr + '</span></span>';
+        questionEl.innerHTML = expression.replace('?', highlighted);
+      } else {
+        questionEl.textContent = expression;
       }
-      questionEl.textContent = expression;
     } else {
       // 通常の問題：途中式ONで答えを表示すべき場合は = 答え にする
       if (showAnswer && question.answer !== undefined) {
-        questionEl.textContent = expression + ' = ' + String(question.answer);
+        const answerStr = String(question.answer);
+        const highlighted = '<span style="display: inline-block; background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%); color: #1e3a8a; padding: 0.5rem 1rem; border-radius: 0.75rem; border: 3px solid #3b82f6; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); font-weight: 700; min-width: 4rem; vertical-align: middle;"><span style="display: block; text-align: center; width: 100%; padding-left: 0.8rem;">' + answerStr + '</span></span>';
+        questionEl.innerHTML = expression + ' = ' + highlighted;
       } else {
         questionEl.textContent = expression + ' = ?';
       }
